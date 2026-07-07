@@ -19,7 +19,7 @@ export type SourceDocument = {
   title: string;
   pageLabel: string;
   pageImageUrl?: string;
-  similarity: Array<{ label: string; tone: "blue" | "green" | "yellow" | "orange" }>;
+  similarityScore: number;
 };
 
 export type ChatPageProps = {

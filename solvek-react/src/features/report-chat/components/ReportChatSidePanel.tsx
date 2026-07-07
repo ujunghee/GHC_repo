@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import type { PointerEvent, RefObject } from "react";
 
 import { springSoft, tapScale } from "../../report-search/motionConfig";
 import type { Report } from "../../report-search/types";
@@ -9,14 +10,14 @@ type ReportChatSidePanelProps = {
   reports: Report[];
   activeReportIds: number[];
   isAllChecked: boolean;
-  selectAllRef: React.RefObject<HTMLInputElement>;
+  selectAllRef: RefObject<HTMLInputElement>;
   isResizing: boolean;
   isResizeHover: boolean;
   onBack: () => void;
   onSearch: () => void;
   onToggleAll: () => void;
   onToggleReport: (reportId: number) => void;
-  onResizeStart: (event: React.PointerEvent<HTMLDivElement>) => void;
+  onResizeStart: (event: PointerEvent<HTMLDivElement>) => void;
   onResizeEnter: () => void;
   onResizeLeave: () => void;
 };
@@ -40,7 +41,7 @@ export function ReportChatSidePanel({
   return (
     <motion.aside
       key="report-panel"
-      className="relative bg-slate-50 border-r border-slate-200 h-screen flex flex-col overflow-hidden"
+      className="prototype-chat-side-panel relative bg-slate-50 border-r border-slate-200 h-screen flex flex-col overflow-hidden"
       initial={{ width: 0, opacity: 0 }}
       animate={{ width, opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}

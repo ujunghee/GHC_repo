@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import type { PointerEvent } from "react";
 
 import { springSoft } from "../../report-search/motionConfig";
 
@@ -7,7 +8,7 @@ type ResizeHandleProps = {
   label: string;
   active: boolean;
   hovered: boolean;
-  onPointerDown: (event: React.PointerEvent<HTMLDivElement>) => void;
+  onPointerDown: (event: PointerEvent<HTMLDivElement>) => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 };

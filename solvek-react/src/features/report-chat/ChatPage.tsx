@@ -235,7 +235,7 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
   };
 
   return (
-    <main className="bg-white h-screen overflow-hidden flex">
+    <main className="prototype-chat-page bg-white h-screen overflow-hidden flex">
       <AnimatePresence initial={false}>
         {isPanelOpen && hasPanelContent && (
           <ReportChatSidePanel
@@ -260,7 +260,7 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
         )}
       </AnimatePresence>
 
-      <section className="relative flex-1 h-screen overflow-hidden" aria-label="보고서 채팅">
+      <section className="prototype-chat-main relative flex-1 h-screen overflow-hidden" aria-label="보고서 채팅">
         <AnimatePresence initial={false}>
           {!isPanelOpen && hasPanelContent && (
             <motion.button

@@ -1,8 +1,8 @@
-import { RefObject } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import type { RefObject } from "react";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 
 import { ClueChips, EmptyState, HelperMenu } from "../../report-search/components/ReportSearchSections";
-import { fadeEase, springSnappy, tapScale } from "../../report-search/motionConfig";
+import { springSnappy, springSoft, tapScale } from "../../report-search/motionConfig";
 import type { Report } from "../../report-search/types";
 
 type ChatSearchModalProps = {
@@ -49,12 +49,12 @@ export function ChatSearchModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.16 }}
+      transition={{ duration: 0.24 }}
       style={{ background: "rgba(15, 23, 42, 0.68)" }}
       onMouseDown={onClose}
     >
       <motion.section
-        className="bg-white radius-md-8 px-24 py-24"
+        className="prototype-chat-search-dialog bg-white radius-md-8 px-24 py-24"
         layout
         role="dialog"
         aria-modal="true"
@@ -121,82 +121,89 @@ export function ChatSearchModal({
           </AnimatePresence>
         </form>
 
-        <AnimatePresence initial={false}>
-          {searchClues.length > 0 && (
-            <motion.div
-              key="chat-search-clues"
-              layout
-              initial={{ opacity: 0, height: 0, y: -6 }}
-              animate={{ opacity: 1, height: "auto", y: 0 }}
-              exit={{ opacity: 0, height: 0, y: -6 }}
-              transition={fadeEase}
-              style={{ overflow: "visible" }}
-            >
-              <ClueChips
-                clues={searchClues}
+        <LayoutGroup>
+          <AnimatePresence initial={false}>
+            {searchClues.length > 0 && (
+              <motion.div
+                key="chat-search-clues"
+                layout
+                initial={{ opacity: 0, height: 0, y: -4 }}
+                animate={{ opacity: 1, height: "auto", y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -4 }}
+                transition={{
+                  layout: springSoft,
+                  height: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+                  opacity: { duration: 0.26 },
+                  y: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
+                }}
+                style={{ overflow: "hidden" }}
+              >
+                <ClueChips
+                  clues={searchClues}
                 checkedClues={checkedSearchClues}
                 onToggleChecked={onToggleClueChecked}
                 onReset={onResetClues}
                 showNavigation={false}
               />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <motion.div className="overflow-hidden mt-24" layout style={{ height: "46.4rem" }}>
-          <AnimatePresence mode="wait" initial={false}>
-            {searchedReports.length === 0 ? (
-              <motion.div
-                key="empty"
-                className="h-full overflow-auto flex align-center justify-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.14 }}
-              >
-                <EmptyState query={searchQuery} onSuggestion={onQueryChange} />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="results"
-                className="h-full"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.14 }}
-              >
-                <ul ref={resultListRef} className="h-full flex flex-col gap-12 overflow-auto">
-                  {searchedReports.map((report) => {
-                    const isChecked = activeReportIds.includes(report.id);
-
-                    return (
-                      <motion.li key={report.id} layout transition={springSnappy}>
-                        <motion.label
-                          layout
-                          className="flex align-center gap-16 radius-md-8 px-16 py-10 cursor-pointer bg-slate-50 border"
-                          animate={{ borderColor: isChecked ? "var(--blue-500)" : "transparent" }}
-                          transition={{ duration: 0.12 }}
-                        >
-                          <input
-                            className="checkbox-basic checkbox-basic-lg"
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => onToggleReport(report.id)}
-                            aria-label={`${report.title} 선택`}
-                          />
-                          <span className="flex flex-col gap-4">
-                            <span className="body2-sb-16 color-slate-900">{renderHighlightedTitle(report.title, searchQuery)}</span>
-                            <span className="body3-r-14 color-slate-900">{report.summary}</span>
-                          </span>
-                        </motion.label>
-                      </motion.li>
-                    );
-                  })}
-                </ul>
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
+
+          <motion.div className="overflow-hidden mt-24" layout="position" transition={springSoft} style={{ height: "46.4rem" }}>
+            <AnimatePresence mode="wait" initial={false}>
+              {searchedReports.length === 0 ? (
+                <motion.div
+                  key="empty"
+                  className="h-full overflow-auto flex align-center justify-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.22 }}
+                >
+                  <EmptyState query={searchQuery} onSuggestion={onQueryChange} />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="results"
+                  className="h-full"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.22 }}
+                >
+                  <ul ref={resultListRef} className="h-full flex flex-col gap-12 overflow-auto">
+                    {searchedReports.map((report) => {
+                      const isChecked = activeReportIds.includes(report.id);
+
+                      return (
+                        <motion.li key={report.id} layout transition={springSnappy}>
+                          <motion.label
+                            layout
+                            className="flex align-center gap-16 radius-md-8 px-16 py-10 cursor-pointer bg-slate-50 border"
+                            animate={{ borderColor: isChecked ? "var(--blue-500)" : "transparent" }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <input
+                              className="checkbox-basic checkbox-basic-lg"
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => onToggleReport(report.id)}
+                              aria-label={`${report.title} 선택`}
+                            />
+                            <span className="flex flex-col gap-4">
+                              <span className="body2-sb-16 color-slate-900">{renderHighlightedTitle(report.title, searchQuery)}</span>
+                              <span className="body3-r-14 color-slate-900">{report.summary}</span>
+                            </span>
+                          </motion.label>
+                        </motion.li>
+                      );
+                    })}
+                  </ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </LayoutGroup>
       </motion.section>
     </motion.div>
   );

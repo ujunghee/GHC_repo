@@ -51,10 +51,5 @@ export const sourceDocument: SourceDocument = {
   title: "함안 윤내리 토기가마",
   pageLabel: "p.12",
   pageImageUrl: "",
-  similarity: [
-    { label: "80%", tone: "blue" },
-    { label: "50%", tone: "green" },
-    { label: "30%", tone: "yellow" },
-    { label: "10%", tone: "orange" },
-  ],
+  similarityScore: 80,
 };

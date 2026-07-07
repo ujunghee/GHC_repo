@@ -1,5 +1,5 @@
 ﻿import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import "swiper/css";
 
 import {
@@ -13,7 +13,7 @@ import {
   ResultHeader,
 } from "./components/ReportSearchSections";
 import { reportData } from "./data";
-import { fadeEase, springSnappy, springSoft, tapScale } from "./motionConfig";
+import { springSnappy, springSoft, tapScale } from "./motionConfig";
 import type { ViewMode } from "./types";
 
 type MainSearchPageProps = {
@@ -155,7 +155,7 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
   }, [isEmptyResult]);
 
   return (
-    <main className="bg-slate-50 h-screen overflow-auto">
+    <main className="prototype-search-page bg-slate-50 h-screen overflow-auto">
       <AnimatePresence>
         {toastVisible && (
           <motion.div
@@ -174,13 +174,13 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
         )}
       </AnimatePresence>
 
-      <section className="mb-default mt-140 py-40" aria-label="발굴보고서 검색">
-        <header className="text-center mb-50">
+      <section className="prototype-search-shell mb-default mt-140 pb-80" aria-label="발굴보고서 검색">
+        <header className="prototype-search-header text-center mb-50">
           <h1 className="heading4-b-32 color-slate-900 mb-8">{heading}</h1>
           <p className="body1-m-18 color-slate-500">AI는 선택한 1개 보고서를 기준으로 요약, 위치, 유구·유물 정보를 답변합니다.</p>
         </header>
 
-        <form className="main-search-wrapper relative" onSubmit={handleSearch}>
+        <form className="prototype-main-search main-search-wrapper relative" onSubmit={handleSearch}>
           <div className="main-search-62 flex align-center gap-8 px-12">
             <motion.button
               className={helperOpen ? "active flex align-center justify-center" : "flex align-center justify-center"}
@@ -233,36 +233,47 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
           </AnimatePresence>
         </form>
 
-        <AnimatePresence>
-          {clues.length > 0 && (
-            <motion.div
-              key="clue-chips"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={fadeEase}
-            >
-              <ClueChips clues={clues} checkedClues={checkedClues} onToggleChecked={toggleClueChecked} onRemove={toggleClue} onReset={resetClues} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {isEmptyResult ? (
-          <EmptyState query={query} onSuggestion={(text) => { setQuery(text); setMode("history"); }} />
-        ) : (
-          <>
-            {query.trim() === "" && searchHistory.length > 0 && (
-              <RecentReports reports={searchHistory} onChoose={chooseRecent} />
+        <LayoutGroup>
+          <AnimatePresence initial={false}>
+            {clues.length > 0 && (
+              <motion.div
+                key="clue-chips"
+                layout
+                initial={{ opacity: 0, height: 0, y: -4 }}
+                animate={{ opacity: 1, height: "auto", y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -4 }}
+                transition={{
+                  layout: springSoft,
+                  height: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+                  opacity: { duration: 0.26 },
+                  y: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
+                }}
+                style={{ overflow: "hidden" }}
+              >
+                <ClueChips clues={clues} checkedClues={checkedClues} onToggleChecked={toggleClueChecked} onRemove={toggleClue} onReset={resetClues} />
+              </motion.div>
             )}
-            {query.trim() === "" && searchHistory.length >= 5 && recommendedReports.length > 0 && (
-              <RecommendSlider reports={recommendedReports} selectedReports={selectedReports} onToggle={toggleReport} keyword={query} />
-            )}
-            {(mode === "filtered" || mode === "grouped") && <FilterRail activeFilters={activeFilters} onToggle={toggleFilter} />}
+          </AnimatePresence>
 
-            <ResultHeader label={mode === "grouped" || mode === "filtered" ? activeFilters[0] || "부산" : "총"} count={resultCount} showChat={mode === "grouped" || mode === "filtered"} />
-            <ReportGrid reports={shownReports} selectedReports={selectedReports} onToggle={toggleReport} keyword={query} />
-          </>
-        )}
+          <motion.div className="prototype-search-content" layout="position" transition={springSoft}>
+            {isEmptyResult ? (
+              <EmptyState query={query} onSuggestion={(text) => { setQuery(text); setMode("history"); }} />
+            ) : (
+              <>
+                {query.trim() === "" && searchHistory.length > 0 && (
+                  <RecentReports reports={searchHistory} onChoose={chooseRecent} />
+                )}
+                {query.trim() === "" && searchHistory.length >= 5 && recommendedReports.length > 0 && (
+                  <RecommendSlider reports={recommendedReports} selectedReports={selectedReports} onToggle={toggleReport} keyword={query} />
+                )}
+                {(mode === "filtered" || mode === "grouped") && <FilterRail activeFilters={activeFilters} onToggle={toggleFilter} />}
+
+                <ResultHeader label={mode === "grouped" || mode === "filtered" ? activeFilters[0] || "부산" : "총"} count={resultCount} showChat={mode === "grouped" || mode === "filtered"} />
+                <ReportGrid reports={shownReports} selectedReports={selectedReports} onToggle={toggleReport} keyword={query} />
+              </>
+            )}
+          </motion.div>
+        </LayoutGroup>
       </section>
 
       <AnimatePresence>

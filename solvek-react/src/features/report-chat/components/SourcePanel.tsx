@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import type { PointerEvent } from "react";
 
 import { sourceDocument } from "../data";
 import { springSoft } from "../../report-search/motionConfig";
@@ -9,23 +10,18 @@ type SourcePanelProps = {
   title: string;
   isResizing: boolean;
   isResizeHover: boolean;
-  onResizeStart: (event: React.PointerEvent<HTMLDivElement>) => void;
+  onResizeStart: (event: PointerEvent<HTMLDivElement>) => void;
   onResizeEnter: () => void;
   onResizeLeave: () => void;
 };
 
-const toneClass = {
-  blue: "bg-blue-50 color-blue-500",
-  green: "bg-green-50 color-green-500",
-  yellow: "bg-yellow-50 color-yellow-700",
-  orange: "bg-orange-50 color-orange-500",
-};
-
 export function SourcePanel({ width, title, isResizing, isResizeHover, onResizeStart, onResizeEnter, onResizeLeave }: SourcePanelProps) {
+  const similarityToneClass = getSimilarityToneClass(sourceDocument.similarityScore);
+
   return (
     <motion.aside
       key="source-panel"
-      className="relative bg-white border-l border-slate-200 h-screen overflow-hidden"
+      className="prototype-source-panel relative bg-white border-l border-slate-200 h-screen overflow-hidden"
       initial={{ width: 0, opacity: 0 }}
       animate={{ width, opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}
@@ -46,11 +42,12 @@ export function SourcePanel({ width, title, isResizing, isResizeHover, onResizeS
       <div className="h-full px-24 py-24 flex flex-col">
         <div className="flex align-center gap-8 mb-12 flex-none">
           <span className="body3-r-14 color-slate-500">유사도</span>
-          {sourceDocument.similarity.map((item) => (
-            <span key={item.label} className={`chip radius-full px-10 h-28 flex align-center justify-center body3-r-14 ${toneClass[item.tone]}`}>
-              {item.label}
-            </span>
-          ))}
+          <span
+            className={`radius-full px-10 h-28 flex align-center justify-center body3-r-14 ${similarityToneClass}`}
+            aria-label={`AI 검색 유사도 ${sourceDocument.similarityScore}%`}
+          >
+            {sourceDocument.similarityScore}%
+          </span>
         </div>
 
         <h2 className="heading10-sb-20 color-slate-900 flex-none">{sourceDocument.pageLabel} | {title || sourceDocument.title}</h2>
@@ -75,4 +72,11 @@ export function SourcePanel({ width, title, isResizing, isResizeHover, onResizeS
       </div>
     </motion.aside>
   );
+}
+
+function getSimilarityToneClass(score: number) {
+  if (score >= 75) return "bg-blue-50 color-blue-500";
+  if (score >= 50) return "bg-green-50 color-green-500";
+  if (score >= 30) return "bg-yellow-50 color-yellow-700";
+  return "bg-orange-50 color-orange-500";
 }

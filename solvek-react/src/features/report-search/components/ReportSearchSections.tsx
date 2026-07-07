@@ -432,9 +432,10 @@ type ClueChipsProps = {
   onRemove?: (value: string) => void;
   onReset?: () => void;
   showNavigation?: boolean;
+  className?: string;
 };
 
-export function ClueChips({ clues, checkedClues, onToggleChecked, onReset, showNavigation = true }: ClueChipsProps) {
+export function ClueChips({ clues, checkedClues, onToggleChecked, onReset, showNavigation = true, className = "mt-16" }: ClueChipsProps) {
   const [swiper, setSwiper] = useState<SwiperClass | null>(null);
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
@@ -451,7 +452,7 @@ export function ClueChips({ clues, checkedClues, onToggleChecked, onReset, showN
   }, [clues, checkedClues, swiper]);
 
   return (
-    <div className="relative mt-16 flex align-center gap-24" aria-label="선택한 단서">
+    <div className={`relative flex align-center gap-24 ${className}`} aria-label="선택한 단서">
       <div className="relative flex-1" style={{ minWidth: 0 }}>
         <Swiper
           modules={[Navigation]}

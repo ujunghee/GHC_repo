@@ -32,16 +32,16 @@ export function ChatConversation({
   onOpenSource,
 }: ChatConversationProps) {
   return (
-    <div className="h-full flex flex-col">
-      <header className="px-24 py-24">
+    <div className="prototype-chat-conversation h-full flex flex-col">
+      <header className="prototype-chat-header px-24 py-24">
         <h1 className="heading10-sb-20 color-slate-900">
           {reportTitle}{selectedCount > 1 ? " 외 " : " "}
           <strong className="color-blue-500">{selectedCount}건</strong>
         </h1>
       </header>
 
-      <div className="flex-1 overflow-auto flex justify-center">
-        <div className="w-full px-16" style={{ maxWidth: "76.4rem", paddingTop: "3.2rem" }}>
+      <div className="prototype-chat-scroll flex-1 overflow-auto flex justify-center">
+        <div className="prototype-chat-body w-full px-16" style={{ maxWidth: "76.4rem", paddingTop: "3.2rem" }}>
           {selectedCount === 0 ? (
             <div className="text-center" style={{ paddingTop: "12rem" }}>
               <p className="heading10-sb-20 color-slate-900 mb-8">보고서를 선택해주세요</p>
@@ -98,8 +98,8 @@ export function ChatConversation({
       </div>
 
       <form className="px-24 pb-24 flex justify-center" onSubmit={onSubmit}>
-        <div className="w-full" style={{ maxWidth: "76.4rem" }}>
-          <p className="body3-r-14 color-slate-500 mb-8">예: 두 보고서의 조사 위치를 비교해줘&nbsp;&nbsp; | &nbsp;&nbsp;A 보고서의 주요 유물은?</p>
+        <div className="prototype-chat-input-wrap w-full" style={{ maxWidth: "76.4rem" }}>
+          <p className="prototype-chat-example body3-r-14 color-slate-500 mb-8">예: 두 보고서의 조사 위치를 비교해줘&nbsp;&nbsp; | &nbsp;&nbsp;A 보고서의 주요 유물은?</p>
           <div className="search-62 flex align-center px-16 bg-white">
             <input
               className="main-search__input body2-r-16 flex-1"
