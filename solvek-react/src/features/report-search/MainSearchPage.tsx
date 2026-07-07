@@ -145,13 +145,13 @@ export function MainSearchPage() {
         {toastVisible && (
           <motion.div
             key="toast"
-            className="toast active left-50 translate-x-50 bg-red-50 radius-md-8 shadow-lg px-20 py-12 flex align-center gap-8 z-index-10"
+            className="toast active bg-red-50 radius-md-8 shadow-lg px-20 py-12 flex align-center gap-8 z-index-10"
             role="status"
-            initial={{ opacity: 0, y: -32 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -24 }}
+            initial={{ opacity: 0, y: -32, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: -24, x: "-50%" }}
             transition={springSoft}
-            style={{ top: "3.2rem", visibility: "visible", transition: "none" }}
+            style={{ top: "3.2rem", left: "50%", visibility: "visible", transition: "none" }}
           >
             <span className="body1-sb-18 color-red-500" aria-hidden="true">▲</span>
             <span className="body1-sb-18 color-red-500">최대 2건만 가능합니다</span>

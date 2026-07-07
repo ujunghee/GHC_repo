@@ -308,7 +308,7 @@ function ReportCard({ report, selected, onToggle, keyword }: { report: Report; s
       whileTap={{ scale: 0.985 }}
       animate={{
         borderColor: selected ? "var(--blue-500)" : "var(--slate-200)",
-        boxShadow: selected ? "0 0 0 .05rem var(--blue-500)" : "0 0 0 0px transparent",
+        // boxShadow: selected ? "0 0 0 .05rem var(--blue-500)" : "0 0 0 0px transparent",
       }}
       transition={springSnappy}
     >
