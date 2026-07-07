@@ -1,0 +1,32 @@
+/* Map Pagination (지도용 컴팩트 페이지네이션) */
+.map-pagination .pagination__list {
+  gap: var(--spacing-4);
+}
+
+.map-pagination .pagination__nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.2rem;
+  min-width: 3.2rem;
+  height: 3.2rem;
+  padding: 0;
+  border-radius: var(--radius-sm-4);
+  background-color: var(--slate-50);
+  text-decoration: none;
+
+  &:hover {
+    background-color: var(--slate-100);
+  }
+
+  &:active {
+    background-color: var(--slate-200);
+  }
+}
+
+.map-pagination .pagination__link {
+  min-width: 3.2rem;
+  height: 3.2rem;
+  padding: 0 var(--spacing-8);
+  border-radius: var(--radius-sm-4);
+}

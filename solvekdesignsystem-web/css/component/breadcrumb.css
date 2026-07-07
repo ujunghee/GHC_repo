@@ -1,0 +1,33 @@
+.breadcrumb {
+  padding: var(--spacing-32) 0 0;
+}
+
+.breadcrumb__title {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.breadcrumb .heading4-b-32,
+.breadcrumb .body2-r-16,
+.breadcrumb .body2-m-16,
+.breadcrumb .heading9-sb-22 {
+  line-height: revert-layer;
+}
+
+.breadcrumb__nav {
+  flex-shrink: 0;
+}
+
+.breadcrumb__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumb__link {
+  text-decoration: none;
+}
+
+.breadcrumb__link:hover {
+  color: var(--slate-700);
+}

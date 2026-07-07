@@ -1,0 +1,163 @@
+/* 검색 필터 사이드바 */
+.search-filter {
+  width: 100%;
+  max-width: 28.4rem;
+  overflow: visible;
+}
+
+.search-filter__head {
+  padding: 0 0 var(--spacing-16);
+  border-bottom: 1px solid var(--slate-900);
+}
+
+.search-filter__title {
+  margin: 0;
+}
+
+.search-filter__reset {
+  flex-shrink: 0;
+}
+
+.search-filter__section {
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.search-filter__toggle {
+  width: 100%;
+  height: 5.6rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.search-filter__toggle .arrow-icon {
+  transform: rotate(-180deg);
+  transition: transform 0.2s ease;
+}
+
+.search-filter__section.active .search-filter__toggle .arrow-icon {
+  transform: rotate(0);
+}
+
+.search-filter__panel {
+  overflow: hidden;
+  height: 0;
+  transition: height 0.3s ease;
+}
+
+.search-filter__section.active .search-filter__panel.is-open {
+  overflow: visible;
+}
+
+.search-filter__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 var(--spacing-8);
+  display: flex;
+  flex-direction: column;
+}
+
+.search-filter__list--cols-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.search-filter__item {
+  padding: var(--spacing-6) 0;
+}
+
+.search-filter__item > .flex.align-center,
+.search-filter__item > .flex.justify-between > .flex {
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.search-filter__item > .flex.justify-between > .flex {
+  flex: 1;
+}
+
+.search-filter__item .checkbox-basic {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.search-filter__item label {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.search-filter__count {
+  flex-shrink: 0;
+}
+
+.search-filter__selects,
+.search-filter__selects .select-wrapper {
+  overflow: visible;
+}
+
+.search-filter__selects .select-wrapper {
+  min-width: 0;
+}
+
+/* 기간 — 라디오 2열 (첫 항목 전체 너비) */
+.search-filter__period-radios.search-filter__list--cols-2 .search-filter__item:first-child {
+  grid-column: 1 / -1;
+}
+
+.search-filter__period-dates {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+  padding-bottom: var(--spacing-16);
+}
+
+.search-filter__period-date .input-wrapper {
+  min-width: 0;
+}
+
+.search-filter__period-label {
+  flex-shrink: 0;
+  width: 6.4rem;
+}
+
+.search-filter .input-field-default-40.input-with-trailing-icon {
+  width: 100%;
+  padding-right: 4rem;
+}
+
+.search-filter__period-date button:disabled,
+.search-filter__period-range button:disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+  padding: 0;
+  background-color: transparent;
+}
+
+.search-filter__period-range .input-wrapper {
+  min-width: 0;
+}
+
+/* 필터 하단 셀렉트 — picker가 위로 뜨지 않도록 앵커 고정 (Chrome base-select) */
+.search-filter #filter-select-1 {
+  anchor-name: --filter-select-1;
+}
+
+.search-filter #filter-select-2 {
+  anchor-name: --filter-select-2;
+}
+
+@supports (appearance: base-select) {
+  .search-filter #filter-select-1::picker(select),
+  .search-filter #filter-select-2::picker(select) {
+    position: fixed;
+    top: calc(anchor(bottom) + var(--spacing-2));
+    left: anchor(left);
+    width: anchor-size(width);
+    margin-top: 0;
+  }
+}

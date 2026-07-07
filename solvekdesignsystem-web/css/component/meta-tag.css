@@ -1,0 +1,31 @@
+.meta-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-8);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.meta-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.4rem;
+  padding: 0 var(--spacing-6);
+  border-radius: var(--radius-sm-4);
+  background-color: var(--slate-50);
+  color: var(--slate-700);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body3);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-170);
+  letter-spacing: var(--letter-spacing-md);
+  white-space: nowrap;
+}
+
+.meta-tag--active {
+  background-color: var(--blue-50);
+  color: var(--blue-500);
+  font-weight: var(--font-weight-medium);
+}

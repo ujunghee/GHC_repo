@@ -1,0 +1,85 @@
+/* date style s */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  background-color: transparent;
+  background-image: url('/image/icon/calendar.svg');
+  background-repeat: no-repeat;
+  background-position: calc(100% - 1.4rem) 50%;
+  background-size: 2.4rem;
+  padding: 0 var(--spacing-12) 0 var(--spacing-12);
+  &::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    cursor: pointer;
+  }
+}
+@supports (-moz-appearance: none) {
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    -moz-appearance: none !important;
+    background-image: none !important;
+  }
+}
+/* date style e */
+
+
+/* range style s */
+/* ==== 커스텀 range input 스타일 ==== */
+input[type=range] {
+  width: 100%; 
+  height: 6px;
+  background: var(--gray-100); 
+  cursor: pointer;
+  border-radius: var(--radius-full); /* iOS */
+ transition: background 450ms ease-in;
+ &:focus {
+  outline: none;
+ }
+ &::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--white);
+  border: 1px solid var(--blue-500);
+  border-radius:50%;
+  cursor: pointer;
+ }
+ &::-moz-range-thumb {
+  width:10px;
+  height:10px;
+  background: var(--white);
+  border: 1px solid var(--gray-500);
+  border-radius:50%;
+  cursor: pointer;
+ }
+}
+/* range style e */
+
+
+/* toast message s */
+.toast {
+  opacity: 0;
+  top: 0;
+  visibility: hidden;
+  transition: all 0.5s ease;
+  position: fixed;
+}
+
+.toast.active {
+  opacity: 1;
+  top: 3.2rem;
+  visibility: visible;
+}
+/* toast message e */
+
+/* form validate s */
+.is-error {
+  border-color: var(--red-500);
+}
+.error-message {
+  display: none;
+}
+.error-message.is-error {
+  display: block;
+}
+/* form validate e */

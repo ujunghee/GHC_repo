@@ -1,0 +1,12 @@
+/* Applied Filter */
+.applied-filter {
+  box-sizing: border-box;
+}
+
+.applied-filter__list {
+  min-width: 0;
+}
+
+.applied-filter__reset {
+  flex-shrink: 0;
+}

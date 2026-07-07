@@ -1,0 +1,66 @@
+/* Map Navigation (지도 좌측 도구 내비게이션) */
+.map-navigation {
+  width: 7.2rem;
+  height: 100vh;
+  background-color: var(--white);
+  border-right: 1px solid var(--slate-200);
+  overflow-y: auto;
+}
+
+.map-navigation__list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100%;
+  margin: 0;
+  padding: var(--spacing-4);
+  list-style: none;
+  gap: var(--spacing-4);
+}
+
+.map-navigation__list > li {
+  width: 100%;
+}
+
+.map-navigation__bottom {
+  margin-top: auto;
+}
+
+.map-navigation__item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* gap: var(--spacing-6); */
+  width: 100%;
+  padding: var(--spacing-4) 0;
+  border: none;
+  background-color: transparent;
+  border-radius: var(--radius-md-8);
+  color: var(--slate-700);
+  cursor: pointer;
+  min-height: 6.4rem;
+}
+
+.map-navigation__item:hover {
+  background-color: var(--slate-50);
+}
+
+.map-navigation__item.active {
+  box-shadow: inset 0 0 0 1px var(--blue-500);
+  color: var(--slate-900);
+  background-color: var(--blue-50);
+}
+
+.map-navigation__label {
+  color: inherit;
+  white-space: nowrap;
+}
+
+/* 아이콘 영역만 확보 (실제 아이콘은 추후 삽입) */
+.map-nav-icon {
+  background-color: var(--slate-100);
+  width: 2.4rem;
+  height: 2.4rem;
+  flex-shrink: 0;
+}

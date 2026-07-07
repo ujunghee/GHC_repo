@@ -1,0 +1,205 @@
+:root {
+  /* ==== color ==== */
+  --white: #fff;
+  --black: #000;
+
+  --gray-50: #f0f2f3;
+  --gray-100: #d2d5d8;
+  --gray-200: #bcc1c6;
+  --gray-300: #9da5ab;
+  --gray-400: #8a939b;
+  --gray-500: #6d7882;
+  --gray-600: #636d76;
+  --gray-700: #4d555c;
+  --gray-800: #3c4248;
+  --gray-900: #2e3237;
+
+
+  --slate-50:#f0f1f3;
+  --slate-100:#cfd4db;
+  --slate-200:#b8bfca;
+  --slate-300:#97a2b1;
+  --slate-400:#8390a2;
+  --slate-500:#64748b;
+  --slate-600:#5b6a7e;
+  --slate-700:#475263;
+  --slate-800:#37404c;
+  --slate-900:#2a313a;
+
+
+  --sky-blue-50: #e8f4fe;
+  --sky-blue-100: #b8ddfd;
+  --sky-blue-200: #95ccfc;
+  --sky-blue-300: #65b5fb;
+  --sky-blue-400: #47a7fa;
+  --sky-blue-500: #1991f9;
+  --sky-blue-600: #1784e3;
+  --sky-blue-700: #1267b1;
+  --sky-blue-800: #0e5089;
+  --sky-blue-900: #0b3d69;
+
+
+  --blue-50: #e8f1ff;
+  --blue-100: #b8d5ff;
+  --blue-200: #96c0ff;
+  --blue-300: #66a3ff;
+  --blue-400: #4891ff;
+  --blue-500: #1a76ff;
+  --blue-600: #186be8;
+  --blue-700: #1254b5;
+  --blue-800: #0e418c;
+  --blue-900: #0b326b;
+
+
+  --navy-50: #e6edf8;
+  --navy-100: #b2c7ea;
+  --navy-200: #8cacdf;
+  --navy-300: #5886d1;
+  --navy-400: #376ec8;
+  --navy-500: #054aba;
+  --navy-600: #0543a9;
+  --navy-700: #043584;
+  --navy-800: #032966;
+  --navy-900: #021f4e;
+
+
+  --orange-50: #fef3e8;
+  --orange-100: #fddbb9;
+  --orange-200: #fbc997;
+  --orange-300: #fab168;
+  --orange-400: #f9a14a;
+  --orange-500: #f78a1d;
+  --orange-600: #e17e1a;
+  --orange-700: #af6215;
+  --orange-800: #884c10;
+  --orange-900: #683a0c;
+
+
+  --yellow-50: #fefaec;
+  --yellow-100: #fdeec4;
+  --yellow-200: #fce6a7;
+  --yellow-300: #fada7f;
+  --yellow-400: #f9d366;
+  --yellow-500: #f8c840;
+  --yellow-600: #e2b63a;
+  --yellow-700: #b08e2d;
+  --yellow-800: #886e23;
+  --yellow-900: #68541b;
+
+
+  --red-50: #fde6e9;
+  --red-100: #f7b0bb;
+  --red-200: #f48a9a;
+  --red-300: #ee546c;
+  --red-400: #eb334f;
+  --red-500: #e60023;
+  --red-600: #d10020;
+  --red-700: #a30019;
+  --red-800: #7f0013;
+  --red-900: #61000f;
+
+
+  --pink-50:#feecee;
+  --pink-100:#fac4c9;
+  --pink-200:#f8a8af;
+  --pink-300:#f5808a;
+  --pink-400:#f36874;
+  --pink-500:#f04251;
+  --pink-600:#da3c4a;
+  --pink-700:#aa2f3a;
+  --pink-800:#84242d;
+  --pink-900:#651c22;
+
+
+  --blue-green-50:#e6f3ef;
+  --blue-green-100:#b1dbcd;
+  --blue-green-200:#8ccab5;
+  --blue-green-300:#57b193;
+  --blue-green-400:#36a27e;
+  --blue-green-500:#048b5e;
+  --blue-green-600:#047e56;
+  --blue-green-700:#036343;
+  --blue-green-800:#024c34;
+  --blue-green-900:#023a27;
+
+
+  --green-50: #ebf9f2;
+  --green-100: #c1ebd5;
+  --green-200: #a3e1c1;
+  --green-300: #7ad3a5;
+  --green-400: #60cb93;
+  --green-500: #38be78;
+  --green-600: #33ad6d;
+  --green-700: #288755;
+  --green-800: #1f6942;
+  --green-900: #185032;
+
+
+  --teal-blue-50:#e6f1f3;
+  --teal-blue-100:#b1d4db;
+  --teal-blue-200:#8cbfca;
+  --teal-blue-300:#57a2b1;
+  --teal-blue-400:#3690a2;
+  --teal-blue-500:#04748b;
+  --teal-blue-600:#046a7e;
+  --teal-blue-700:#035263;
+  --teal-blue-800:#02404c;
+  --teal-blue-900:#02313a;
+
+
+  --teal-50:#ecf3f2;
+  --teal-100:#c3dbd8;
+  --teal-200:#a6cac5;
+  --teal-300:#7db1ab;
+  --teal-400:#64a29a;
+  --teal-500:#3d8b81;
+  --teal-600:#387e75;
+  --teal-700:#2b635c;
+  --teal-800:#224c47;
+  --teal-900:#1a3a36;
+
+
+  --blue-purple-50:#efe8f9;
+  --blue-purple-100:#ccb8ec;
+  --blue-purple-200:#b496e3;
+  --blue-purple-300:#9166d6;
+  --blue-purple-400:#7c49ce;
+  --blue-purple-500:#5b1bc2;
+  --blue-purple-600:#5319b1;
+  --blue-purple-700:#41138a;
+  --blue-purple-800:#320f6b;
+  --blue-purple-900:#260b51;
+
+
+  --violet-50:#f3e9f8;
+  --violet-100:#d9bae9;
+  --violet-200:#c698de;
+  --violet-300:#ac69cf;
+  --violet-400:#9c4cc5;
+  --violet-500:#831fb7;
+  --violet-600:#771ca7;
+  --violet-700:#5d1682;
+  --violet-800:#481165;
+  --violet-900:#370d4d;
+
+
+  --mulberry-50:#f6ecf3;
+  --mulberry-100:#e4c4da;
+  --mulberry-200:#d7a8c9;
+  --mulberry-300:#c580b0;
+  --mulberry-400:#ba68a1;
+  --mulberry-500:#a94289;
+  --mulberry-600:#9a3c7d;
+  --mulberry-700:#782f61;
+  --mulberry-800:#5d244b;
+  --mulberry-900:#471c3a;
+
+
+  --color-icon-gray:#33363D;
+
+  --overlay-50: rgba(0, 0, 0, 0.5);
+  --overlay-75: rgba(0, 0, 0, 0.75);
+  --scrollbar-thumb: rgb(196, 198, 200);
+  --tap-highlight-slate: rgb(240 241 243 / 0.45);
+
+}

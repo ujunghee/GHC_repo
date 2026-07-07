@@ -1,0 +1,133 @@
+.modal-container {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-24);
+  box-sizing: border-box;
+  background-color: var(--overlay-75);
+}
+
+.modal-container[hidden] {
+  display: none;
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  max-height: calc(100vh - var(--spacing-48));
+  max-height: calc(100dvh - var(--spacing-48));
+  background-color: var(--white);
+  border-radius: var(--radius-md-8);
+  transition: 0.3s;
+}
+
+/* 1440px → 860px | 1280px → 760px | 1024px → 610px | 768px → 460px | ~767px → 100% */
+@media (min-width: 768px) {
+  .modal {
+    max-width: 46rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .modal {
+    max-width: 61rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .modal {
+    max-width: 76rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .modal {
+    max-width: 86rem;
+  }
+}
+
+.modal__header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-16) var(--spacing-16) var(--spacing-20) var(--spacing-24);
+}
+
+.modal__header h2 {
+  font-size: var(--font-size-h8);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-0);
+}
+
+/* modal__content 스크롤 시작점 (뷰포트 높이)
+   1366×768  → 540px | 1440×900 → 640px | 1920×1080 → 840px
+   페이지 모달(.modal--page) → 1100px */
+.modal__content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  max-height: calc(100dvh - var(--spacing-48) - 14rem);
+}
+
+@media (min-height: 768px) {
+  .modal__content {
+    max-height: 54rem;
+  }
+}
+
+@media (min-height: 900px) {
+  .modal__content {
+    max-height: 64rem;
+  }
+}
+
+@media (min-height: 1080px) {
+  .modal__content {
+    max-height: 84rem;
+  }
+}
+
+.modal--page .modal__content {
+  max-height: 110rem;
+}
+
+.modal__footer {
+  flex-shrink: 0;
+  padding: var(--spacing-24);
+}
+
+/* 이벤트성 모달 */
+.modal__content--event {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal__content-action {
+  margin-top: auto;
+  padding-top: var(--spacing-24);
+}
+
+.modal__footer--event {
+  border-top: 1px solid var(--slate-200);
+  padding: var(--spacing-8) 0;
+}
+
+@media (max-width: 767px) {
+  .modal-container--event {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-container--event .modal--event {
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius-lg-16) var(--radius-lg-16) 0 0;
+    max-height: calc(100dvh - var(--spacing-24));
+  }
+}

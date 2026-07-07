@@ -1,0 +1,55 @@
+/* Board (게시판 목록 테이블) */
+.board-table {
+  border-collapse: collapse;
+}
+
+.board-table__th {
+  padding: var(--spacing-16);
+  background-color: var(--slate-50);
+  border-bottom: 1px solid var(--slate-200);
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-md);
+  color: var(--slate-900);
+  text-align: center;
+}
+
+.board-table__td {
+  padding: var(--spacing-16);
+  border-bottom: 1px solid var(--slate-200);
+  vertical-align: middle;
+}
+
+.board-table__type {
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-md);
+  color: var(--slate-700);
+}
+
+.board-table__type--important {
+  font-weight: var(--font-weight-regular);
+  color: var(--blue-500);
+}
+
+.board-table__link {
+  text-decoration: none;
+}
+
+.board-table__link:hover {
+  text-decoration: underline;
+}
+
+.board-table__badge-new {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-xs-2);
+  background-color: var(--green-500);
+  color: var(--white);
+  font-size: var(--font-size-body5);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}

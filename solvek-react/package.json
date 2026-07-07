@@ -1,0 +1,43 @@
+{
+  "name": "solvek-react",
+  "version": "0.1.0",
+  "private": true,
+  "source": "index.html",
+  "scripts": {
+    "dev": "parcel serve index.html --host 127.0.0.1 --no-cache",
+    "dev:5173": "parcel serve index.html --host 127.0.0.1 --port 5173 --no-cache",
+    "build": "parcel build index.html --dist-dir dist --public-url ./ --no-cache"
+  },
+  "dependencies": {
+    "framer-motion": "^12.42.2",
+    "motion": "^12.42.2",
+    "parcel": "^2.12.0",
+    "process": "^0.11.10",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "swiper": "^14.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "parcel-reporter-static-files-copy": "^1.5.3",
+    "typescript": "^5.5.4"
+  },
+  "browserslist": [
+    "defaults",
+    "not IE 11"
+  ],
+  "@parcel/resolver-default": {
+    "packageExports": true
+  },
+  "staticFiles": [
+    {
+      "staticPath": "../solvekdesignsystem-web/css",
+      "staticOutPath": "css"
+    },
+    {
+      "staticPath": "../solvekdesignsystem-web/image",
+      "staticOutPath": "image"
+    }
+  ]
+}

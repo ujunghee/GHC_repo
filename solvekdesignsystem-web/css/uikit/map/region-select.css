@@ -1,0 +1,77 @@
+/* Region Select (주소 선택 - 광역시도/시군구/읍면동 3단 선택) */
+.region-select {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.region-select__tabs {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md-8);
+  background-color: var(--white);
+  overflow: hidden;
+}
+
+.region-select__tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 4rem;
+  border: none;
+  padding: 0 var(--spacing-20) 0 var(--spacing-16);
+  background-color: var(--white);
+  cursor: pointer;
+}
+
+.region-select__tab > span {
+  white-space: nowrap;
+}
+
+.region-select__divider-icon {
+  flex: none;
+  pointer-events: none;
+  background-size: cover;
+  width: 1rem;
+}
+
+.region-select__panel {
+  width: 100%;
+  border: 1px solid var(--slate-200);
+  display: none;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  max-height: 28rem;
+  overflow-y: auto;
+  margin: var(--spacing-2) 0 0;
+  padding: var(--spacing-8);
+  list-style: none;
+  background-color: var(--white);
+  border-radius: var(--radius-sm-4);
+}
+
+.region-select__panel.active {
+  display: flex;
+}
+
+.region-select__item {
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-sm-4);
+  font-size: var(--font-size-body3);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-md);
+  padding: 0 var(--spacing-8);
+  color: var(--slate-900);
+  cursor: pointer;
+  height: 3.2rem;
+}
+
+.region-select__item:hover {
+  background-color: var(--slate-50);
+}
+
+.region-select__item.active {
+  background-color: var(--slate-50);
+}

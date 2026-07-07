@@ -1,0 +1,18 @@
+/* Chip */
+.chip {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.chip > span {
+  min-width: 0;
+}
+
+.chip .chips-close-icon {
+  flex-shrink: 0;
+}
+
+.chip:hover {
+  background-color: var(--slate-50);
+  cursor: pointer;
+}

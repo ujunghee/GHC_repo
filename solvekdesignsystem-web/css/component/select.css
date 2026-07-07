@@ -1,0 +1,227 @@
+/* select style s
+ * 네이밍: select-{48|40|36} (input 필드 높이와 동일)
+ * Chrome: appearance base-select + ::picker(select) / :open · option::checkmark
+ * 파일 하단: Firefox select 화살표 제거 + 네이티브 option 보정(전역) */
+.select-48,
+.select-40,
+.select-36 {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid var(--slate-400);
+  background-color: var(--white);
+  background-image: url(/image/icon/chevron-down.svg);
+  background-repeat: no-repeat;
+  background-size: 2.4rem;
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-160);
+  letter-spacing: var(--letter-spacing-md);
+  transition: border-color 0.2s ease, background-image 0.2s ease;
+
+  &::picker-icon {
+    display: none;
+  }
+
+  @supports (appearance: base-select) {
+    &, &::picker(select) {
+      appearance: base-select;
+    }
+  }
+
+  &:focus,
+  &:hover {
+    outline: none;
+    border-color: var(--blue-500);
+  }
+
+  &:active {
+    outline: none;
+  }
+
+  &:open {
+    border-color: var(--blue-500);
+    background-image: url(/image/icon/chevron-up-blue.svg);
+  }
+
+  &::picker(select) {
+    margin-top: var(--spacing-2);
+    padding: var(--spacing-8);
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-md-8);
+    background: var(--white);
+  }
+
+  &::picker(select)option {
+    display: grid;
+    box-sizing: border-box;
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--spacing-8);
+    padding: var(--spacing-10) var(--spacing-12);
+    border-radius: var(--radius-md-6);
+    color: var(--slate-900);
+    font-weight: var(--font-weight-regular);
+    cursor: pointer;
+  }
+
+  &::picker(select)option:hover {
+    background-color: var(--slate-50);
+  }
+
+  &::picker(select)option:active {
+    background-color: var(--slate-200);
+    color: var(--slate-700);
+  }
+
+  &::picker(select)option:checked {
+    background-color: var(--slate-50);
+    color: var(--blue-500);
+    font-weight: var(--font-weight-medium);
+  }
+
+  &::picker(select)option::checkmark {
+    grid-column: 2;
+    justify-self: end;
+    align-self: center;
+    width: 1.4rem;
+    height: 1.2rem;
+    content: "";
+    background: url(/image/icon/check.svg) no-repeat center / contain;
+  }
+
+  &::picker(select)option:disabled::checkmark {
+    display: none;
+    content: none;
+  }
+
+  /* 플레이스홀더: 목록에는 안 보이고 트리거에는 "선택하세요"만 유지 */
+  &::picker(select)option[disabled][hidden],
+  &::picker(select)option[disabled][value=""] {
+    display: none;
+  }
+}
+
+.select-48 {
+  height: 4.8rem;
+  border-radius: var(--radius-md-8);
+  padding: 0 calc(2.4rem + var(--spacing-16) + var(--spacing-8)) 0 var(--spacing-16);
+  background-position: right var(--spacing-8) center;
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-160);
+  letter-spacing: var(--letter-spacing-md);
+}
+
+.select-40 {
+  height: 4rem;
+  border-radius: var(--radius-md-8);
+  padding: 0 calc(2.4rem + var(--spacing-16) + var(--spacing-8)) 0 var(--spacing-14);
+  background-position: right var(--spacing-8) center;
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-160);
+  letter-spacing: var(--letter-spacing-md);
+}
+
+.select-36 {
+  height: 3.6rem;
+  border-radius: var(--radius-md-6);
+  padding: 0 calc(2.4rem + var(--spacing-12) + var(--spacing-8)) 0 var(--spacing-14);
+  background-position: right var(--spacing-6) center;
+  font-size: var(--font-size-body3);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-160);
+  letter-spacing: var(--letter-spacing-md);
+}
+
+.select-48:has(option[value=""]:checked),
+.select-40:has(option[value=""]:checked),
+.select-36:has(option[value=""]:checked) {
+  color: var(--slate-400);
+}
+.select-48:disabled,
+.select-40:disabled,
+.select-36:disabled {
+  border-color: var(--slate-400);
+  background-color: var(--slate-200);
+  cursor: default;
+}
+
+.select-48:disabled:open,
+.select-40:disabled:open,
+.select-36:disabled:open {
+  background: url(/image/icon/check.svg) no-repeat center / contain;
+}
+
+/* 에러 — input-wrapper 와 동일 패턴 */
+.select-wrapper.is-error .select-48,
+.select-wrapper.is-error .select-40,
+.select-wrapper.is-error .select-36 {
+  border-color: var(--red-500);
+}
+
+.select-wrapper.is-error .select-48:open,
+.select-wrapper.is-error .select-40:open,
+.select-wrapper.is-error .select-36:open {
+  border-color: var(--red-500);
+  background: url(/image/icon/check.svg) no-repeat center / contain;
+}
+
+.select-wrapper.is-error .error-message {
+  display: block;
+  margin-top: var(--spacing-6);
+  color: var(--red-500);
+  font-size: var(--font-size-body3);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-160);
+  letter-spacing: var(--letter-spacing-md);
+}
+
+/* Firefox: 네이티브 화살표 제거 → 위에서 지정한 배경 chevron 이 보이도록 */
+@supports (-moz-appearance: none) {
+  select {
+    -moz-appearance: none !important;
+    appearance: none !important;
+    text-indent: 0.01px;
+    text-overflow: '';
+    padding-right: var(--spacing-16);
+  }
+}
+
+/* Firefox 등 UA 드롭다운: option 상태 보정(base-select 미적용 시) */
+option {
+  padding: var(--spacing-8);
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  border-radius: var(--radius-md-6);
+  font-size: var(--font-size-body2);
+  color: var(--slate-900);
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  &[hidden],
+  &[disabled][hidden],
+  &[disabled][value=""] {
+    display: none !important;
+  }
+  &:hover {
+    background-color: var(--gray-50) !important;
+  }
+
+  &:active {
+    background-color: var(--gray-100) !important;
+    color: var(--slate-700);
+  }
+
+  &:checked {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    color: var(--blue-500) !important;
+    background-color: var(--slate-50) !important;
+  }
+}
+
+/* select style e */
