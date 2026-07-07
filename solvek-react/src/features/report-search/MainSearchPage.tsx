@@ -136,8 +136,15 @@ export function MainSearchPage() {
     });
   };
 
+  const isEmptyResult = mode === "empty" || (query.trim() !== "" && shownReports.length === 0);
   const resultCount = query.trim() ? shownReports.length : mode === "grouped" || mode === "filtered" ? 3 : reportData.length;
   const heading = mode === "recommend" ? "이번엔 어떤 보고서로 이야기를 나눌까요?" : "대화할 발굴보고서를 선택하거나 입력해보세요";
+
+  useEffect(() => {
+    if (!isEmptyResult) return;
+    setSelectedReports((current) => (current.length > 0 ? [] : current));
+    setToastVisible(false);
+  }, [isEmptyResult]);
 
   return (
     <main className="bg-slate-50 h-screen overflow-auto">
@@ -153,7 +160,7 @@ export function MainSearchPage() {
             transition={springSoft}
             style={{ top: "3.2rem", left: "50%", visibility: "visible", transition: "none" }}
           >
-            <span className="body1-sb-18 color-red-500" aria-hidden="true">▲</span>
+            <i className="toast-icon" aria-hidden="true"></i>
             <span className="body1-sb-18 color-red-500">최대 2건만 가능합니다</span>
           </motion.div>
         )}
@@ -232,7 +239,7 @@ export function MainSearchPage() {
           )}
         </AnimatePresence>
 
-        {mode === "empty" || (query.trim() !== "" && shownReports.length === 0) ? (
+        {isEmptyResult ? (
           <EmptyState query={query} onSuggestion={(text) => { setQuery(text); setMode("history"); }} />
         ) : (
           <>

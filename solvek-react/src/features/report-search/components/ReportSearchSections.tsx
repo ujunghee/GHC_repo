@@ -265,7 +265,7 @@ export function RecentReports({ reports, onChoose }: { reports: string[]; onChoo
 export function ResultHeader({ label, count, showChat = false }: { label: string; count: number; showChat?: boolean }) {
   return (
     <div className="flex justify-between align-center mt-40 mb-16">
-      <p className="body1-sb-18 color-slate-900">{label} <strong className="color-blue-500">{count}</strong> 건</p>
+      <p className="body1-m-18 color-slate-900">{label} <strong className="color-blue-500">{count}</strong> 건</p>
       {showChat && (
         <motion.button className="transparent-button-40 flex align-center gap-8" type="button" {...tapScale}>
           <span className="body2-sb-16 color-slate-900">채팅하기</span>
