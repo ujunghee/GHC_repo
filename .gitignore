@@ -1,5 +1,6 @@
 .agents/
 .parcel-cache/
+.pages-deploy/
 dist/
 
 **/node_modules/
