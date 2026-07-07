@@ -1,5 +1,7 @@
 # SolveK Design System
 
+> 현재 GHC 프로토타입 전달본에서는 이 폴더를 **CSS 디자인시스템과 아이콘 자산 출처**로 사용합니다. 원본 디자인시스템 설명에는 `components/`, `docs/`, `solvek-web/` 같은 참조 폴더가 언급되지만, 이 전달본에는 포함되어 있지 않습니다. 개발자 또는 AI가 새 UI를 만들 때는 루트 `DEVELOPER_HANDOFF.md`, `solvek-react/src/features/report-search/PROTOTYPE_FLOW.md`, `solvek-react/src/features/report-search/COMPONENT_RULES.md`, 그리고 이 폴더의 `css/`, `image/`를 기준으로 구현하세요.
+
 공공기관/정부 프로젝트용 HTML/CSS 퍼블리싱 디자인 시스템입니다. 프레임워크 없이 순수 HTML + CSS + JS로 구성되며, CSS 변수(Custom Properties) 기반 디자인 토큰을 사용합니다.
 
 - 기본 폰트: Pretendard

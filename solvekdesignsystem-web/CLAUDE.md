@@ -1,5 +1,7 @@
 # SolveK Design System — AI 규칙
 
+> **GHC 프로토타입 전달본 기준 안내**: 이 폴더는 현재 `css/`와 `image/` 자산을 제공하는 디자인시스템 패키지입니다. 아래 규칙에는 원본 디자인시스템의 `components/`, `docs/`, `solvek-web/`, `solvek-map/`, `js/` 참조가 남아 있지만, 이 전달본에는 해당 폴더가 없을 수 있습니다. 없는 경로를 추측해 만들지 말고, 루트 `DEVELOPER_HANDOFF.md`, `solvek-react/src/features/report-search/PROTOTYPE_FLOW.md`, `solvek-react/src/features/report-search/COMPONENT_RULES.md`, 실제 React TSX, 그리고 `css/`/`image/` 파일을 기준으로 화면을 재구현합니다.
+
 이 문서는 AI가 SolveK Design System 기준으로 페이지를 생성할 때 반드시 따라야 하는 규칙입니다.
 
 > **마크업 예시의 단일 출처**: 컴포넌트 마크업은 반드시 `components/{name}/README.md`를 읽고 따른다. 이 문서의 컴포넌트 섹션은 규칙·클래스명·변형 요약만 제공한다.
