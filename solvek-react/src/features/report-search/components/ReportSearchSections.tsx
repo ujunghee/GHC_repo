@@ -77,8 +77,8 @@ export function HelperMenu({ clues, onToggleClue }: { clues: string[]; onToggleC
                 key={item.key}
                 className={
                   isActive
-                    ? "transparent-button-40 flex align-center justify-between w-full bg-slate-50 flex-auto"
-                    : "transparent-button-40 flex align-center justify-between w-full hover-slate-50 flex-auto"
+                    ? "transparent-button-40 flex justify-between w-full bg-slate-50 flex-auto"
+                    : "transparent-button-40 flex justify-between w-full hover-slate-50 flex-auto"
                 }
                 type="button"
                 aria-haspopup="listbox"
@@ -425,7 +425,16 @@ export function RecommendSlider({ reports, selectedReports, onToggle, keyword }:
   );
 }
 
-export function ClueChips({ clues, checkedClues, onToggleChecked, onRemove }: { clues: string[]; checkedClues: string[]; onToggleChecked: (value: string) => void; onRemove: (value: string) => void }) {
+type ClueChipsProps = {
+  clues: string[];
+  checkedClues: string[];
+  onToggleChecked: (value: string) => void;
+  onRemove?: (value: string) => void;
+  onReset?: () => void;
+  showNavigation?: boolean;
+};
+
+export function ClueChips({ clues, checkedClues, onToggleChecked, onReset, showNavigation = true }: ClueChipsProps) {
   const [swiper, setSwiper] = useState<SwiperClass | null>(null);
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
@@ -442,75 +451,76 @@ export function ClueChips({ clues, checkedClues, onToggleChecked, onRemove }: { 
   }, [clues, checkedClues, swiper]);
 
   return (
-    <div className="relative mt-16" aria-label="선택한 단서">
-      <Swiper
-        modules={[Navigation]}
-        slidesPerView="auto"
-        spaceBetween={8}
-        grabCursor
-        onSwiper={(instance) => {
-          setSwiper(instance);
-          syncEdges(instance);
-        }}
-        onSlideChange={syncEdges}
-        onResize={syncEdges}
-        onReachBeginning={() => setIsBeginning(true)}
-        onReachEnd={() => setIsEnd(true)}
-      >
-        {clues.map((clue) => {
-          const checked = checkedClues.includes(clue);
-          return (
-            <SwiperSlide key={clue} style={{ width: "auto" }}>
-              <label className="checkbox-chip-label body2-r-16">
-                <input
-                  className="checkbox-chip"
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => onToggleChecked(clue)}
-                  aria-label={clue}
-                />
-                <span className="body2-m-16">{clue}</span>
-                {checked && (
-                  <button
-                    type="button"
-                    className="chips-close-icon block"
-                    aria-label={`${clue} 삭제`}
-                    onClick={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      onRemove(clue);
-                    }}
-                    style={{ border: "none", padding: 0, marginInlineStart: "0.8rem", cursor: "pointer" }}
-                  ></button>
-                )}
-              </label>
-            </SwiperSlide>
-          );
-        })}
-      </Swiper>
+    <div className="relative mt-16 flex align-center gap-24" aria-label="선택한 단서">
+      <div className="relative flex-1" style={{ minWidth: 0 }}>
+        <Swiper
+          modules={[Navigation]}
+          slidesPerView="auto"
+          spaceBetween={8}
+          grabCursor
+          onSwiper={(instance) => {
+            setSwiper(instance);
+            syncEdges(instance);
+          }}
+          onSlideChange={syncEdges}
+          onResize={syncEdges}
+          onReachBeginning={() => setIsBeginning(true)}
+          onReachEnd={() => setIsEnd(true)}
+        >
+          {clues.map((clue) => {
+            const checked = checkedClues.includes(clue);
+            return (
+              <SwiperSlide key={clue} style={{ width: "auto" }}>
+                <label className="checkbox-chip-label body2-r-16">
+                  <input
+                    className="checkbox-chip"
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => onToggleChecked(clue)}
+                    aria-label={clue}
+                  />
+                  <span className="body2-m-16">{clue}</span>
+                </label>
+              </SwiperSlide>
+            );
+          })}
+        </Swiper>
 
-      {!isBeginning && (
+        {showNavigation && !isBeginning && (
+          <motion.button
+            type="button"
+            className="bg-white radius-full flex align-center justify-center shadow-lg"
+            aria-label="이전 단서"
+            onClick={() => swiper?.slidePrev()}
+            style={{ ...sliderNavButtonStyle, left: "-2rem" }}
+            {...tapScale}
+          >
+            <i className="chevron-left-slate-700" aria-hidden="true"></i>
+          </motion.button>
+        )}
+        {showNavigation && !isEnd && (
+          <motion.button
+            type="button"
+            className="bg-white radius-full flex align-center justify-center shadow-lg"
+            aria-label="다음 단서"
+            onClick={() => swiper?.slideNext()}
+            style={{ ...sliderNavButtonStyle, right: "-2rem" }}
+            {...tapScale}
+          >
+            <i className="chevron-right-slate-700" aria-hidden="true"></i>
+          </motion.button>
+        )}
+      </div>
+
+      {onReset && (
         <motion.button
           type="button"
-          className="bg-white radius-full flex align-center justify-center shadow-lg"
-          aria-label="이전 단서"
-          onClick={() => swiper?.slidePrev()}
-          style={{ ...sliderNavButtonStyle, left: "-2rem" }}
+          className="chip border-slate-500 border h-36 w-fit px-12 radius-full flex align-center justify-center bg-white flex-none"
+          aria-label="선택한 단서 초기화"
+          onClick={onReset}
           {...tapScale}
         >
-          <i className="chevron-left-slate-700" aria-hidden="true"></i>
-        </motion.button>
-      )}
-      {!isEnd && (
-        <motion.button
-          type="button"
-          className="bg-white radius-full flex align-center justify-center shadow-lg"
-          aria-label="다음 단서"
-          onClick={() => swiper?.slideNext()}
-          style={{ ...sliderNavButtonStyle, right: "-2rem" }}
-          {...tapScale}
-        >
-          <i className="chevron-right-slate-700" aria-hidden="true"></i>
+          <span className="body2-r-16 color-slate-700">초기화</span>
         </motion.button>
       )}
     </div>
@@ -520,7 +530,7 @@ export function ClueChips({ clues, checkedClues, onToggleChecked, onRemove }: { 
 export function EmptyState({ query, onSuggestion }: { query: string; onSuggestion: (text: string) => void }) {
   return (
     <motion.section
-      className="flex flex-col align-center text-center mt-40"
+      className="flex flex-col align-center text-center mt-40 mb-20"
       aria-label="검색 결과 없음"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}

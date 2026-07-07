@@ -1,0 +1,219 @@
+import { RefObject } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+
+import { ClueChips, EmptyState, HelperMenu } from "../../report-search/components/ReportSearchSections";
+import { fadeEase, springSnappy, tapScale } from "../../report-search/motionConfig";
+import type { Report } from "../../report-search/types";
+
+type ChatSearchModalProps = {
+  searchQuery: string;
+  searchHelperOpen: boolean;
+  searchClues: string[];
+  checkedSearchClues: string[];
+  searchedReports: Report[];
+  activeReportIds: number[];
+  helperPopupRef: RefObject<HTMLDivElement>;
+  resultListRef: RefObject<HTMLUListElement>;
+  onClose: () => void;
+  onQueryChange: (value: string) => void;
+  onSubmit: () => void;
+  onToggleHelper: () => void;
+  onToggleClue: (value: string) => void;
+  onToggleClueChecked: (value: string) => void;
+  onResetClues: () => void;
+  onToggleReport: (reportId: number) => void;
+};
+
+export function ChatSearchModal({
+  searchQuery,
+  searchHelperOpen,
+  searchClues,
+  checkedSearchClues,
+  searchedReports,
+  activeReportIds,
+  helperPopupRef,
+  resultListRef,
+  onClose,
+  onQueryChange,
+  onSubmit,
+  onToggleHelper,
+  onToggleClue,
+  onToggleClueChecked,
+  onResetClues,
+  onToggleReport,
+}: ChatSearchModalProps) {
+  return (
+    <motion.div
+      className="fixed top-0 left-0 w-full h-full flex align-center justify-center z-index-10"
+      role="presentation"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.16 }}
+      style={{ background: "rgba(15, 23, 42, 0.68)" }}
+      onMouseDown={onClose}
+    >
+      <motion.section
+        className="bg-white radius-md-8 px-24 py-24"
+        layout
+        role="dialog"
+        aria-modal="true"
+        aria-label="보고서 검색"
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 16, scale: 0.98 }}
+        transition={springSnappy}
+        style={{ width: "85.2rem", maxHeight: "64rem" }}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <form
+          className="relative mb-26"
+          onSubmit={(event) => {
+            event.preventDefault();
+            onSubmit();
+          }}
+        >
+          <div className="search-48 flex align-center gap-8 px-12">
+            <motion.button
+              className={searchHelperOpen ? "active flex align-center justify-center" : "flex align-center justify-center"}
+              type="button"
+              aria-label="검색 도우미"
+              aria-haspopup="dialog"
+              aria-expanded={searchHelperOpen}
+              data-chat-filter-trigger
+              onClick={onToggleHelper}
+              {...tapScale}
+            >
+              <i className={searchHelperOpen ? "filter-icon active" : "filter-icon"} aria-hidden="true"></i>
+            </motion.button>
+            <input
+              type="search"
+              className="main-search__input body2-r-16 flex-1"
+              aria-label="보고서 검색어"
+              value={searchQuery}
+              onChange={(event) => onQueryChange(event.target.value)}
+              placeholder="보고서명, 유적명, 지역, 유물명으로 검색하기"
+              autoComplete="off"
+              autoFocus
+            />
+            <motion.button className="search-button h-fit" type="submit" aria-label="검색" {...tapScale}>
+              <i className="searchbar-search-icon" aria-hidden="true"></i>
+            </motion.button>
+          </div>
+
+          <AnimatePresence>
+            {searchHelperOpen && (
+              <motion.div
+                key="chat-helper-popup"
+                className="map-search-dropdown align-start z-index-10"
+                role="dialog"
+                aria-label="검색 도우미 단서 추가"
+                initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                transition={springSnappy}
+              >
+                <div ref={helperPopupRef}>
+                  <HelperMenu clues={searchClues} onToggleClue={onToggleClue} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </form>
+
+        <AnimatePresence initial={false}>
+          {searchClues.length > 0 && (
+            <motion.div
+              key="chat-search-clues"
+              layout
+              initial={{ opacity: 0, height: 0, y: -6 }}
+              animate={{ opacity: 1, height: "auto", y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -6 }}
+              transition={fadeEase}
+              style={{ overflow: "visible" }}
+            >
+              <ClueChips
+                clues={searchClues}
+                checkedClues={checkedSearchClues}
+                onToggleChecked={onToggleClueChecked}
+                onReset={onResetClues}
+                showNavigation={false}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <motion.div className="overflow-hidden mt-24" layout style={{ height: "46.4rem" }}>
+          <AnimatePresence mode="wait" initial={false}>
+            {searchedReports.length === 0 ? (
+              <motion.div
+                key="empty"
+                className="h-full overflow-auto flex align-center justify-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.14 }}
+              >
+                <EmptyState query={searchQuery} onSuggestion={onQueryChange} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="results"
+                className="h-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.14 }}
+              >
+                <ul ref={resultListRef} className="h-full flex flex-col gap-12 overflow-auto">
+                  {searchedReports.map((report) => {
+                    const isChecked = activeReportIds.includes(report.id);
+
+                    return (
+                      <motion.li key={report.id} layout transition={springSnappy}>
+                        <motion.label
+                          layout
+                          className="flex align-center gap-16 radius-md-8 px-16 py-10 cursor-pointer bg-slate-50 border"
+                          animate={{ borderColor: isChecked ? "var(--blue-500)" : "transparent" }}
+                          transition={{ duration: 0.12 }}
+                        >
+                          <input
+                            className="checkbox-basic checkbox-basic-lg"
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => onToggleReport(report.id)}
+                            aria-label={`${report.title} 선택`}
+                          />
+                          <span className="flex flex-col gap-4">
+                            <span className="body2-sb-16 color-slate-900">{renderHighlightedTitle(report.title, searchQuery)}</span>
+                            <span className="body3-r-14 color-slate-900">{report.summary}</span>
+                          </span>
+                        </motion.label>
+                      </motion.li>
+                    );
+                  })}
+                </ul>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </motion.section>
+    </motion.div>
+  );
+}
+
+function renderHighlightedTitle(title: string, query: string) {
+  const keyword = query.trim();
+  if (!keyword) return <>{title}</>;
+
+  const index = title.toLowerCase().indexOf(keyword.toLowerCase());
+  if (index === -1) return <>{title}</>;
+
+  return (
+    <>
+      {title.slice(0, index)}
+      <strong className="color-blue-500">{title.slice(index, index + keyword.length)}</strong>
+      {title.slice(index + keyword.length)}
+    </>
+  );
+}

@@ -62,6 +62,46 @@
   display: block;
 }
 
+.home-icon {
+  background: url("../../image/icon/home.svg") center center / contain no-repeat;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: block;
+  flex-shrink: 0;
+}
+
+.file-attach-icon {
+  background: url("../../image/icon/file-attach.svg") center center / contain no-repeat;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: block;
+  flex-shrink: 0;
+}
+
+.searchbar-search-icon {
+  background: url("../../image/icon/searchbar-search.svg") center center / contain no-repeat;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: block;
+  flex-shrink: 0;
+}
+
+.layout-right-active-icon {
+  background: url("../../image/icon/layout-right/active.svg") center center / contain no-repeat;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: block;
+  flex-shrink: 0;
+}
+
+.layout-right-inactive-icon {
+  background: url("../../image/icon/layout-right/inactive.svg") center center / contain no-repeat;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: block;
+  flex-shrink: 0;
+}
+
 .header-menu-24 {
   background: url("data:image/svg+xml,<svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M4 7H20M4 12H20M4 17H20' stroke='%2358616A' stroke-width='1.5' stroke-linecap='round'/></svg>") center center / contain no-repeat;
   width: 2.4rem;

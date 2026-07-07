@@ -14,7 +14,8 @@
 ## Project Map
 
 - `solvek-react/`: 현재 동작하는 React 프로토타입입니다.
-- `solvek-react/src/App.tsx`: 앱 루트입니다. 현재는 메인 검색 화면만 렌더링합니다.
+- `solvek-react/src/App.tsx`: 앱 루트입니다. 메인 검색 화면과 보고서 채팅 화면 전환을 관리합니다.
+- `solvek-react/src/features/report-chat/ChatPage.tsx`: 선택한 보고서 기반 채팅 화면 초안입니다.
 - `solvek-react/src/features/report-search/MainSearchPage.tsx`: 발굴보고서 검색 메인 화면의 상태와 화면 흐름입니다.
 - `solvek-react/src/features/report-search/components/ReportSearchSections.tsx`: 검색 도우미, 칩, 결과 카드, 추천, 빈 상태 등 화면 섹션 컴포넌트입니다.
 - `solvek-react/src/features/report-search/data.ts`: 임시 보고서 데이터와 필터/추천/검색 도우미 옵션입니다.
@@ -37,7 +38,7 @@ npm exec -- parcel serve index.html --host 0.0.0.0 --port 5173 --no-cache
 
 ## What To Rebuild
 
-새 UI를 만들 때 재현해야 하는 핵심 화면은 하나입니다.
+새 UI를 만들 때 재현해야 하는 핵심 화면은 두 개입니다.
 
 - 발굴보고서 검색 메인 화면
 - 검색 도우미 팝업
@@ -48,8 +49,11 @@ npm exec -- parcel serve index.html --host 0.0.0.0 --port 5173 --no-cache
 - 결과 없음 상태
 - 보고서 선택 후 하단 채팅 CTA
 - 최대 2건 선택 제한 토스트
+- 선택 보고서 기반 채팅 화면
+- 채팅 화면의 선택 보고서 패널
+- 채팅 메시지 영역과 메시지 입력 영역
 
-챗봇 화면은 아직 구현 전입니다. 현재 메인 화면의 `채팅하기` 버튼은 선택한 보고서 id를 챗봇 화면으로 넘기기 위한 진입점으로 보면 됩니다.
+현재 `채팅하기` 버튼은 선택한 보고서 id를 `App.tsx`로 넘기고, `App.tsx`가 해당 id에 맞는 `Report[]`를 찾아 `ChatPage`로 전달합니다. 실제 AI 답변 API는 아직 연결 전이며, 채팅 화면에는 백엔드 연결 전용 placeholder 응답이 들어 있습니다.
 
 ## Backend Contract Draft
 

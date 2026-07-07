@@ -16,8 +16,11 @@ import { reportData } from "./data";
 import { fadeEase, springSnappy, springSoft, tapScale } from "./motionConfig";
 import type { ViewMode } from "./types";
 
+type MainSearchPageProps = {
+  onStartChat?: (reportIds: number[]) => void;
+};
 
-export function MainSearchPage() {
+export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<ViewMode>("default");
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
@@ -54,6 +57,11 @@ export function MainSearchPage() {
     setCheckedClues((current) =>
       current.includes(value) ? current.filter((item) => item !== value) : [...current, value],
     );
+  };
+
+  const resetClues = () => {
+    setClues([]);
+    setCheckedClues([]);
   };
 
   const shownReports = useMemo(() => {
@@ -234,7 +242,7 @@ export function MainSearchPage() {
               exit={{ opacity: 0, y: -8 }}
               transition={fadeEase}
             >
-              <ClueChips clues={clues} checkedClues={checkedClues} onToggleChecked={toggleClueChecked} onRemove={toggleClue} />
+              <ClueChips clues={clues} checkedClues={checkedClues} onToggleChecked={toggleClueChecked} onRemove={toggleClue} onReset={resetClues} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -275,6 +283,7 @@ export function MainSearchPage() {
               className="blue-button-48 w-300"
               type="button"
               style={{ backgroundImage: "none" }}
+              onClick={() => onStartChat?.(selectedReports)}
               whileTap={{ scale: 0.97 }}
               transition={springSnappy}
             >

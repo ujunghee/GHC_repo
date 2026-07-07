@@ -16,3 +16,31 @@
   background-color: var(--slate-50);
   cursor: pointer;
 }
+
+/* Evidence action */
+.evidence-action {
+  box-sizing: border-box;
+  min-width: 0;
+  border: none;
+  cursor: pointer;
+}
+
+.evidence-action > span {
+  min-width: 0;
+}
+
+.evidence-action--source {
+  background-color: var(--slate-50);
+}
+
+.evidence-action--source:active {
+  background-color: var(--slate-100);
+}
+
+.evidence-action--map {
+  background-color: var(--blue-50);
+}
+
+.evidence-action--map:active {
+  background-color: var(--blue-100);
+}
