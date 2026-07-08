@@ -8,6 +8,7 @@
 - `data.ts`: 현재 프로토타입용 보고서 목록, 필터 칩, 검색 도우미 옵션입니다. 추후 API 응답으로 교체할 대상입니다.
 - `types.ts`: 프론트엔드에서 기대하는 보고서 데이터와 화면 상태 타입입니다.
 - `motionConfig.ts`: Framer Motion 애니메이션 설정입니다.
+- `components/ReportSearchSections.tsx`: 검색 도우미, 단서 칩, 결과 카드, 빈 상태 등 재사용 UI 섹션입니다.
 
 ## Backend Handoff Notes
 
@@ -30,4 +31,14 @@
 - 추천 보고서: 최근 검색어 또는 선택 보고서를 기준으로 추천 목록 반환
 - 채팅 시작: 선택한 보고서 `id` 목록을 챗봇 화면으로 전달
 
-챗봇 화면이 추가되면 `App.tsx`에서 `MainSearchPage`와 `ChatPage`를 라우팅하면 됩니다.
+챗봇 화면 규칙은 `../report-chat/README.md`, `../report-chat/PROTOTYPE_FLOW.md`, `../report-chat/COMPONENT_RULES.md`를 확인합니다.
+
+## Current UX Notes
+
+- 보고서는 메인 화면에서 최대 2건까지 선택할 수 있습니다.
+- 검색 결과가 없으면 선택 보고서와 하단 `채팅하기` CTA가 초기화됩니다.
+- 단서 칩은 공통 `ClueChips`를 사용합니다.
+- 단서 칩은 개별 X 삭제 대신 `초기화` 버튼으로 전체 초기화합니다.
+- 칩 체크는 검색 조건의 활성/비활성 표시용입니다.
+- 칩 영역이 사라질 때 아래 컨텐츠는 `LayoutGroup`으로 자연스럽게 올라옵니다.
+- 반응형 보정은 `../../prototype-responsive.css`에서 처리합니다.
