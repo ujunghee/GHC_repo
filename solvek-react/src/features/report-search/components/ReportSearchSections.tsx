@@ -262,12 +262,12 @@ export function RecentReports({ reports, onChoose }: { reports: string[]; onChoo
   );
 }
 
-export function ResultHeader({ label, count, showChat = false }: { label: string; count: number; showChat?: boolean }) {
+export function ResultHeader({ label, count, showChat = false, onChat }: { label: string; count: number; showChat?: boolean; onChat?: () => void }) {
   return (
-    <div className="flex justify-between align-center mt-40 mb-16">
+    <div className={`flex justify-between align-center mb-8`}>
       <p className="body1-m-18 color-slate-900">{label} <strong className="color-blue-500">{count}</strong> 건</p>
       {showChat && (
-        <motion.button className="transparent-button-40 flex align-center gap-8" type="button" {...tapScale}>
+        <motion.button className="transparent-button-40 flex align-center gap-8" type="button" onClick={onChat} {...tapScale}>
           <span className="body2-sb-16 color-slate-900">채팅하기</span>
           <i className="chevron-right-slate-700" aria-hidden="true"></i>
         </motion.button>
@@ -350,6 +350,41 @@ export function ReportGrid({ reports, selectedReports, onToggle, keyword }: { re
   );
 }
 
+export type ReportGroup = {
+  label: string;
+  reports: Report[];
+};
+
+export function GroupedReportSections({
+  groups,
+  selectedReports,
+  onToggle,
+  onChat,
+  keyword,
+}: {
+  groups: ReportGroup[];
+  selectedReports: number[];
+  onToggle: (id: number) => void;
+  onChat?: (reports: Report[]) => void;
+  keyword: string;
+}) {
+  return (
+    <div className="flex flex-col gap-24">
+      {groups.map((group) => (
+        <section key={group.label} aria-label={`${group.label} 보고서 그룹`}>
+          <ResultHeader
+            label={group.label}
+            count={group.reports.length}
+            showChat
+            onChat={() => onChat?.(group.reports)}
+          />
+          <ReportGrid reports={group.reports} selectedReports={selectedReports} onToggle={onToggle} keyword={keyword} />
+        </section>
+      ))}
+    </div>
+  );
+}
+
 const sliderNavButtonStyle = {
   position: "absolute" as const,
   top: "50%",
@@ -372,12 +407,12 @@ export function RecommendSlider({ reports, selectedReports, onToggle, keyword }:
   };
 
   return (
-    <section className="mt-40" aria-label="추천 보고서">
+    <section className="mt-40" style={{ marginBottom: "4.2rem" }} aria-label="추천 보고서">
       <h2 className="body1-sb-18 color-slate-900 mb-16">추천 보고서</h2>
       <div className="relative">
         <Swiper
           modules={[Navigation]}
-          slidesPerView="auto"
+          slidesPerView={2}
           spaceBetween={16}
           grabCursor
           onSwiper={(instance) => {

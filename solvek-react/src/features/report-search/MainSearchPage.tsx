@@ -6,6 +6,7 @@ import {
   ClueChips,
   EmptyState,
   FilterRail,
+  GroupedReportSections,
   HelperMenu,
   RecentReports,
   RecommendSlider,
@@ -14,7 +15,7 @@ import {
 } from "./components/ReportSearchSections";
 import { reportData } from "./data";
 import { springSnappy, springSoft, tapScale } from "./motionConfig";
-import type { ViewMode } from "./types";
+import type { Report, ViewMode } from "./types";
 
 type MainSearchPageProps = {
   onStartChat?: (reportIds: number[]) => void;
@@ -77,6 +78,28 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
     if (mode === "filtered" || mode === "grouped") return reportData.slice(0, 6);
     return reportData;
   }, [mode, query]);
+
+  const activeGroupKeywords = checkedClues.length > 0 ? checkedClues : activeFilters;
+
+  const groupedReports = useMemo(() => {
+    if (activeGroupKeywords.length === 0) return [];
+    const baseReports = shownReports.length > 0 ? shownReports : reportData;
+
+    return activeGroupKeywords.map((keyword) => {
+      const normalizedKeyword = keyword.toLowerCase();
+      const matchedReports = baseReports.filter(
+        (report) =>
+          report.title.toLowerCase().includes(normalizedKeyword) ||
+          report.summary.toLowerCase().includes(normalizedKeyword) ||
+          report.tags.some((tag) => tag.toLowerCase().includes(normalizedKeyword)),
+      );
+
+      return {
+        label: keyword,
+        reports: (matchedReports.length > 0 ? matchedReports : baseReports).slice(0, 3),
+      };
+    });
+  }, [activeGroupKeywords, shownReports]);
 
   const recommendedReports = useMemo(() => {
     const keywords = Array.from(
@@ -144,7 +167,25 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
     });
   };
 
+  const startChatWithReports = (reportIds: number[]) => {
+    if (reportIds.length === 0) return;
+    onStartChat?.(reportIds.slice(0, 2));
+  };
+
+  const startChatWithGroup = (reports: Report[]) => {
+    const groupReportIds = reports.map((report) => report.id);
+    if (groupReportIds.length === 0) return;
+    if (groupReportIds.length > 2) {
+      setSelectedReports(groupReportIds.slice(0, 2));
+      setToastVisible(true);
+      window.setTimeout(() => setToastVisible(false), 1800);
+      return;
+    }
+    onStartChat?.(groupReportIds);
+  };
+
   const isEmptyResult = mode === "empty" || (query.trim() !== "" && shownReports.length === 0);
+  const hasGroupedResults = groupedReports.length > 0;
   const resultCount = query.trim() ? shownReports.length : mode === "grouped" || mode === "filtered" ? 3 : reportData.length;
   const heading = mode === "recommend" ? "이번엔 어떤 보고서로 이야기를 나눌까요?" : "대화할 발굴보고서를 선택하거나 입력해보세요";
 
@@ -263,13 +304,28 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
                 {query.trim() === "" && searchHistory.length > 0 && (
                   <RecentReports reports={searchHistory} onChoose={chooseRecent} />
                 )}
-                {query.trim() === "" && searchHistory.length >= 5 && recommendedReports.length > 0 && (
-                  <RecommendSlider reports={recommendedReports} selectedReports={selectedReports} onToggle={toggleReport} keyword={query} />
-                )}
-                {(mode === "filtered" || mode === "grouped") && <FilterRail activeFilters={activeFilters} onToggle={toggleFilter} />}
 
-                <ResultHeader label={mode === "grouped" || mode === "filtered" ? activeFilters[0] || "부산" : "총"} count={resultCount} showChat={mode === "grouped" || mode === "filtered"} />
-                <ReportGrid reports={shownReports} selectedReports={selectedReports} onToggle={toggleReport} keyword={query} />
+                <motion.div className="mt-50" layout="position" transition={springSoft}>
+                  {query.trim() === "" && searchHistory.length >= 5 && recommendedReports.length > 0 && (
+                    <RecommendSlider reports={recommendedReports} selectedReports={selectedReports} onToggle={toggleReport} keyword={query} />
+                  )}
+                  {(mode === "filtered" || mode === "grouped") && <FilterRail activeFilters={activeFilters} onToggle={toggleFilter} />}
+
+                  {hasGroupedResults ? (
+                    <GroupedReportSections
+                      groups={groupedReports}
+                      selectedReports={selectedReports}
+                      onToggle={toggleReport}
+                      onChat={startChatWithGroup}
+                      keyword={query}
+                    />
+                  ) : (
+                    <>
+                      <ResultHeader label={mode === "grouped" || mode === "filtered" ? activeFilters[0] || "부산" : "총"} count={resultCount} showChat={mode === "grouped" || mode === "filtered"} />
+                      <ReportGrid reports={shownReports} selectedReports={selectedReports} onToggle={toggleReport} keyword={query} />
+                    </>
+                  )}
+                </motion.div>
               </>
             )}
           </motion.div>
@@ -294,7 +350,7 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
               className="blue-button-48 w-300"
               type="button"
               style={{ backgroundImage: "none" }}
-              onClick={() => onStartChat?.(selectedReports)}
+              onClick={() => startChatWithReports(selectedReports)}
               whileTap={{ scale: 0.97 }}
               transition={springSnappy}
             >

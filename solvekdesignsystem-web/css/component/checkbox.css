@@ -172,25 +172,6 @@
   color: var(--blue-500);
 }
 
-.checkbox-chip-label:has(.checkbox-chip:checked)::before {
-  content: '';
-  flex-shrink: 0;
-  width: 1.6rem;
-  height: 1.6rem;
-  margin-inline-end: 0.4rem;
-  margin-top: -0.1rem;
-  border: none;
-  box-sizing: border-box;
-  background-color: currentColor;
-  -webkit-mask-image: url(/image/icon/check.svg);
-  mask-image: url(/image/icon/check.svg);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-}
 .checkbox-chip:focus {
   outline: none;
 }

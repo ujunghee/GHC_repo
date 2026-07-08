@@ -4,16 +4,17 @@
 
 ## Read Order
 
-1. `PROTOTYPE_OVERVIEW.md`
-2. `DEVELOPER_HANDOFF.md`
-3. `solvek-react/src/features/report-search/README.md`
-4. `solvek-react/src/features/report-search/PROTOTYPE_FLOW.md`
-5. `solvek-react/src/features/report-search/COMPONENT_RULES.md`
-6. `solvek-react/src/features/report-chat/README.md`
-7. `solvek-react/src/features/report-chat/PROTOTYPE_FLOW.md`
-8. `solvek-react/src/features/report-chat/COMPONENT_RULES.md`
-9. `solvekdesignsystem-web/README.md`
-10. `solvekdesignsystem-web/CLAUDE.md`
+1. `CLAUDE_CODE_IMPLEMENTATION_GUIDE.md`
+2. `PROTOTYPE_OVERVIEW.md`
+3. `DEVELOPER_HANDOFF.md`
+4. `solvek-react/src/features/report-search/README.md`
+5. `solvek-react/src/features/report-search/PROTOTYPE_FLOW.md`
+6. `solvek-react/src/features/report-search/COMPONENT_RULES.md`
+7. `solvek-react/src/features/report-chat/README.md`
+8. `solvek-react/src/features/report-chat/PROTOTYPE_FLOW.md`
+9. `solvek-react/src/features/report-chat/COMPONENT_RULES.md`
+10. `solvekdesignsystem-web/README.md`
+11. `solvekdesignsystem-web/CLAUDE.md`
 
 ## Project Purpose
 
@@ -33,7 +34,6 @@
 | `solvek-react/src/App.tsx` | 검색 화면과 챗봇 화면 전환 |
 | `solvek-react/src/features/report-search/` | 발굴보고서 검색 메인 화면 |
 | `solvek-react/src/features/report-chat/` | 선택 보고서 기반 챗봇 화면 |
-| `solvek-react/src/prototype-responsive.css` | 프로토타입 전용 반응형 보정 |
 | `solvekdesignsystem-web/` | SolveK CSS 디자인시스템 및 아이콘 자산 |
 | `DEVELOPER_HANDOFF.md` | 개발자 전달용 요약 및 API 연결 메모 |
 
@@ -45,7 +45,7 @@ App.tsx
   │   ├─ 검색어 입력
   │   ├─ 검색 도우미 팝업
   │   ├─ 단서 칩
-  │   ├─ 보고서 결과 목록
+  │   ├─ 키워드별 보고서 결과 그룹
   │   └─ 선택 보고서 → 채팅하기
   │
   └─ ChatPage
@@ -66,7 +66,7 @@ App.tsx
 - 색상/간격/타이포: `color-*`, `bg-*`, `border-*`, `px-*`, `body*`, `heading*`
 - 아이콘: `filter-icon`, `searchbar-search-icon`, `home-icon`, `layout-right-*`
 
-프로토타입에서만 필요한 반응형 보정은 `prototype-*` class와 `src/prototype-responsive.css`에 모았습니다.
+반응형 보정은 `solvekdesignsystem-web/css/default/responsive.css` 또는 최종 앱의 정식 CSS 위치에서 관리합니다. 삭제된 `src/prototype-responsive.css`는 다시 만들지 않습니다.
 
 ## Data Handoff
 
@@ -100,4 +100,3 @@ type SourceDocument = {
 - 챗봇 상태와 패널 resize는 `ChatPage.tsx`가 관리합니다.
 - 세부 UI는 `components/` 폴더의 컴포넌트로 분리합니다.
 - 실제 API 연결 시 `data.ts`를 직접 수정하기보다 service/hook을 만들어 페이지 컨테이너에서 데이터를 주입합니다.
-

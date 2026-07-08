@@ -586,6 +586,10 @@
   margin-top: var(--spacing-40);
 }
 
+.mt-50 {
+  margin-top: 5rem;
+}
+
 .mt-140 {
   margin-top: 14rem;
 }

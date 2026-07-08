@@ -4,16 +4,17 @@
 
 ## Read Order
 
-1. `PROTOTYPE_OVERVIEW.md`
-2. `DEVELOPER_HANDOFF.md`
-3. `solvek-react/src/features/report-search/README.md`
-4. `solvek-react/src/features/report-search/PROTOTYPE_FLOW.md`
-5. `solvek-react/src/features/report-search/COMPONENT_RULES.md`
-6. `solvek-react/src/features/report-chat/README.md`
-7. `solvek-react/src/features/report-chat/PROTOTYPE_FLOW.md`
-8. `solvek-react/src/features/report-chat/COMPONENT_RULES.md`
-9. `solvekdesignsystem-web/README.md`
-10. `solvekdesignsystem-web/CLAUDE.md`
+1. `CLAUDE_CODE_IMPLEMENTATION_GUIDE.md`
+2. `PROTOTYPE_OVERVIEW.md`
+3. `DEVELOPER_HANDOFF.md`
+4. `solvek-react/src/features/report-search/README.md`
+5. `solvek-react/src/features/report-search/PROTOTYPE_FLOW.md`
+6. `solvek-react/src/features/report-search/COMPONENT_RULES.md`
+7. `solvek-react/src/features/report-chat/README.md`
+8. `solvek-react/src/features/report-chat/PROTOTYPE_FLOW.md`
+9. `solvek-react/src/features/report-chat/COMPONENT_RULES.md`
+10. `solvekdesignsystem-web/README.md`
+11. `solvekdesignsystem-web/CLAUDE.md`
 
 ## Project Map
 
@@ -24,7 +25,6 @@
 - `solvek-react/src/features/report-search/MainSearchPage.tsx`: 발굴보고서 검색 메인 화면의 상태와 화면 흐름입니다.
 - `solvek-react/src/features/report-search/components/ReportSearchSections.tsx`: 검색 도우미, 칩, 결과 카드, 추천, 빈 상태 등 화면 섹션 컴포넌트입니다.
 - `solvek-react/src/features/report-search/data.ts`: 임시 보고서 데이터와 필터/추천/검색 도우미 옵션입니다.
-- `solvek-react/src/prototype-responsive.css`: 프로토타입 전용 반응형 보정입니다.
 - `solvekdesignsystem-web/`: 프로토타입에서 사용하는 CSS 디자인시스템과 아이콘 자산입니다.
 
 ## How To Run
@@ -52,6 +52,7 @@ npm exec -- parcel serve index.html --host 0.0.0.0 --port 5173 --no-cache
 - 최근 검색어
 - 추천 보고서 슬라이더
 - 보고서 결과 그리드
+- 키워드별 보고서 결과 그룹
 - 결과 없음 상태
 - 보고서 선택 후 하단 채팅 CTA
 - 최대 2건 선택 제한 토스트
@@ -81,6 +82,7 @@ type Report = {
 예상 API:
 
 - `GET /reports?query=&filters=&clues=`: 보고서 검색
+- `POST /report-groups`: 활성 키워드별 그룹 결과 반환
 - `GET /reports/recommendations`: 추천 보고서
 - `POST /search-history`: 최근 검색어 저장
 - `POST /chat/sessions`: 선택 보고서 기반 채팅 세션 생성
@@ -94,6 +96,7 @@ type Report = {
 - `solvekdesignsystem-web/README.md`와 `CLAUDE.md`에는 원본 디자인시스템의 확장 폴더 설명이 일부 남아 있습니다. 현재 전달본에는 `components/`, `docs/`, `solvek-web/` 폴더가 없으므로, 없는 파일 링크를 따라가지 말고 `css/`, `image/`, React TSX, 이 문서들을 기준으로 구현합니다.
 - 결과 없음 상태에서는 선택된 보고서를 초기화하고 하단 채팅 CTA를 숨깁니다.
 - 보고서 선택은 최대 2건까지 허용합니다.
+- 그룹 헤더의 `채팅하기`가 3건 이상을 대상으로 하면 앞 2건만 선택하고 토스트를 띄운 뒤 하단 `채팅하기`를 누르게 합니다.
 - 챗봇 화면의 좌측 패널은 메인에서 선택한 보고서만 기본 목록으로 사용합니다.
 - 챗봇 화면에서는 최소 1건 이상 선택 상태를 유지합니다.
 - 원문 패널의 `similarityScore`는 버튼이 아니라 AI가 찾은 근거와 원문 페이지의 유사도 표시값입니다.
