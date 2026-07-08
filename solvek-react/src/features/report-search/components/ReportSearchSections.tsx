@@ -387,8 +387,7 @@ export function GroupedReportSections({
 
 const sliderNavButtonStyle = {
   position: "absolute" as const,
-  top: "50%",
-  transform: "translateY(-50%)",
+  top: "calc(50% - 2rem)",
   width: "4rem",
   height: "4rem",
   border: "1px solid var(--slate-200)",

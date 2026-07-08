@@ -7,8 +7,7 @@
     "dev": "parcel serve index.html --host 127.0.0.1 --no-cache",
     "dev:5173": "parcel serve index.html --host 127.0.0.1 --port 5173 --no-cache",
     "clean": "node scripts/clean-dist.mjs",
-    "build": "npm run clean && parcel build index.html --dist-dir dist --public-url /GHC_repo/ --no-cache && node scripts/prepare-pages.mjs",
-    "deploy": "npm run build && gh-pages -d dist"
+    "build": "npm run clean && parcel build index.html --dist-dir dist --public-url ./ --no-cache && node scripts/normalize-dist.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.42.2",
@@ -20,7 +19,6 @@
   "devDependencies": {
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "gh-pages": "^6.3.0",
     "parcel-reporter-static-files-copy": "^1.5.3",
     "typescript": "^5.5.4"
   },

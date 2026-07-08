@@ -1,4 +1,4 @@
-import { copyFile, readdir, writeFile } from "node:fs/promises";
+import { copyFile, readdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 const distDir = resolve("dist");
@@ -31,7 +31,4 @@ if (builtIndex !== rootIndex) {
   await copyFile(builtIndex, rootIndex);
 }
 
-await copyFile(rootIndex, join(distDir, "404.html"));
-await writeFile(join(distDir, ".nojekyll"), "");
-
-console.log(`Prepared GitHub Pages files from ${builtIndex}`);
+console.log(`Normalized dist index from ${builtIndex}`);
