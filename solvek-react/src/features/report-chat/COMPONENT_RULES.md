@@ -147,7 +147,7 @@
 ## Styling Rules
 
 - 디자인시스템 class를 우선 사용합니다.
-- 챗봇 전용 반응형 보정은 `src/prototype-responsive.css`의 `prototype-*` class를 사용합니다.
+- 의미 없는 식별용 class는 추가하지 않습니다. 디자인시스템 유틸 class와 실제 스타일이 연결된 class만 사용합니다.
 - 인라인 스타일은 동적 width, max width, object fit처럼 컴포넌트 상태와 직접 연결된 값에 한정합니다.
 - 신규 색상은 만들지 않고 디자인 토큰 또는 유틸 클래스를 사용합니다.
 
@@ -166,4 +166,3 @@
 - 근거가 있는 답변만 원문 패널 버튼을 표시합니다.
 - 원문 이미지는 `SourcePanel`에 URL 또는 viewer payload로 전달합니다.
 - 지도 근거는 `AnswerEvidenceAction = "map"` 분기에서 지도 패널 또는 지도 화면으로 연결합니다.
-

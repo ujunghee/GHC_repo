@@ -435,7 +435,7 @@ type ClueChipsProps = {
   className?: string;
 };
 
-export function ClueChips({ clues, checkedClues, onToggleChecked, onReset, showNavigation = true, className = "mt-16" }: ClueChipsProps) {
+export function ClueChips({ clues, checkedClues, onToggleChecked, onRemove, onReset, showNavigation = true, className = "mt-16" }: ClueChipsProps) {
   const [swiper, setSwiper] = useState<SwiperClass | null>(null);
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
@@ -481,6 +481,22 @@ export function ClueChips({ clues, checkedClues, onToggleChecked, onReset, showN
                     aria-label={clue}
                   />
                   <span className="body2-m-16">{clue}</span>
+                  {onRemove && (
+                    <motion.button
+                      className="transparent-button-28 flex align-center justify-center ml-6"
+                      type="button"
+                      aria-label={`${clue} 삭제`}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        onRemove(clue);
+                      }}
+                      style={{ width: "2rem", height: "2rem", flex: "none", padding: 0 }}
+                      {...tapScale}
+                    >
+                      <i className="chips-close-icon" aria-hidden="true"></i>
+                    </motion.button>
+                  )}
                 </label>
               </SwiperSlide>
             );

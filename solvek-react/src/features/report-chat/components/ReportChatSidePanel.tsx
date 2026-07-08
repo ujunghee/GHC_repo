@@ -41,7 +41,7 @@ export function ReportChatSidePanel({
   return (
     <motion.aside
       key="report-panel"
-      className="prototype-chat-side-panel relative bg-slate-50 border-r border-slate-200 h-screen flex flex-col overflow-hidden"
+      className="relative bg-slate-50 border-r border-slate-200 h-screen flex flex-col overflow-hidden"
       initial={{ width: 0, opacity: 0 }}
       animate={{ width, opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}

@@ -21,7 +21,7 @@ export function SourcePanel({ width, title, isResizing, isResizeHover, onResizeS
   return (
     <motion.aside
       key="source-panel"
-      className="prototype-source-panel relative bg-white border-l border-slate-200 h-screen overflow-hidden"
+      className="relative bg-white border-l border-slate-200 h-screen overflow-hidden"
       initial={{ width: 0, opacity: 0 }}
       animate={{ width, opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}

@@ -54,7 +54,7 @@ export function ChatSearchModal({
       onMouseDown={onClose}
     >
       <motion.section
-        className="prototype-chat-search-dialog bg-white radius-md-8 px-24 py-24"
+        className="bg-white radius-md-8 px-24 py-24"
         layout
         role="dialog"
         aria-modal="true"
@@ -75,7 +75,7 @@ export function ChatSearchModal({
         >
           <div className="search-48 flex align-center gap-8 px-12">
             <motion.button
-              className={searchHelperOpen ? "active flex align-center justify-center" : "flex align-center justify-center"}
+              className={searchHelperOpen ? "filter-tooltip-trigger active flex align-center justify-center" : "filter-tooltip-trigger flex align-center justify-center"}
               type="button"
               aria-label="검색 도우미"
               aria-haspopup="dialog"
@@ -139,9 +139,10 @@ export function ChatSearchModal({
                 style={{ overflow: "hidden" }}
               >
                 <ClueChips
-                  clues={searchClues}
+                clues={searchClues}
                 checkedClues={checkedSearchClues}
                 onToggleChecked={onToggleClueChecked}
+                onRemove={onToggleClue}
                 onReset={onResetClues}
                 showNavigation={false}
               />

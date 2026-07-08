@@ -155,7 +155,7 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
   }, [isEmptyResult]);
 
   return (
-    <main className="prototype-search-page bg-slate-50 h-screen overflow-auto">
+    <main className="bg-slate-50 h-screen overflow-auto">
       <AnimatePresence>
         {toastVisible && (
           <motion.div
@@ -174,16 +174,16 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
         )}
       </AnimatePresence>
 
-      <section className="prototype-search-shell mb-default mt-140 pb-80" aria-label="발굴보고서 검색">
-        <header className="prototype-search-header text-center mb-50">
+      <section className="mb-default mt-140 pb-80" aria-label="발굴보고서 검색">
+        <header className="text-center mb-50">
           <h1 className="heading4-b-32 color-slate-900 mb-8">{heading}</h1>
           <p className="body1-m-18 color-slate-500">AI는 선택한 1개 보고서를 기준으로 요약, 위치, 유구·유물 정보를 답변합니다.</p>
         </header>
 
-        <form className="prototype-main-search main-search-wrapper relative" onSubmit={handleSearch}>
+        <form className="main-search-wrapper relative" onSubmit={handleSearch}>
           <div className="main-search-62 flex align-center gap-8 px-12">
             <motion.button
-              className={helperOpen ? "active flex align-center justify-center" : "flex align-center justify-center"}
+              className={helperOpen ? "filter-tooltip-trigger active flex align-center justify-center" : "filter-tooltip-trigger flex align-center justify-center"}
               type="button"
               aria-label="검색 도우미"
               aria-haspopup="dialog"
@@ -255,7 +255,7 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
             )}
           </AnimatePresence>
 
-          <motion.div className="prototype-search-content" layout="position" transition={springSoft}>
+          <motion.div layout="position" transition={springSoft}>
             {isEmptyResult ? (
               <EmptyState query={query} onSuggestion={(text) => { setQuery(text); setMode("history"); }} />
             ) : (

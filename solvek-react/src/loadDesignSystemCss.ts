@@ -1,5 +1,5 @@
 export function loadDesignSystemCss() {
-  const href = "/css/index.css";
+  const href = window.location.hostname.endsWith("github.io") ? "/GHC_repo/css/index.css" : "./css/index.css";
 
   if (document.querySelector(`link[href="${href}"]`)) {
     return;
