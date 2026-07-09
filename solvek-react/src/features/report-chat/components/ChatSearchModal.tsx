@@ -63,7 +63,7 @@ export function ChatSearchModal({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 16, scale: 0.98 }}
         transition={springSnappy}
-        style={{ width: "85.2rem", maxHeight: "64rem" }}
+        style={{ width: "min(85.2rem, calc(100vw - 3.2rem))", maxHeight: "min(64rem, calc(100vh - 3.2rem))", overflow: "hidden" }}
         onMouseDown={(event) => event.stopPropagation()}
       >
         <form
@@ -150,7 +150,7 @@ export function ChatSearchModal({
             )}
           </AnimatePresence>
 
-          <motion.div className="overflow-hidden mt-24" layout="position" transition={springSoft} style={{ height: "46.4rem" }}>
+          <motion.div className="overflow-hidden mt-24" layout="position" transition={springSoft} style={{ height: "min(46.4rem, calc(100vh - 20rem))" }}>
             <AnimatePresence mode="wait" initial={false}>
               {searchedReports.length === 0 ? (
                 <motion.div

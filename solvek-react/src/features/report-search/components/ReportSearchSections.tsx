@@ -62,11 +62,11 @@ export function HelperMenu({ clues, onToggleClue }: { clues: string[]; onToggleC
   };
 
   return (
-    <div className="flex flex-row gap-6">
+    <div className="flex flex-row gap-6" style={{ flexWrap: "wrap", maxWidth: "calc(100vw - 3.2rem)" }}>
         <section
           className="bg-white radius-md-8 shadow-lg border border-slate-300 p-16 w-200 flex flex-col"
           aria-labelledby="helper-title"
-          style={{ height: "18.8rem"}}
+          style={{ height: "18.8rem", width: "min(20rem, 100%)" }}
         >
           <h2 id="helper-title" className="body3-r-14 color-slate-900 mb-16">어떤 단서를 추가할까요?</h2>
           {helperCategories.map((item) => {
@@ -110,7 +110,7 @@ export function HelperMenu({ clues, onToggleClue }: { clues: string[]; onToggleC
               key={activeCategory.key}
               className="bg-white radius-md-8 shadow-lg border border-slate-300 p-16 w-200"
               aria-label={`${activeCategory.label} 상세`}
-              style={{ height: "18.8rem", display: "flex", flexDirection: "column", overflowY: "auto" }}
+              style={{ height: "18.8rem", display: "flex", flexDirection: "column", overflowY: "auto", width: "min(20rem, 100%)" }}
               initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -16 }}
@@ -267,8 +267,8 @@ export function ResultHeader({ label, count, showChat = false, onChat }: { label
     <div className={`flex justify-between align-center mb-8`}>
       <p className="body1-m-18 color-slate-900">{label} <strong className="color-blue-500">{count}</strong> 건</p>
       {showChat && (
-        <motion.button className="transparent-button-40 flex align-center gap-8" type="button" onClick={onChat} {...tapScale}>
-          <span className="body2-sb-16 color-slate-900">채팅하기</span>
+        <motion.button className="transparent-button-32 flex align-center gap-8" type="button" onClick={onChat} {...tapScale}>
+          <span className="body2-m-16 color-slate-700">채팅하기</span>
           <i className="chevron-right-slate-700" aria-hidden="true"></i>
         </motion.button>
       )}
@@ -331,12 +331,26 @@ function ReportCard({ report, selected, onToggle, keyword }: { report: Report; s
   );
 }
 
-export function ReportGrid({ reports, selectedReports, onToggle, keyword }: { reports: Report[]; selectedReports: number[]; onToggle: (id: number) => void; keyword: string }) {
+export type ReportGridProps = {
+  reports: Report[];
+  selectedReports: number[];
+  onToggle: (id: number) => void;
+  keyword: string;
+  compact?: boolean;
+};
+
+export function ReportGrid({
+  reports,
+  selectedReports,
+  onToggle,
+  keyword,
+  compact = false,
+}: ReportGridProps) {
   return (
     <ul className="grid-column-sub-8 gap-y-20">
       {reports.map((report) => (
         <motion.li
-          className="grid-column-4"
+          className={compact ? "grid-column-8" : "grid-column-4"}
           key={report.id}
           layout
           initial={{ opacity: 0, y: 12 }}
@@ -355,19 +369,23 @@ export type ReportGroup = {
   reports: Report[];
 };
 
+export type GroupedReportSectionsProps = {
+  groups: ReportGroup[];
+  selectedReports: number[];
+  onToggle: (id: number) => void;
+  onChat?: (reports: Report[]) => void;
+  keyword: string;
+  compact?: boolean;
+};
+
 export function GroupedReportSections({
   groups,
   selectedReports,
   onToggle,
   onChat,
   keyword,
-}: {
-  groups: ReportGroup[];
-  selectedReports: number[];
-  onToggle: (id: number) => void;
-  onChat?: (reports: Report[]) => void;
-  keyword: string;
-}) {
+  compact = false,
+}: GroupedReportSectionsProps) {
   return (
     <div className="flex flex-col gap-24">
       {groups.map((group) => (
@@ -378,7 +396,7 @@ export function GroupedReportSections({
             showChat
             onChat={() => onChat?.(group.reports)}
           />
-          <ReportGrid reports={group.reports} selectedReports={selectedReports} onToggle={onToggle} keyword={keyword} />
+          <ReportGrid reports={group.reports} selectedReports={selectedReports} onToggle={onToggle} keyword={keyword} compact={compact} />
         </section>
       ))}
     </div>
@@ -395,7 +413,21 @@ const sliderNavButtonStyle = {
   zIndex: 2,
 };
 
-export function RecommendSlider({ reports, selectedReports, onToggle, keyword }: { reports: Report[]; selectedReports: number[]; onToggle: (id: number) => void; keyword: string }) {
+export type RecommendSliderProps = {
+  reports: Report[];
+  selectedReports: number[];
+  onToggle: (id: number) => void;
+  keyword: string;
+  compact?: boolean;
+};
+
+export function RecommendSlider({
+  reports,
+  selectedReports,
+  onToggle,
+  keyword,
+  compact = false,
+}: RecommendSliderProps) {
   const [swiper, setSwiper] = useState<SwiperClass | null>(null);
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
@@ -411,7 +443,7 @@ export function RecommendSlider({ reports, selectedReports, onToggle, keyword }:
       <div className="relative">
         <Swiper
           modules={[Navigation]}
-          slidesPerView={2}
+          slidesPerView={compact ? 1 : 2}
           spaceBetween={16}
           grabCursor
           onSwiper={(instance) => {
@@ -424,7 +456,7 @@ export function RecommendSlider({ reports, selectedReports, onToggle, keyword }:
           onReachEnd={() => setIsEnd(true)}
         >
           {reports.map((report) => (
-            <SwiperSlide key={report.id} style={{ width: "30rem", height: "auto" }}>
+            <SwiperSlide key={report.id} style={{ width: compact ? "100%" : "30rem", height: "auto" }}>
               <ReportCard report={report} selected={selectedReports.includes(report.id)} onToggle={onToggle} keyword={keyword} />
             </SwiperSlide>
           ))}

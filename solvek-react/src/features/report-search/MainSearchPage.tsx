@@ -22,6 +22,7 @@ type MainSearchPageProps = {
 };
 
 export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
+  const [viewportWidth, setViewportWidth] = useState(() => (typeof window === "undefined" ? 1440 : window.innerWidth));
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<ViewMode>("default");
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
@@ -32,6 +33,13 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
   const [selectedReports, setSelectedReports] = useState<number[]>([]);
   const [toastVisible, setToastVisible] = useState(false);
   const helperPopupRef = useRef<HTMLDivElement>(null);
+  const isNarrowViewport = viewportWidth <= 768;
+
+  useEffect(() => {
+    const handleResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (!helperOpen) return;
@@ -215,7 +223,11 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
         )}
       </AnimatePresence>
 
-      <section className="mb-default mt-140 pb-80" aria-label="발굴보고서 검색">
+      <section
+        className="mb-default mt-140 pb-80"
+        aria-label="발굴보고서 검색"
+        style={isNarrowViewport ? { paddingLeft: "1.6rem", paddingRight: "1.6rem" } : undefined}
+      >
         <header className="text-center mb-50">
           <h1 className="heading4-b-32 color-slate-900 mb-8">{heading}</h1>
           <p className="body1-m-18 color-slate-500">AI는 선택한 1개 보고서를 기준으로 요약, 위치, 유구·유물 정보를 답변합니다.</p>
@@ -305,7 +317,7 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
 
                 <div className="mt-50">
                   {query.trim() === "" && searchHistory.length >= 5 && recommendedReports.length > 0 && (
-                    <RecommendSlider reports={recommendedReports} selectedReports={selectedReports} onToggle={toggleReport} keyword={query} />
+                    <RecommendSlider reports={recommendedReports} selectedReports={selectedReports} onToggle={toggleReport} keyword={query} compact={isNarrowViewport} />
                   )}
                   {(mode === "filtered" || mode === "grouped") && <FilterRail activeFilters={activeFilters} onToggle={toggleFilter} />}
 
@@ -316,11 +328,12 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
                       onToggle={toggleReport}
                       onChat={startChatWithGroup}
                       keyword={query}
+                      compact={isNarrowViewport}
                     />
                   ) : (
                     <>
                       <ResultHeader label={mode === "grouped" || mode === "filtered" ? activeFilters[0] || "부산" : "총"} count={resultCount} showChat={mode === "grouped" || mode === "filtered"} />
-                      <ReportGrid reports={shownReports} selectedReports={selectedReports} onToggle={toggleReport} keyword={query} />
+                      <ReportGrid reports={shownReports} selectedReports={selectedReports} onToggle={toggleReport} keyword={query} compact={isNarrowViewport} />
                     </>
                   )}
                 </div>

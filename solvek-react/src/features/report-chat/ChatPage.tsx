@@ -21,6 +21,7 @@ import { ReportChatSidePanel } from "./components/ReportChatSidePanel";
 import { SourcePanel } from "./components/SourcePanel";
 
 export function ChatPage({ reports, onBack }: ChatPageProps) {
+  const [viewportWidth, setViewportWidth] = useState(() => (typeof window === "undefined" ? 1440 : window.innerWidth));
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isPanelOpen, setIsPanelOpen] = useState(true);
@@ -44,6 +45,8 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
   const searchResultListRef = useRef<HTMLUListElement>(null);
   const pendingSearchScrollTopRef = useRef<number | null>(null);
   const panelCollapseTimerRef = useRef<number | null>(null);
+  const isChatCompact = viewportWidth <= 1100;
+  const shouldPreferConversation = viewportWidth <= 1280;
 
   const panelReports = useMemo(
     () => reportData.filter((report) => panelReportIds.includes(report.id)),
@@ -80,6 +83,27 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
   const reportTitle = activeReports[0]?.title ?? "보고서 선택";
   const suggestionLabels = getSuggestionLabels(activeReports);
   const hasSourceContent = messages.some((item) => item.role === "assistant" && item.hasEvidence);
+
+  useEffect(() => {
+    const handleResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (isChatCompact) {
+      setIsPanelOpen(false);
+      setIsPanelResizing(false);
+      setIsSourcePanelOpen(false);
+      setIsSourcePanelResizing(false);
+      return;
+    }
+
+    if (shouldPreferConversation) {
+      setIsSourcePanelOpen(false);
+      setIsSourcePanelResizing(false);
+    }
+  }, [isChatCompact, shouldPreferConversation]);
 
   const clearPanelCollapseTimer = () => {
     if (panelCollapseTimerRef.current !== null) {
@@ -215,6 +239,7 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
   };
 
   const openSourcePanel = () => {
+    if (isChatCompact) return;
     setActiveSourceTitle(activeReports[0]?.title ?? sourceDocument.title);
     setIsSourcePanelOpen(true);
   };
@@ -239,7 +264,7 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
   return (
     <main className="bg-white h-screen overflow-hidden flex">
       <AnimatePresence initial={false}>
-        {isPanelOpen && hasPanelContent && (
+        {!isChatCompact && isPanelOpen && hasPanelContent && (
           <ReportChatSidePanel
             width={panelWidth}
             reports={panelReports}
@@ -262,9 +287,9 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
         )}
       </AnimatePresence>
 
-      <section className="relative flex-1 h-screen overflow-hidden" aria-label="보고서 채팅">
+      <section className="relative flex-1 h-screen overflow-hidden" aria-label="보고서 채팅" style={{ minWidth: 0 }}>
         <AnimatePresence initial={false}>
-          {!isPanelOpen && hasPanelContent && (
+          {!isChatCompact && !isPanelOpen && hasPanelContent && (
             <motion.button
               className="absolute left-0 bg-white border border-slate-200 radius-md-8 flex align-center justify-center z-index-3"
               type="button"
@@ -285,7 +310,7 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
           )}
         </AnimatePresence>
 
-        {hasSourceContent && (
+        {!isChatCompact && hasSourceContent && (
           <motion.button
             className="absolute top-0 right-16 flex align-center justify-center z-index-2"
             type="button"
@@ -317,7 +342,7 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
       </section>
 
       <AnimatePresence initial={false}>
-        {isSourcePanelOpen && hasSourceContent && (
+        {!isChatCompact && isSourcePanelOpen && hasSourceContent && (
           <SourcePanel
             width={sourcePanelWidth}
             title={activeSourceTitle}

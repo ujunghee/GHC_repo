@@ -7,7 +7,6 @@
 @import url('./default/component.css');
 @import url('./default/icon.css');
 @import url('./default/layout.css');
-@import url('./default/responsive.css');
 @import url('./default/spacing.css');
 @import url('./default/typography.css');
 
@@ -40,3 +39,6 @@
 @import url('./uikit/map/map-side-panel.css');
 @import url('./uikit/map/pagination.css');
 @import url('./uikit/map/region-select.css');
+
+/* 반응형 보정: 기본/컴포넌트 타이포그래피를 최종 덮어쓰기 */
+@import url('./default/responsive.css');

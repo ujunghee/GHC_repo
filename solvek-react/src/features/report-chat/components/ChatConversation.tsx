@@ -129,7 +129,7 @@ function EvidenceSummary({ activeReports, onOpenSource }: { activeReports: Repor
       <ul className="flex flex-col gap-8 mb-16">
         {answerFacts.map((fact) => (
           <li key={fact.label} className="body2-r-16 color-slate-900 line-160 flex align-center gap-8 flex-wrap">
-            <span className="body2-sb-16 color-slate-900">- {fact.label}:</span>
+            <span className="body2-m-16 color-slate-700">- {fact.label}:</span>
             <span>{fact.value}</span>
             {fact.actions.includes("source") && (
               <motion.button
