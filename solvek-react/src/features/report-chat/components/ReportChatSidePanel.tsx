@@ -45,7 +45,7 @@ export function ReportChatSidePanel({
       initial={{ width: 0, opacity: 0 }}
       animate={{ width, opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}
-      transition={springSoft}
+      transition={isResizing ? { duration: 0 } : springSoft}
       style={{ flexShrink: 0 }}
     >
       <header className="border-b border-slate-200 px-16 py-24 flex align-center justify-between" style={{ height: "8rem" }}>

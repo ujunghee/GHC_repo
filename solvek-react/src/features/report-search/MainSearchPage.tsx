@@ -1,5 +1,5 @@
 ﻿import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import "swiper/css";
 
 import {
@@ -274,17 +274,15 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
           </AnimatePresence>
         </form>
 
-        <LayoutGroup>
+        <>
           <AnimatePresence initial={false}>
             {clues.length > 0 && (
               <motion.div
                 key="clue-chips"
-                layout
                 initial={{ opacity: 0, height: 0, y: -4 }}
                 animate={{ opacity: 1, height: "auto", y: 0 }}
                 exit={{ opacity: 0, height: 0, y: -4 }}
                 transition={{
-                  layout: springSoft,
                   height: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
                   opacity: { duration: 0.26 },
                   y: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
@@ -296,7 +294,7 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
             )}
           </AnimatePresence>
 
-          <motion.div layout="position" transition={springSoft}>
+          <div>
             {isEmptyResult ? (
               <EmptyState query={query} onSuggestion={(text) => { setQuery(text); setMode("history"); }} />
             ) : (
@@ -305,7 +303,7 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
                   <RecentReports reports={searchHistory} onChoose={chooseRecent} />
                 )}
 
-                <motion.div className="mt-50" layout="position" transition={springSoft}>
+                <div className="mt-50">
                   {query.trim() === "" && searchHistory.length >= 5 && recommendedReports.length > 0 && (
                     <RecommendSlider reports={recommendedReports} selectedReports={selectedReports} onToggle={toggleReport} keyword={query} />
                   )}
@@ -325,11 +323,11 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
                       <ReportGrid reports={shownReports} selectedReports={selectedReports} onToggle={toggleReport} keyword={query} />
                     </>
                   )}
-                </motion.div>
+                </div>
               </>
             )}
-          </motion.div>
-        </LayoutGroup>
+          </div>
+        </>
       </section>
 
       <AnimatePresence>

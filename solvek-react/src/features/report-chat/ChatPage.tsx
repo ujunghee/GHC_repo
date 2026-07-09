@@ -10,7 +10,6 @@ import {
   panelMinWidth,
   sourceDocument,
   sourcePanelDefaultWidth,
-  sourcePanelMaxWidth,
   sourcePanelMinWidth,
 } from "./data";
 import type { ChatMessage, ChatPageProps } from "./types";
@@ -135,12 +134,15 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
 
     const handlePointerMove = (event: PointerEvent) => {
       const nextWidth = window.innerWidth - event.clientX;
-      setSourcePanelWidth(Math.min(sourcePanelMaxWidth, Math.max(sourcePanelMinWidth, nextWidth)));
+      const reservedChatWidth = 360;
+      const openReportPanelWidth = isPanelOpen ? panelWidth : 0;
+      const dynamicMaxWidth = Math.max(sourcePanelMinWidth, window.innerWidth - openReportPanelWidth - reservedChatWidth);
+      setSourcePanelWidth(Math.min(dynamicMaxWidth, Math.max(sourcePanelMinWidth, nextWidth)));
     };
 
     const handlePointerUp = () => setIsSourcePanelResizing(false);
     return bindResizeEvents(handlePointerMove, handlePointerUp);
-  }, [isSourcePanelResizing]);
+  }, [isPanelOpen, isSourcePanelResizing, panelWidth]);
 
   useEffect(() => {
     if (isPanelOpen) clearPanelCollapseTimer();

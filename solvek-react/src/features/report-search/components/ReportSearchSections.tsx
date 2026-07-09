@@ -387,9 +387,9 @@ export function GroupedReportSections({
 
 const sliderNavButtonStyle = {
   position: "absolute" as const,
-  top: "calc(50% - 2rem)",
-  width: "4rem",
-  height: "4rem",
+  top: "calc(50% - 1.8rem)",
+  width: "3.6rem",
+  height: "3.6rem",
   border: "1px solid var(--slate-200)",
   cursor: "pointer",
   zIndex: 2,
@@ -487,7 +487,15 @@ export function ClueChips({ clues, checkedClues, onToggleChecked, onRemove, onRe
 
   return (
     <div className={`relative flex align-center gap-24 ${className}`} aria-label="선택한 단서">
-      <div className="relative flex-1" style={{ minWidth: 0 }}>
+      <div
+        className="relative flex-1"
+        style={{
+          minWidth: 0,
+          paddingLeft: showNavigation && !isBeginning ? "4.4rem" : 0,
+          paddingRight: showNavigation && !isEnd ? "4.4rem" : 0,
+          boxSizing: "border-box",
+        }}
+      >
         <Swiper
           modules={[Navigation]}
           slidesPerView="auto"
@@ -543,7 +551,7 @@ export function ClueChips({ clues, checkedClues, onToggleChecked, onRemove, onRe
             className="bg-white radius-full flex align-center justify-center shadow-lg"
             aria-label="이전 단서"
             onClick={() => swiper?.slidePrev()}
-            style={{ ...sliderNavButtonStyle, left: "-2rem" }}
+            style={{ ...sliderNavButtonStyle, left: 0 }}
             {...tapScale}
           >
             <i className="chevron-left-slate-700" aria-hidden="true"></i>
@@ -555,7 +563,7 @@ export function ClueChips({ clues, checkedClues, onToggleChecked, onRemove, onRe
             className="bg-white radius-full flex align-center justify-center shadow-lg"
             aria-label="다음 단서"
             onClick={() => swiper?.slideNext()}
-            style={{ ...sliderNavButtonStyle, right: "-2rem" }}
+            style={{ ...sliderNavButtonStyle, right: 0 }}
             {...tapScale}
           >
             <i className="chevron-right-slate-700" aria-hidden="true"></i>

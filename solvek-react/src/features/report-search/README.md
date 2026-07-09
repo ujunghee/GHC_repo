@@ -1,6 +1,6 @@
 # 발굴보고서 메인 검색 화면 README
 
-> 최신 기준 문서입니다. 아래에 남아 있는 이전 본문보다 이 섹션과 `MAIN_SCREEN_SPEC.md`, `PROTOTYPE_FLOW.md`, `COMPONENT_RULES.md`를 우선합니다.
+> 최신 기준 문서입니다. 메인 화면을 새로 구현하거나 AI에게 작업을 맡길 때는 `MAIN_SEARCH_FINAL_HANDOFF.md`를 최우선으로 읽습니다. 그 다음 `MAIN_SCREEN_SPEC.md`, `PROTOTYPE_FLOW.md`, `COMPONENT_RULES.md`를 보조 문서로 확인합니다.
 
 ## 목적
 
@@ -13,6 +13,7 @@
 - `data.ts`: 프로토타입용 임시 보고서 데이터와 검색 도우미 옵션입니다. 실제 개발에서는 Python API 응답으로 교체합니다.
 - `types.ts`: `Report`, `ViewMode`, `HelperCategory` 타입 기준입니다.
 - `motionConfig.ts`: 공통 인터랙션 값입니다.
+- `MAIN_SEARCH_FINAL_HANDOFF.md`: 현재 완성된 메인 화면의 모든 기능, 컴포넌트, 이벤트, 상태, API 연결 기준을 모은 최종 전달 문서입니다.
 - `MAIN_SCREEN_SPEC.md`: 메인 화면 전체 기능, UI, API, CSS/JS 규칙을 정리한 상세 전달 문서입니다.
 - `PROTOTYPE_FLOW.md`: 사용자 흐름과 상태 전환 규칙입니다.
 - `COMPONENT_RULES.md`: 컴포넌트별 책임과 재구현 규칙입니다.
@@ -54,9 +55,10 @@ type Report = {
 
 ## 구현 시 우선 읽을 문서
 
-1. `MAIN_SCREEN_SPEC.md`
-2. `PROTOTYPE_FLOW.md`
-3. `COMPONENT_RULES.md`
+1. `MAIN_SEARCH_FINAL_HANDOFF.md`
+2. `MAIN_SCREEN_SPEC.md`
+3. `PROTOTYPE_FLOW.md`
+4. `COMPONENT_RULES.md`
 
 ---
 
@@ -105,5 +107,5 @@ type Report = {
 - 단서 칩은 공통 `ClueChips`를 사용합니다.
 - 단서 칩은 개별 X 삭제 대신 `초기화` 버튼으로 전체 초기화합니다.
 - 칩 체크는 검색 조건의 활성/비활성 표시용이며, 체크 아이콘 없이 blue 활성 스타일만 사용합니다.
-- 칩 영역이 사라질 때 아래 컨텐츠는 `LayoutGroup`으로 자연스럽게 올라옵니다.
+- 칩 영역 자체는 height/opacity로 접히지만, 검색 결과 영역 위치 이동에는 `LayoutGroup`/`layout` 애니메이션을 쓰지 않습니다.
 - 반응형 보정은 디자인시스템의 `default/responsive.css` 또는 컴포넌트 구조 안에서 처리합니다.

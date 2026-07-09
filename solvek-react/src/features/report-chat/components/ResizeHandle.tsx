@@ -1,7 +1,4 @@
-import { motion } from "framer-motion";
 import type { PointerEvent } from "react";
-
-import { springSoft } from "../../report-search/motionConfig";
 
 type ResizeHandleProps = {
   side: "left" | "right";
@@ -25,20 +22,19 @@ export function ResizeHandle({ side, label, active, hovered, onPointerDown, onMo
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       style={{
-        [side]: "-0.4rem",
-        width: "0.8rem",
+        [side]: "-0.8rem",
+        width: "1.6rem",
         cursor: "col-resize",
         touchAction: "none",
       }}
     >
-      <motion.span
+      <span
         className="block h-full"
-        animate={{
+        style={{
+          margin: "0 auto",
           width: active || hovered ? "0.4rem" : "0.1rem",
           backgroundColor: active || hovered ? "var(--slate-200)" : "rgba(0, 0, 0, 0)",
         }}
-        transition={springSoft}
-        style={{ margin: "0 auto" }}
       />
     </div>
   );
