@@ -1,0 +1,510 @@
+/* Chat Map Panel */
+.map-panel {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  background-color: var(--slate-100);
+}
+
+.map-panel__viewport {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.map-panel__canvas {
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(180deg, rgba(232, 244, 234, 0.95) 0%, rgba(212, 232, 208, 0.95) 45%, rgba(197, 220, 232, 0.95) 100%);
+}
+
+.map-panel__marker-area {
+  position: absolute;
+  top: 42%;
+  left: 54%;
+  width: 14rem;
+  height: 9rem;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  border: 0.2rem dashed var(--red-500);
+  background-color: color-mix(in srgb, var(--red-500) 12%, transparent);
+  border-radius: var(--radius-sm-4);
+  pointer-events: none;
+}
+
+.map-panel__marker-pin {
+  position: absolute;
+  top: 38%;
+  left: 54%;
+  width: 2.4rem;
+  height: 2.4rem;
+  transform: translate(-50%, -100%);
+  border-radius: var(--radius-full);
+  background-color: var(--red-500);
+  box-shadow: 0 0.2rem 0.6rem rgba(26, 30, 35, 0.18);
+  pointer-events: none;
+}
+
+.map-panel__marker-pin::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -0.6rem;
+  width: 0;
+  height: 0;
+  transform: translateX(-50%);
+  border-left: 0.5rem solid transparent;
+  border-right: 0.5rem solid transparent;
+  border-top: 0.8rem solid var(--red-500);
+}
+
+/* 지도 설정 팝업 */
+.map-settings-popup {
+  position: absolute;
+  top: 1.6rem;
+  left: 1.6rem;
+  width: 28rem;
+  background-color: var(--white);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md-8);
+  box-shadow: 0 0.4rem 1.6rem rgba(26, 30, 35, 0.08);
+  z-index: 2;
+}
+
+.map-settings-popup__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.6rem;
+}
+
+.map-settings-popup__body {
+  padding: 0 1.6rem 1.6rem;
+}
+
+.map-settings-popup__foot {
+  padding: 0 1.6rem 1.6rem;
+}
+
+.map-settings-popup__location {
+  margin-bottom: 1.6rem;
+}
+
+.map-settings-popup__section-title {
+  margin-bottom: .8rem;
+}
+
+.map-settings-popup__layers {
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.map-settings-popup__active-section {
+  margin-top: 1.6rem;
+}
+
+.map-settings-popup__layer {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.map-layer-icon {
+  width: 1.8rem;
+  height: 1.8rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-xs-2);
+}
+
+.map-layer-icon--pin {
+  position: relative;
+  width: 1.8rem;
+  height: 1.8rem;
+  transform: rotate(-45deg);
+  border-radius: 50% 50% 50% 0;
+  background-color: var(--red-500);
+}
+
+.map-layer-icon--pin::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.6rem;
+  height: 0.6rem;
+  transform: translate(-50%, -50%);
+  border-radius: var(--radius-full);
+  background-color: var(--white);
+}
+
+.map-layer-icon--survey {
+  border: 0.15rem dashed var(--red-500);
+  background-color: transparent;
+}
+
+.map-layer-icon--ruins {
+  background-color: var(--orange-500);
+}
+
+.map-layer-icon--drawing {
+  border: 0.15rem solid var(--blue-500);
+  background-color: transparent;
+}
+
+/* 지도 설정 확장 패널 */
+.map-settings-panel {
+  display: flex;
+  flex-direction: column;
+  width: 25.4rem;
+  flex-shrink: 0;
+  height: 100%;
+  background-color: var(--white);
+  border-right: 1px solid var(--slate-200);
+}
+
+.map-settings-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.6rem 1.6rem 1.2rem;
+  min-height: 5.6rem;
+  flex-shrink: 0;
+}
+
+.map-settings-panel__head h2 {
+  font-size: 1.6rem;
+  line-height: 1.35;
+}
+
+.map-settings-panel .map-panel__icon-btn {
+  width: 2.8rem;
+  height: 2.8rem;
+}
+
+.map-settings-panel__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 1.6rem 1.6rem;
+}
+
+.map-settings-panel__location {
+  margin-bottom: 1.6rem;
+  font-size: 1.8rem;
+  line-height: 1.35;
+}
+
+.map-settings-panel__section {
+  margin-bottom: 1.6rem;
+}
+
+.map-settings-panel__section--divided {
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--slate-300);
+}
+
+.map-settings-panel__section-title {
+  margin-bottom: 1.2rem;
+  font-size: 1.6rem;
+  line-height: 1.35;
+}
+
+.map-settings-panel__active-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.map-settings-panel__checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: .4rem;
+  width: 100%;
+  min-height: 3.6rem;
+  padding: 0.4rem 0;
+}
+
+.map-settings-panel__checkbox-row .checkbox-basic-sm {
+  flex: none;
+  margin-top: 0.1rem;
+}
+
+.map-settings-panel__checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: .4rem;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.map-settings-panel__checkbox-label .map-layer-icon {
+  margin-top: 0.1rem;
+  flex: none;
+}
+
+.map-settings-panel__checkbox-row .checkbox-basic-sm:checked:not(:indeterminate)::after {
+  width: 1rem;
+  height: 0.5rem;
+  border-left-width: 0.18rem;
+  border-bottom-width: 0.18rem;
+}
+
+.map-settings-panel__checkbox-label .body2-r-16 {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.4rem;
+  line-height: 1.45;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.map-settings-panel__tabs {
+  display: flex;
+  width: 100%;
+  margin-bottom: 1.6rem;
+}
+
+.map-settings-panel__tab {
+  flex: 1;
+  min-width: 0;
+  min-height: 4.4rem;
+  font-size: 1.4rem;
+}
+
+.map-settings-panel__tab span {
+  font-size: 1.4rem;
+}
+
+.map-settings-panel__accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.map-layer-node--depth-1 {
+  border-bottom: 1px solid var(--slate-300);
+  width: 100%;
+}
+
+.map-layer-node--depth-3,
+.map-layer-node--depth-4 {
+  width: 100%;
+}
+
+.map-layer-node__body {
+  width: 100%;
+}
+
+.map-layer-node--depth-1:last-child {
+  border-bottom: none;
+}
+
+.map-layer-node__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 4rem;
+  border: none;
+  background-color: var(--white);
+  cursor: pointer;
+  text-align: left;
+}
+
+.map-layer-node__head--depth-1 {
+  min-height: 4.4rem;
+}
+
+.map-layer-node__head:hover:not(.active) {
+  background-color: var(--slate-50);
+}
+
+.map-layer-node__head--depth-2.active {
+  border-radius: var(--radius-md-6);
+  background-color: var(--slate-50);
+}
+
+.map-layer-node__head--depth-2 {
+  padding-left: .8rem;
+}
+
+.map-layer-node__body--depth-1 {
+  padding-bottom: 0.8rem;
+}
+
+.map-layer-node__body--depth-2 {
+  padding: 0.4rem;
+  margin-top: .8rem;
+}
+
+.map-layer-node__body--depth-3 {
+  padding: 0 0 0.4rem 1.2rem;
+}
+
+.map-layer-node__branch {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.4rem;
+  width: 100%;
+  min-height: 3.6rem;
+  padding: 0.4rem 0;
+}
+
+.map-layer-node__branch .checkbox-basic-sm {
+  flex: none;
+  margin-top: 0.1rem;
+}
+
+.map-layer-node__checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.map-layer-node__checkbox-label .map-layer-icon {
+  flex: none;
+  margin-top: 0.1rem;
+}
+
+.map-layer-node__checkbox-label .body2-r-16 {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.4rem;
+  line-height: 1.45;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.map-layer-node__toggle {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  margin-top: 0.1rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.map-layer-node__leaf {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  width: 100%;
+  min-height: 3.6rem;
+  padding: 0.4rem 0;
+}
+
+.map-layer-node__leaf .checkbox-basic-sm {
+  flex: none;
+  margin-top: 0.1rem;
+}
+
+.map-layer-node__leaf--depth-3 {
+  padding-left: 0;
+}
+
+.map-layer-node__leaf--depth-4 {
+  padding-left: 0;
+}
+
+.map-layer-node__leaf--depth-2 {
+  padding-left: 0;
+}
+
+.map-layer-node__leaf .checkbox-basic-sm:checked:not(:indeterminate)::after,
+.map-layer-node__branch .checkbox-basic-sm:checked:not(:indeterminate)::after {
+  width: 1rem;
+  height: 0.5rem;
+  border-left-width: 0.18rem;
+  border-bottom-width: 0.18rem;
+}
+
+.map-layer-node__head .body2-m-16 {
+  font-size: 1.4rem;
+  line-height: 1.45;
+}
+
+.map-layer-node__head strong {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.map-settings-panel .main-search__input {
+  font-size: 1.4rem;
+}
+
+.map-settings-panel .map-settings-popup__layer .body2-r-16,
+.map-settings-panel .map-settings-popup__layer .body3-r-14 {
+  font-size: 1.4rem;
+}
+
+.map-settings-panel .map-settings-popup__layers {
+  gap: .8rem;
+}
+
+.map-settings-panel .map-settings-popup__layer {
+  gap: 1rem;
+}
+
+
+.map-settings-panel .search-wrapper {
+  margin-bottom: 1.6rem;
+}
+
+.map-settings-panel .search-48 {
+  height: 4.8rem;
+  border-color: var(--slate-200);
+  border-radius: var(--radius-md-8);
+}
+
+/* 지도 유형 토글 */
+.map-panel__map-type {
+  z-index: 2;
+}
+
+.map-panel__map-type .radio-toggle-label {
+  min-width: 5.6rem;
+  height: 3.6rem;
+  padding: 0 1.2rem;
+}
+
+/* 지도 컨트롤 위치 */
+.map-panel__controls {
+  position: absolute;
+  top: 50%;
+  right: 2rem;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.map-panel__controls .map-control__btn.active {
+  color: var(--blue-500);
+  background-color: var(--blue-50);
+}
+
+.map-panel__icon-btn {
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  border-radius: var(--radius-sm-4);
+  background-color: var(--white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -135,6 +135,7 @@
   border: 0.1rem solid var(--slate-400);
   border-radius: var(--radius-md-6);
   background: var(--white);
+  gap: .8rem;
   color: var(--slate-700);
   cursor: pointer;
   user-select: none;

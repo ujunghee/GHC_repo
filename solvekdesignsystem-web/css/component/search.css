@@ -305,7 +305,7 @@ input[type="search"]:hover::-webkit-search-cancel-button {
   border: 1px solid var(--slate-200);
   background-color: var(--slate-50);
   border-radius: var(--radius-md-8);
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 400;
   color: var(--slate-900);
   outline: none;
@@ -332,3 +332,105 @@ input[type="search"]:hover::-webkit-search-cancel-button {
     background-color: inherit;
   }
 }
+
+/* chat file drop s */
+.chat-drop-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: color-mix(in srgb, var(--mulberry-50) 40%, transparent);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.chat-drop-overlay__message {
+  background-color: var(--mulberry-200);
+  color: var(--white);
+  border-radius: var(--radius-md-8);
+  padding: 0.4rem 1.2rem;
+}
+
+.search-62--with-attach {
+  height: auto;
+  min-height: 14rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.2rem;
+  padding: 1.6rem;
+}
+
+.search-62--with-attach .chat-compose__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  width: 100%;
+  margin-top: auto;
+}
+
+.chat-compose__field {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  border: none;
+  outline: none;
+  padding: 0;
+  background: transparent;
+  color: var(--slate-900);
+}
+
+.chat-compose__field::placeholder {
+  color: var(--slate-500);
+}
+
+.chat-compose__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-shrink: 0;
+}
+
+.chat-attach-preview {
+  position: relative;
+  width: 8rem;
+  height: 8rem;
+  flex-shrink: 0;
+}
+
+.chat-attach-preview__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-sm-4);
+  border: 1px solid var(--slate-200);
+  display: block;
+  background-color: var(--slate-100);
+}
+
+.chat-attach-preview__remove {
+  position: absolute;
+  top: .6rem;
+  right: .6rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background-color: var(--white);
+  box-shadow: 0 0.2rem 0.6rem rgba(26, 30, 35, 0.08);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-message-image img {
+  width: 8rem;
+  height: 8rem;
+  object-fit: cover;
+  border-radius: var(--radius-sm-4);
+  border: 1px solid var(--slate-200);
+  background-color: var(--white);
+  display: block;
+}
+/* chat file drop e */

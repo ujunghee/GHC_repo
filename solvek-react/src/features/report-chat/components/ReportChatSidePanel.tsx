@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
+import { useState } from "react";
 import type { PointerEvent, RefObject } from "react";
 
 import { springSoft, tapScale } from "../../report-search/motionConfig";
 import type { Report } from "../../report-search/types";
 import { ResizeHandle } from "./ResizeHandle";
 
-type ReportChatSidePanelProps = {
+export type ReportChatSidePanelProps = {
   width: number;
   reports: Report[];
   activeReportIds: number[];
@@ -17,6 +18,8 @@ type ReportChatSidePanelProps = {
   onSearch: () => void;
   onToggleAll: () => void;
   onToggleReport: (reportId: number) => void;
+  /** 패널 목록에서 보고서 제거 */
+  onRemoveReport: (reportId: number) => void;
   onResizeStart: (event: PointerEvent<HTMLDivElement>) => void;
   onResizeEnter: () => void;
   onResizeLeave: () => void;
@@ -34,10 +37,14 @@ export function ReportChatSidePanel({
   onSearch,
   onToggleAll,
   onToggleReport,
+  onRemoveReport,
   onResizeStart,
   onResizeEnter,
   onResizeLeave,
 }: ReportChatSidePanelProps) {
+  const [hoveredReportId, setHoveredReportId] = useState<number | null>(null);
+  const [menuReportId, setMenuReportId] = useState<number | null>(null);
+
   return (
     <motion.aside
       key="report-panel"
@@ -63,37 +70,117 @@ export function ReportChatSidePanel({
         <div className="flex align-center justify-between mb-20">
           <p className="body2-sb-16 color-slate-900">총 <strong className="color-blue-500">{reports.length}</strong> 건</p>
           <div className="flex align-center gap-10">
-            <span className="body2-m-16 color-slate-900">전체 선택</span>
             <input
+              id="report-select-all"
               ref={selectAllRef}
               className="checkbox-basic checkbox-basic-lg"
               type="checkbox"
               checked={isAllChecked}
               onChange={onToggleAll}
-              aria-label="전체 선택"
             />
+            <label htmlFor="report-select-all" className="body2-m-16 color-slate-900 cursor-pointer">
+              전체 선택
+            </label>
           </div>
         </div>
 
         <ul className="flex flex-col gap-8">
           {reports.map((report) => {
             const isChecked = activeReportIds.includes(report.id);
+            const isMenuOpen = menuReportId === report.id;
+            const showAction = hoveredReportId === report.id || isMenuOpen;
             return (
-              <li key={report.id}>
-                <label
-                  className={`bg-white border ${isChecked ? "border-blue-500" : "border-slate-300"} radius-md-8 px-16 flex align-center justify-between cursor-pointer py-10`}
+              <li
+                key={report.id}
+                className="relative"
+                onMouseEnter={() => setHoveredReportId(report.id)}
+                onMouseLeave={() => {
+                  setHoveredReportId(null);
+                  setMenuReportId((currentId) => (currentId === report.id ? null : currentId));
+                }}
+              >
+                <div
+                  className={`${showAction ? "bg-blue-50" : "bg-white"} border ${isChecked ? "border-blue-500" : "border-slate-300"} radius-md-8 px-16 flex align-center justify-between py-10`}
                 >
-                  <span className="body2-m-16 color-slate-900 text-nowrap" style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <label
+                    htmlFor={`report-select-${report.id}`}
+                    className="body2-m-16 color-slate-900 text-nowrap flex-1 cursor-pointer"
+                    style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", marginRight: showAction ? "4.4rem" : "1.6rem" }}
+                  >
                     {report.title}
-                  </span>
+                  </label>
                   <input
+                    id={`report-select-${report.id}`}
                     className="checkbox-basic checkbox-basic-lg"
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => onToggleReport(report.id)}
-                    aria-label={`${report.title} 선택`}
                   />
-                </label>
+                </div>
+                <motion.button
+                  className="flex align-center justify-center radius-md-8"
+                  type="button"
+                  aria-label={`${report.title} 메뉴 열기`}
+                  aria-haspopup="menu"
+                  aria-expanded={isMenuOpen}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setMenuReportId((currentId) => (currentId === report.id ? null : report.id));
+                  }}
+                  animate={{ opacity: showAction ? 1 : 0 }}
+                  transition={{ duration: 0.16 }}
+                  style={{
+                    position: "absolute",
+                    top: "calc(50% - 1.4rem)",
+                    right: "5.2rem",
+                    width: "2.8rem",
+                    height: "2.8rem",
+                    padding: 0,
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    pointerEvents: showAction ? "auto" : "none",
+                  }}
+                >
+                  <i
+                    aria-hidden="true"
+                    style={{
+                      width: "2.4rem",
+                      height: "2.4rem",
+                      background: "url('./image/icon/details-vertical-stroke.svg') center / contain no-repeat",
+                    }}
+                  ></i>
+                </motion.button>
+                {isMenuOpen && (
+                  <motion.div
+                    className="absolute bg-white border border-slate-200 radius-md-8 shadow-lg z-index-4 p-4"
+                    role="menu"
+                    aria-label={`${report.title} 작업`}
+                    initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                    transition={{ duration: 0.16 }}
+                    style={{ top: "3.8rem", right: "4.4rem" }}
+                  >
+                    <motion.button
+                      className="transparent-button-32 flex align-center justify-center px-12"
+                      type="button"
+                      role="menuitem"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        onRemoveReport(report.id);
+                        setMenuReportId(null);
+                      }}
+                      disabled={reports.length <= 1}
+                      style={{ minWidth: "6.4rem", opacity: reports.length <= 1 ? 0.45 : 1 }}
+                      {...tapScale}
+                    >
+                      <span className="body2-m-16 color-red-500">삭제</span>
+                    </motion.button>
+                  </motion.div>
+                )}
               </li>
             );
           })}

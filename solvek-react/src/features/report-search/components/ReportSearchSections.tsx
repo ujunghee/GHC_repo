@@ -6,7 +6,7 @@ import type { Swiper as SwiperClass } from "swiper";
 
 import { filterChips, helperCategories, suggestions } from "../data";
 import { fadeEase, springSnappy, tapScale } from "../motionConfig";
-import type { Report } from "../types";
+import type { Report, ReportGroup } from "../types";
 const checkIcon =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='12' viewBox='0 0 14 12' fill='none'%3E%3Cpath d='M1 6.5L5 10.5L13 1.5' stroke='%231A76FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\") center / contain no-repeat";
 
@@ -364,11 +364,6 @@ export function ReportGrid({
   );
 }
 
-export type ReportGroup = {
-  label: string;
-  reports: Report[];
-};
-
 export type GroupedReportSectionsProps = {
   groups: ReportGroup[];
   selectedReports: number[];
@@ -376,6 +371,7 @@ export type GroupedReportSectionsProps = {
   onChat?: (reports: Report[]) => void;
   keyword: string;
   compact?: boolean;
+  showGroupChat?: boolean;
 };
 
 export function GroupedReportSections({
@@ -385,6 +381,7 @@ export function GroupedReportSections({
   onChat,
   keyword,
   compact = false,
+  showGroupChat = true,
 }: GroupedReportSectionsProps) {
   return (
     <div className="flex flex-col gap-24">
@@ -393,7 +390,7 @@ export function GroupedReportSections({
           <ResultHeader
             label={group.label}
             count={group.reports.length}
-            showChat
+            showChat={showGroupChat}
             onChat={() => onChat?.(group.reports)}
           />
           <ReportGrid reports={group.reports} selectedReports={selectedReports} onToggle={onToggle} keyword={keyword} compact={compact} />

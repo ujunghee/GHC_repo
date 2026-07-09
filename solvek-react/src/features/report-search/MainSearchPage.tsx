@@ -14,6 +14,7 @@ import {
   ResultHeader,
 } from "./components/ReportSearchSections";
 import { reportData } from "./data";
+import { buildGroupedReports } from "./searchUtils";
 import { springSnappy, springSoft, tapScale } from "./motionConfig";
 import type { Report, ViewMode } from "./types";
 
@@ -89,25 +90,10 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
 
   const activeGroupKeywords = checkedClues.length > 0 ? checkedClues : activeFilters;
 
-  const groupedReports = useMemo(() => {
-    if (activeGroupKeywords.length === 0) return [];
-    const baseReports = shownReports.length > 0 ? shownReports : reportData;
-
-    return activeGroupKeywords.map((keyword) => {
-      const normalizedKeyword = keyword.toLowerCase();
-      const matchedReports = baseReports.filter(
-        (report) =>
-          report.title.toLowerCase().includes(normalizedKeyword) ||
-          report.summary.toLowerCase().includes(normalizedKeyword) ||
-          report.tags.some((tag) => tag.toLowerCase().includes(normalizedKeyword)),
-      );
-
-      return {
-        label: keyword,
-        reports: (matchedReports.length > 0 ? matchedReports : baseReports).slice(0, 3),
-      };
-    });
-  }, [activeGroupKeywords, shownReports]);
+  const groupedReports = useMemo(
+    () => buildGroupedReports(shownReports, activeGroupKeywords),
+    [activeGroupKeywords, shownReports],
+  );
 
   const recommendedReports = useMemo(() => {
     const keywords = Array.from(
@@ -209,7 +195,7 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
         {toastVisible && (
           <motion.div
             key="toast"
-            className="toast active bg-red-50 radius-md-8 shadow-lg px-20 py-12 flex align-center gap-8 z-index-10"
+            className="toast active bg-red-50 radius-md-8 shadow-lg px-16 py-8 flex align-center gap-6 z-index-10"
             role="status"
             initial={{ opacity: 0, y: -32, x: "-50%" }}
             animate={{ opacity: 1, y: 0, x: "-50%" }}
@@ -217,8 +203,7 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
             transition={springSoft}
             style={{ top: "3.2rem", left: "50%", visibility: "visible", transition: "none" }}
           >
-            <i className="toast-icon" aria-hidden="true"></i>
-            <span className="body1-sb-18 color-red-500">최대 2건만 가능합니다</span>
+            <span className="body2-sb-16 color-red-500">최대 2건만 가능합니다</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -234,6 +219,9 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
         </header>
 
         <form className="main-search-wrapper relative" onSubmit={handleSearch}>
+          <label className="blind" htmlFor="report-search">
+            발굴보고서 검색어
+          </label>
           <div className="main-search-62 flex align-center gap-8 px-12">
             <motion.button
               className={helperOpen ? "filter-tooltip-trigger active flex align-center justify-center" : "filter-tooltip-trigger flex align-center justify-center"}
@@ -252,7 +240,6 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
               id="report-search"
               type="search"
               className="main-search__input body2-r-16 flex-1"
-              aria-label="발굴보고서 검색어"
               value={query}
               onChange={(event) => {
                 setQuery(event.target.value);

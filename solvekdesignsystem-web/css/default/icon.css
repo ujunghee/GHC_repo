@@ -78,6 +78,38 @@
   flex-shrink: 0;
 }
 
+.copy-icon {
+  background: url("../../image/icon/copy.svg") center center / contain no-repeat;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: block;
+  flex-shrink: 0;
+}
+
+.align-corner-icon {
+  background: url("../../image/icon/align-corner.svg") center center / contain no-repeat;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: block;
+  flex-shrink: 0;
+}
+
+.expand-corner-icon {
+  background: url("../../image/icon/expand-corner.svg") center center / contain no-repeat;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: block;
+  flex-shrink: 0;
+}
+
+.check-icon {
+  background: url("../../image/icon/check.svg") center center / contain no-repeat;
+  width: 2rem;
+  height: 1.8rem;
+  display: block;
+  flex-shrink: 0;
+}
+
 .searchbar-search-icon {
   background: url("../../image/icon/searchbar-search.svg") center center / contain no-repeat;
   width: 2.4rem;
@@ -189,6 +221,22 @@
   display: block;
   width: 2.4rem;
   height: 2.4rem;
+}
+
+.chevron-down-slate-700 {
+  background: url("../../image/icon/chevron-down.svg") center center / contain no-repeat;
+  display: block;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex-shrink: 0;
+}
+
+.chevron-up-slate-700 {
+  background: url("data:image/svg+xml,<svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M17 14L11.9992 9.42L7 14' stroke='%23475263' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>") center center / contain no-repeat;
+  display: block;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex-shrink: 0;
 }
 
 .chevron-down-white {

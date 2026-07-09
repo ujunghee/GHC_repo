@@ -1,4 +1,4 @@
-﻿import { FormEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import {
@@ -9,15 +9,20 @@ import {
   panelMaxWidth,
   panelMinWidth,
   sourceDocument,
-  sourcePanelDefaultWidth,
+  getRightPanelMaxWidth,
+  getRightPanelDefaultWidth,
+  getRightPanelWidth,
   sourcePanelMinWidth,
 } from "./data";
-import type { ChatMessage, ChatPageProps } from "./types";
+import type { ChatMessage, ChatPageProps, RightPanelMode } from "./types";
 import { reportData } from "../report-search/data";
+import { buildGroupedReports, filterReportsByKeyword } from "../report-search/searchUtils";
 import { springSoft, tapScale } from "../report-search/motionConfig";
 import { ChatConversation } from "./components/ChatConversation";
 import { ChatSearchModal } from "./components/ChatSearchModal";
+import { MapPanel } from "./components/MapPanel";
 import { ReportChatSidePanel } from "./components/ReportChatSidePanel";
+import { ResizeHandle } from "./components/ResizeHandle";
 import { SourcePanel } from "./components/SourcePanel";
 
 export function ChatPage({ reports, onBack }: ChatPageProps) {
@@ -28,11 +33,15 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
   const [panelWidth, setPanelWidth] = useState(panelDefaultWidth);
   const [isPanelResizing, setIsPanelResizing] = useState(false);
   const [isPanelResizeHover, setIsPanelResizeHover] = useState(false);
-  const [isSourcePanelOpen, setIsSourcePanelOpen] = useState(false);
-  const [sourcePanelWidth, setSourcePanelWidth] = useState(sourcePanelDefaultWidth);
+  const [rightPanelMode, setRightPanelMode] = useState<RightPanelMode>("none");
+  const [lastRightPanelMode, setLastRightPanelMode] = useState<Exclude<RightPanelMode, "none">>("source");
+  const [sourcePanelWidth, setSourcePanelWidth] = useState(() =>
+    getRightPanelWidth(typeof window === "undefined" ? 1440 : window.innerWidth, panelDefaultWidth),
+  );
   const [isSourcePanelResizing, setIsSourcePanelResizing] = useState(false);
   const [isSourcePanelResizeHover, setIsSourcePanelResizeHover] = useState(false);
   const [activeSourceTitle, setActiveSourceTitle] = useState(sourceDocument.title);
+  const isRightPanelOpen = rightPanelMode !== "none";
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchHelperOpen, setSearchHelperOpen] = useState(false);
@@ -56,24 +65,22 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
     () => reportData.filter((report) => activeReportIds.includes(report.id)),
     [activeReportIds],
   );
+  const baseSearchReports = useMemo(
+    () => filterReportsByKeyword(reportData, searchQuery),
+    [searchQuery],
+  );
+  const groupedSearchReports = useMemo(
+    () => buildGroupedReports(baseSearchReports, checkedSearchClues),
+    [baseSearchReports, checkedSearchClues],
+  );
   const searchedReports = useMemo(() => {
-    const keyword = searchQuery.trim().toLowerCase();
-    const filtered = !keyword
-      ? reportData
-      : reportData.filter(
-          (report) =>
-            report.title.toLowerCase().includes(keyword) ||
-            report.summary.toLowerCase().includes(keyword) ||
-            report.tags.some((tag) => tag.toLowerCase().includes(keyword)),
-        );
-
-    return [...filtered].sort((a, b) => {
+    return [...baseSearchReports].sort((a, b) => {
       const aChecked = activeReportIds.includes(a.id);
       const bChecked = activeReportIds.includes(b.id);
       if (aChecked === bChecked) return 0;
       return aChecked ? -1 : 1;
     });
-  }, [searchQuery, activeReportIds]);
+  }, [baseSearchReports, activeReportIds]);
 
   const hasPanelContent = panelReports.length > 0;
   const selectedCount = activeReports.length;
@@ -94,13 +101,13 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
     if (isChatCompact) {
       setIsPanelOpen(false);
       setIsPanelResizing(false);
-      setIsSourcePanelOpen(false);
+      setRightPanelMode("none");
       setIsSourcePanelResizing(false);
       return;
     }
 
     if (shouldPreferConversation) {
-      setIsSourcePanelOpen(false);
+      setRightPanelMode("none");
       setIsSourcePanelResizing(false);
     }
   }, [isChatCompact, shouldPreferConversation]);
@@ -126,7 +133,7 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
     setPanelReportIds(nextReportIds);
     setActiveReportIds(nextReportIds);
     setMessages([]);
-    setIsSourcePanelOpen(false);
+    setRightPanelMode("none");
   }, [reports]);
 
   useEffect(() => {
@@ -154,13 +161,23 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
   }, [isPanelResizing]);
 
   useEffect(() => {
+    if (isChatCompact) return;
+    setSourcePanelWidth(getRightPanelWidth(viewportWidth, isPanelOpen ? panelWidth : 0));
+  }, [viewportWidth, isChatCompact]);
+
+  useEffect(() => {
+    if (isChatCompact) return;
+    setSourcePanelWidth((current) =>
+      Math.min(current, getRightPanelMaxWidth(viewportWidth, isPanelOpen ? panelWidth : 0)),
+    );
+  }, [isPanelOpen, panelWidth, viewportWidth, isChatCompact]);
+
+  useEffect(() => {
     if (!isSourcePanelResizing) return;
 
     const handlePointerMove = (event: PointerEvent) => {
       const nextWidth = window.innerWidth - event.clientX;
-      const reservedChatWidth = 360;
-      const openReportPanelWidth = isPanelOpen ? panelWidth : 0;
-      const dynamicMaxWidth = Math.max(sourcePanelMinWidth, window.innerWidth - openReportPanelWidth - reservedChatWidth);
+      const dynamicMaxWidth = getRightPanelMaxWidth(window.innerWidth, isPanelOpen ? panelWidth : 0);
       setSourcePanelWidth(Math.min(dynamicMaxWidth, Math.max(sourcePanelMinWidth, nextWidth)));
     };
 
@@ -238,27 +255,64 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
     toggleReport(reportId);
   };
 
+  const removePanelReport = (reportId: number) => {
+    if (panelReportIds.length <= 1) return;
+
+    const nextPanelReportIds = panelReportIds.filter((id) => id !== reportId);
+    setPanelReportIds(nextPanelReportIds);
+
+    setActiveReportIds((currentIds) => {
+      if (!currentIds.includes(reportId)) return currentIds;
+      const nextActiveIds = currentIds.filter((id) => id !== reportId);
+      return nextActiveIds.length > 0 ? nextActiveIds : [nextPanelReportIds[0]];
+    });
+  };
+
   const openSourcePanel = () => {
     if (isChatCompact) return;
     setActiveSourceTitle(activeReports[0]?.title ?? sourceDocument.title);
-    setIsSourcePanelOpen(true);
+    setLastRightPanelMode("source");
+    setRightPanelMode("source");
   };
 
-  const sendMessage = (text: string) => {
+  const openMapPanel = () => {
+    if (isChatCompact) return;
+    setLastRightPanelMode("map");
+    setRightPanelMode("map");
+  };
+
+  const closeRightPanel = () => {
+    setRightPanelMode("none");
+  };
+
+  const toggleRightPanel = () => {
+    if (isRightPanelOpen) {
+      closeRightPanel();
+      return;
+    }
+
+    if (lastRightPanelMode === "source") {
+      setActiveSourceTitle(activeReports[0]?.title ?? sourceDocument.title);
+    }
+
+    setRightPanelMode(lastRightPanelMode);
+  };
+
+  const sendMessage = (text: string, imageUrl?: string) => {
     const nextMessage = text.trim();
-    if (!nextMessage || activeReports.length === 0) return;
+    if ((!nextMessage && !imageUrl) || activeReports.length === 0) return;
 
     setMessages((current) => [
       ...current,
-      { id: current.length + 1, role: "user", text: nextMessage },
+      {
+        id: current.length + 1,
+        role: "user",
+        text: nextMessage,
+        ...(imageUrl ? { imageUrl } : {}),
+      },
       createAssistantMessage(current.length + 2),
     ]);
     setMessage("");
-  };
-
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    sendMessage(message);
   };
 
   return (
@@ -277,6 +331,7 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
             onSearch={() => setIsSearchOpen(true)}
             onToggleAll={toggleAllReports}
             onToggleReport={toggleReport}
+            onRemoveReport={removePanelReport}
             onResizeStart={(event) => {
               event.preventDefault();
               setIsPanelResizing(true);
@@ -314,16 +369,13 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
           <motion.button
             className="absolute top-0 right-16 flex align-center justify-center z-index-2"
             type="button"
-            aria-label={isSourcePanelOpen ? "원문 패널 접기" : "원문 패널 펼치기"}
-            aria-pressed={isSourcePanelOpen}
-            onClick={() => {
-              if (!activeSourceTitle) setActiveSourceTitle(activeReports[0]?.title ?? sourceDocument.title);
-              setIsSourcePanelOpen((open) => !open);
-            }}
+            aria-label={isRightPanelOpen ? "오른쪽 패널 접기" : "오른쪽 패널 펼치기"}
+            aria-pressed={isRightPanelOpen}
+            onClick={toggleRightPanel}
             style={{ top: "2rem" }}
             {...tapScale}
           >
-            <i className={isSourcePanelOpen ? "layout-right-active-icon" : "layout-right-inactive-icon"} aria-hidden="true"></i>
+            <i className={isRightPanelOpen ? "layout-right-active-icon" : "layout-right-inactive-icon"} aria-hidden="true"></i>
           </motion.button>
         )}
 
@@ -335,26 +387,45 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
           suggestionLabels={suggestionLabels}
           message={message}
           onMessageChange={setMessage}
-          onSubmit={handleSubmit}
           onSend={sendMessage}
           onOpenSource={openSourcePanel}
+          onOpenMap={openMapPanel}
         />
       </section>
 
       <AnimatePresence initial={false}>
-        {!isChatCompact && isSourcePanelOpen && hasSourceContent && (
-          <SourcePanel
-            width={sourcePanelWidth}
-            title={activeSourceTitle}
-            isResizing={isSourcePanelResizing}
-            isResizeHover={isSourcePanelResizeHover}
-            onResizeStart={(event) => {
-              event.preventDefault();
-              setIsSourcePanelResizing(true);
-            }}
-            onResizeEnter={() => setIsSourcePanelResizeHover(true)}
-            onResizeLeave={() => setIsSourcePanelResizeHover(false)}
-          />
+        {!isChatCompact && isRightPanelOpen && hasSourceContent && (
+          <motion.aside
+            key="right-panel"
+            className="relative bg-white border-l border-slate-200 h-screen overflow-hidden"
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: sourcePanelWidth, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={isSourcePanelResizing ? { duration: 0 } : springSoft}
+            style={{ flexShrink: 0 }}
+            aria-label={rightPanelMode === "source" ? "원문 보기" : "지도 보기"}
+          >
+            <ResizeHandle
+              side="left"
+              label="오른쪽 패널 너비 조절"
+              active={isSourcePanelResizing}
+              hovered={isSourcePanelResizeHover}
+              onPointerDown={(event) => {
+                event.preventDefault();
+                setIsSourcePanelResizing(true);
+              }}
+              onMouseEnter={() => setIsSourcePanelResizeHover(true)}
+              onMouseLeave={() => setIsSourcePanelResizeHover(false)}
+            />
+            <div className="h-full w-full overflow-hidden">
+              <div className={rightPanelMode === "source" ? "h-full" : "hidden"} aria-hidden={rightPanelMode !== "source"}>
+                <SourcePanel embedded title={activeSourceTitle} />
+              </div>
+              <div className={rightPanelMode === "map" ? "h-full" : "hidden"} aria-hidden={rightPanelMode !== "map"}>
+                <MapPanel embedded />
+              </div>
+            </div>
+          </motion.aside>
         )}
       </AnimatePresence>
 
@@ -366,6 +437,7 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
             searchClues={searchClues}
             checkedSearchClues={checkedSearchClues}
             searchedReports={searchedReports}
+            groupedSearchReports={groupedSearchReports}
             activeReportIds={activeReportIds}
             helperPopupRef={searchHelperPopupRef}
             resultListRef={searchResultListRef}

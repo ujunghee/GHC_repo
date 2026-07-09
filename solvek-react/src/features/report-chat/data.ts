@@ -1,4 +1,4 @@
-import type { AnswerFact, ChatMessage, SourceDocument } from "./types";
+import type { AnswerFact, ChatMessage, MapDocument, SourceDocument } from "./types";
 import type { Report } from "../report-search/types";
 
 export const panelMinWidth = 240;
@@ -8,7 +8,37 @@ export const panelCollapseDelay = 450;
 
 export const sourcePanelMinWidth = 360;
 export const sourcePanelMaxWidth = 720;
-export const sourcePanelDefaultWidth = 500;
+export const sourcePanelDefaultWidth = 760;
+export const sourcePanelWideBreakpoint = 1600;
+export const sourcePanelExtraWideBreakpoint = 2000;
+export const sourcePanelExtraWideDefaultWidth = 1000;
+export const sourcePanelReservedChatWidth = 360;
+
+export function getRightPanelDefaultWidth(viewportWidth: number) {
+  if (viewportWidth <= sourcePanelWideBreakpoint) return sourcePanelDefaultWidth;
+  if (viewportWidth >= sourcePanelExtraWideBreakpoint) return sourcePanelExtraWideDefaultWidth;
+
+  const ratio =
+    (viewportWidth - sourcePanelWideBreakpoint) /
+    (sourcePanelExtraWideBreakpoint - sourcePanelWideBreakpoint);
+
+  return Math.round(sourcePanelDefaultWidth + ratio * (sourcePanelExtraWideDefaultWidth - sourcePanelDefaultWidth));
+}
+
+export function getRightPanelMaxWidth(
+  viewportWidth: number,
+  openReportPanelWidth: number,
+  reservedChatWidth = sourcePanelReservedChatWidth,
+) {
+  return Math.max(
+    sourcePanelMinWidth,
+    viewportWidth - openReportPanelWidth - reservedChatWidth,
+  );
+}
+
+export function getRightPanelWidth(viewportWidth: number, openReportPanelWidth: number) {
+  return Math.min(getRightPanelDefaultWidth(viewportWidth), getRightPanelMaxWidth(viewportWidth, openReportPanelWidth));
+}
 
 export function getChatTargetLabel(activeReports: Report[]) {
   if (activeReports.length === 0) return "선택된 보고서";
@@ -52,4 +82,68 @@ export const sourceDocument: SourceDocument = {
   pageLabel: "p.12",
   pageImageUrl: "",
   similarityScore: 80,
+};
+
+export const mapDocument: MapDocument = {
+  title: "함안 윤내리 토기가마",
+  location: "함안 윤내리 1443 번지",
+  baseLayers: [
+    { label: "대표 좌표", tone: "pin" },
+    { label: "조사 범위", tone: "survey" },
+    { label: "주변 유적", tone: "ruins" },
+    { label: "보고서 도면", tone: "drawing" },
+  ],
+  activeLayers: ["국가지정유산 보호구역", "연속지적도(부번)"],
+  advancedTabs: ["기본", "필지", "도면", "주변"],
+  layerRoots: [
+    {
+      label: "국가유산",
+      children: [
+        {
+          label: "지정유산",
+          children: [
+            {
+              label: "국가지정",
+              checked: true,
+              children: [
+                { label: "국가등록문화유산", checked: false },
+                { label: "국가등록문화유산", checked: false },
+                { label: "국가지정유산보호구역주기", checked: true },
+              ],
+            },
+            { label: "시도지정", checked: false },
+            { label: "시군구지정", checked: false },
+            { label: "국가등록", checked: false },
+          ],
+        },
+      ],
+    },
+    {
+      label: "활용 주제도",
+      children: [
+        { label: "문화유산 활용권역", checked: true },
+        { label: "역사문화환경", checked: true },
+        { label: "관광 활용 주제도", checked: true },
+      ],
+    },
+    {
+      label: "도시 계획",
+      children: [
+        { label: "도시지역", checked: true },
+        { label: "관리지역", checked: true },
+      ],
+    },
+    {
+      label: "고급 레이어",
+      children: [
+        {
+          label: "위치·필지",
+          children: [
+            { label: "도시지역", checked: false },
+            { label: "연속지적도(부번)", checked: true },
+          ],
+        },
+      ],
+    },
+  ],
 };

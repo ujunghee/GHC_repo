@@ -167,6 +167,7 @@
   display: inline-flex;
   align-items: stretch;
   vertical-align: middle;
+  border-radius: var(--radius-md-8);
 }
 
 .radio-toggle-label {
@@ -174,11 +175,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 4.8rem;
+  height: 4.2rem;
   padding: var(--spacing-8) var(--spacing-16);
   min-width: 7.2rem;
-  border: 0.1rem solid var(--slate-400);
-  border-left-width: 0;
+  border: 1px solid var(--slate-200);
   background-color: var(--white);
   color: var(--slate-700);
   cursor: pointer;
@@ -187,7 +187,12 @@
     background-color 0.25s ease,
     border-color 0.25s ease,
     color 0.25s ease,
-    opacity 0.25s ease;
+    opacity 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.radio-toggle-label + .radio-toggle-label {
+  margin-left: -0.1rem;
 }
 
 .radio-toggle-label span {
@@ -218,18 +223,17 @@
 }
 
 .radio-toggle-label:has(.radio-toggle:checked) {
-  z-index: 1;
+  z-index: 2;
   background-color: var(--blue-50);
-  border-color: var(--blue-500);
   color: var(--blue-500);
+  border: none;
+  box-shadow: inset 0 0 0 0.1rem var(--blue-500);
 }
 
-/* 오른쪽만 선택됐을 때 가운데 구분선도 파란색 */
-.radio-toggle-group:has(> .radio-toggle-label:last-of-type .radio-toggle:checked)
-  > .radio-toggle-label:first-of-type {
-  border-right-color: var(--blue-500);
+/* 선택 항목 왼쪽 이웃 — slate border는 유지하되, 맞닿은 1px만 숨김 (이중 두께 방지) */
+.radio-toggle-label:has(+ .radio-toggle-label .radio-toggle:checked) {
+  border-right-color: transparent;
 }
-
 .radio-toggle-label:not(:has(.radio-toggle:checked)):hover span {
   color: var(--blue-500);
 }
