@@ -1,6 +1,6 @@
 # 발굴보고서 메인 검색 화면 README
 
-> 최신 기준 문서입니다. 메인 화면을 새로 구현하거나 AI에게 작업을 맡길 때는 `MAIN_SEARCH_FINAL_HANDOFF.md`를 최우선으로 읽습니다. 그 다음 `MAIN_SCREEN_SPEC.md`, `PROTOTYPE_FLOW.md`, `COMPONENT_RULES.md`를 보조 문서로 확인합니다.
+> 최신 기준 문서입니다. 새 UI를 그대로 입혀야 할 때는 `MAIN_UI_SCREEN_SPEC.md`를 먼저 읽고, 이어서 `MAIN_UI_REPLACEMENT_HANDOFF.md`를 읽습니다. 기능/API 중심 재구현은 `MAIN_SEARCH_FINAL_HANDOFF.md`, `MAIN_SCREEN_SPEC.md`, `PROTOTYPE_FLOW.md`, `COMPONENT_RULES.md`를 함께 확인합니다.
 
 ## 목적
 
@@ -13,6 +13,8 @@
 - `data.ts`: 프로토타입용 임시 보고서 데이터와 검색 도우미 옵션입니다. 실제 개발에서는 Python API 응답으로 교체합니다.
 - `types.ts`: `Report`, `ViewMode`, `HelperCategory` 타입 기준입니다.
 - `motionConfig.ts`: 공통 인터랙션 값입니다.
+- `MAIN_UI_SCREEN_SPEC.md`: 새 메인 UI 화면을 CSS, React 구분, 치수, 반응형, asset 기준으로 복사하기 위한 화면 정의서입니다.
+- `MAIN_UI_REPLACEMENT_HANDOFF.md`: 새 메인 UI 화면을 덮어쓸 때 현재 검색/선택/채팅 CTA 기능을 보존하기 위한 인수인계 문서입니다.
 - `MAIN_SEARCH_FINAL_HANDOFF.md`: 현재 완성된 메인 화면의 모든 기능, 컴포넌트, 이벤트, 상태, API 연결 기준을 모은 최종 전달 문서입니다.
 - `MAIN_SCREEN_SPEC.md`: 메인 화면 전체 기능, UI, API, CSS/JS 규칙을 정리한 상세 전달 문서입니다.
 - `PROTOTYPE_FLOW.md`: 사용자 흐름과 상태 전환 규칙입니다.
@@ -27,8 +29,9 @@
 - 검색 도우미 팝업에서 지역, 소재지, 시대 단서를 추가합니다.
 - 선택한 단서는 공통 `ClueChips`로 표시하고, 활성 칩은 blue 상태만 사용합니다.
 - 칩 선택 또는 필터 선택이 있으면 결과를 키워드별 그룹으로 묶어 표시합니다.
-- 보고서는 최대 2건까지만 선택할 수 있습니다.
-- 그룹의 `채팅하기` 대상이 3건 이상이면 자동으로 앞 2건만 선택하고 토스트를 띄웁니다.
+- 보고서 선택 개수는 프론트에서 임의로 제한하지 않습니다.
+- 그룹의 `채팅하기`는 그룹에 포함된 보고서 id 전체를 채팅 시작 흐름으로 전달합니다.
+- 채팅 가능한 보고서 수 초과 등은 채팅 세션 생성 API 응답 메시지를 토스트로 표시합니다.
 - 검색 결과가 없으면 빈 상태 화면을 보여주고 선택된 보고서와 하단 CTA를 초기화합니다.
 - 선택된 보고서가 1건 이상이면 하단 fixed `채팅하기` 버튼을 표시합니다.
 
@@ -39,7 +42,7 @@
 - `POST /api/reports/recommendations`: 최근 검색어 또는 사용자 맥락을 기준으로 추천 보고서를 반환합니다.
 - `GET /api/users/{user_id}/search-history`: 최근 검색어 목록을 반환합니다.
 - `POST /api/users/{user_id}/search-history`: 검색 성공 시 최근 검색어를 저장합니다.
-- `POST /api/chat/sessions`: 선택된 보고서 id 목록으로 채팅 세션을 생성합니다.
+- `POST /api/chat/sessions`: 선택된 보고서 id 목록으로 채팅 세션을 생성합니다. 허용 가능한 보고서 수와 실패 메시지는 이 API 응답을 기준으로 처리합니다.
 
 ## 데이터 기준
 
@@ -54,6 +57,17 @@ type Report = {
 ```
 
 ## 구현 시 우선 읽을 문서
+
+새 UI를 그대로 입히는 경우:
+
+1. `MAIN_UI_SCREEN_SPEC.md`
+2. `MAIN_UI_REPLACEMENT_HANDOFF.md`
+3. `MAIN_SEARCH_FINAL_HANDOFF.md`
+4. `MAIN_SCREEN_SPEC.md`
+5. `PROTOTYPE_FLOW.md`
+6. `COMPONENT_RULES.md`
+
+기능/API 기준으로만 재구현하는 경우:
 
 1. `MAIN_SEARCH_FINAL_HANDOFF.md`
 2. `MAIN_SCREEN_SPEC.md`
@@ -94,15 +108,16 @@ type Report = {
 - 키워드별 그룹 검색: 활성 단서/필터 키워드별 보고서 그룹을 반환
 - 최근 검색어: 사용자별 최근 검색어 저장 및 조회
 - 추천 보고서: 최근 검색어 또는 선택 보고서를 기준으로 추천 목록 반환
-- 채팅 시작: 선택한 보고서 `id` 목록을 챗봇 화면으로 전달
+- 채팅 시작: 선택한 보고서 `id` 목록 전체를 채팅 세션 생성 흐름으로 전달
 
 챗봇 화면 규칙은 `../report-chat/README.md`, `../report-chat/PROTOTYPE_FLOW.md`, `../report-chat/COMPONENT_RULES.md`를 확인합니다.
 
 ## Current UX Notes
 
-- 보고서는 메인 화면에서 최대 2건까지 선택할 수 있습니다.
+- 보고서 선택 개수는 메인 화면에서 고정하지 않습니다.
 - 활성 단서 칩 또는 필터가 있으면 결과는 키워드별 그룹으로 표시합니다.
-- 그룹 헤더의 `채팅하기`가 3건 이상을 대상으로 하면 앞 2건만 선택하고 토스트를 띄운 뒤 하단 `채팅하기`를 누르게 합니다.
+- 그룹 헤더의 `채팅하기`는 그룹 보고서 id 전체를 채팅 시작 흐름으로 전달합니다.
+- 토스트는 프론트 임의 제한이 아니라 채팅 세션 생성 API가 반환한 실패 사유를 표시할 때 사용합니다.
 - 검색 결과가 없으면 선택 보고서와 하단 `채팅하기` CTA가 초기화됩니다.
 - 단서 칩은 공통 `ClueChips`를 사용합니다.
 - 단서 칩은 개별 X 삭제 대신 `초기화` 버튼으로 전체 초기화합니다.

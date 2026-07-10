@@ -32,7 +32,6 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
   const [clues, setClues] = useState<string[]>([]);
   const [checkedClues, setCheckedClues] = useState<string[]>([]);
   const [selectedReports, setSelectedReports] = useState<number[]>([]);
-  const [toastVisible, setToastVisible] = useState(false);
   const helperPopupRef = useRef<HTMLDivElement>(null);
   const isNarrowViewport = viewportWidth <= 768;
 
@@ -152,29 +151,18 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
   const toggleReport = (id: number) => {
     setSelectedReports((current) => {
       if (current.includes(id)) return current.filter((item) => item !== id);
-      if (current.length >= 2) {
-        setToastVisible(true);
-        window.setTimeout(() => setToastVisible(false), 1800);
-        return current;
-      }
       return [...current, id];
     });
   };
 
   const startChatWithReports = (reportIds: number[]) => {
     if (reportIds.length === 0) return;
-    onStartChat?.(reportIds.slice(0, 2));
+    onStartChat?.(reportIds);
   };
 
   const startChatWithGroup = (reports: Report[]) => {
     const groupReportIds = reports.map((report) => report.id);
     if (groupReportIds.length === 0) return;
-    if (groupReportIds.length > 2) {
-      setSelectedReports(groupReportIds.slice(0, 2));
-      setToastVisible(true);
-      window.setTimeout(() => setToastVisible(false), 1800);
-      return;
-    }
     onStartChat?.(groupReportIds);
   };
 
@@ -186,28 +174,10 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
   useEffect(() => {
     if (!isEmptyResult) return;
     setSelectedReports((current) => (current.length > 0 ? [] : current));
-    setToastVisible(false);
   }, [isEmptyResult]);
 
   return (
     <main className="bg-slate-50 h-screen overflow-auto">
-      <AnimatePresence>
-        {toastVisible && (
-          <motion.div
-            key="toast"
-            className="toast active bg-red-50 radius-md-8 shadow-lg px-16 py-8 flex align-center gap-6 z-index-10"
-            role="status"
-            initial={{ opacity: 0, y: -32, x: "-50%" }}
-            animate={{ opacity: 1, y: 0, x: "-50%" }}
-            exit={{ opacity: 0, y: -24, x: "-50%" }}
-            transition={springSoft}
-            style={{ top: "3.2rem", left: "50%", visibility: "visible", transition: "none" }}
-          >
-            <span className="body2-sb-16 color-red-500">최대 2건만 가능합니다</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <section
         className="mb-default mt-140 pb-80"
         aria-label="발굴보고서 검색"

@@ -4,25 +4,35 @@
 
 ## Read Order
 
-1. `CLAUDE_CODE_IMPLEMENTATION_GUIDE.md`
-2. `PROTOTYPE_OVERVIEW.md`
-3. `DEVELOPER_HANDOFF.md`
-4. `solvek-react/src/features/report-search/README.md`
-5. `solvek-react/src/features/report-search/PROTOTYPE_FLOW.md`
-6. `solvek-react/src/features/report-search/COMPONENT_RULES.md`
-7. `solvek-react/src/features/report-chat/README.md`
-8. `solvek-react/src/features/report-chat/PROTOTYPE_FLOW.md`
-9. `solvek-react/src/features/report-chat/COMPONENT_RULES.md`
-10. `solvekdesignsystem-web/README.md`
-11. `solvekdesignsystem-web/CLAUDE.md`
+1. `UI_SOURCE_OF_TRUTH.md`
+2. `CLAUDE_CODE_IMPLEMENTATION_GUIDE.md`
+3. `PROTOTYPE_OVERVIEW.md`
+4. `DEVELOPER_HANDOFF.md`
+5. `solvek-react/src/features/report-search/README.md`
+6. `solvek-react/src/features/report-search/MAIN_UI_SCREEN_SPEC.md`
+7. `solvek-react/src/features/report-search/MAIN_UI_REPLACEMENT_HANDOFF.md`
+8. `solvek-react/src/features/report-search/PROTOTYPE_FLOW.md`
+9. `solvek-react/src/features/report-search/COMPONENT_RULES.md`
+10. `solvek-react/src/features/report-chat/README.md`
+11. `solvek-react/src/features/report-chat/CHAT_UI_SCREEN_SPEC.md`
+12. `solvek-react/src/features/report-chat/CHAT_UI_REPLACEMENT_HANDOFF.md`
+13. `solvek-react/src/features/report-chat/PROTOTYPE_FLOW.md`
+14. `solvek-react/src/features/report-chat/COMPONENT_RULES.md`
+15. `solvekdesignsystem-web/README.md`
+16. `solvekdesignsystem-web/CLAUDE.md`
 
 ## Project Map
 
 - `solvek-react/`: 현재 동작하는 React 프로토타입입니다.
+- `UI_SOURCE_OF_TRUTH.md`: 이 git 자체가 UI 원본임을 명시하고 메인/챗봇 원본 React 파일과 CSS 경로를 안내하는 최상위 문서입니다.
 - `solvek-react/src/App.tsx`: 앱 루트입니다. 메인 검색 화면과 보고서 채팅 화면 전환을 관리합니다.
 - `solvek-react/src/features/report-chat/ChatPage.tsx`: 선택한 보고서 기반 채팅 화면 초안입니다.
+- `solvek-react/src/features/report-chat/CHAT_UI_SCREEN_SPEC.md`: 사용자가 제공한 새 챗봇 UI 화면을 CSS/React 구분/치수/반응형 기준으로 복사하기 위한 화면 정의서입니다.
+- `solvek-react/src/features/report-chat/CHAT_UI_REPLACEMENT_HANDOFF.md`: 사용자가 제공한 새 챗봇 UI 화면을 기능 손상 없이 덮어쓰기 위한 최우선 상세 인수인계 문서입니다.
 - `solvek-react/src/features/report-chat/components/`: 채팅 본문, 선택 보고서 패널, 검색 모달, 원문 패널 컴포넌트입니다.
 - `solvek-react/src/features/report-search/MainSearchPage.tsx`: 발굴보고서 검색 메인 화면의 상태와 화면 흐름입니다.
+- `solvek-react/src/features/report-search/MAIN_UI_SCREEN_SPEC.md`: 사용자가 제공한 새 메인 UI 화면을 CSS/React 구분/치수/반응형 기준으로 복사하기 위한 화면 정의서입니다.
+- `solvek-react/src/features/report-search/MAIN_UI_REPLACEMENT_HANDOFF.md`: 새 메인 UI 화면을 기능 손상 없이 덮어쓰기 위한 인수인계 문서입니다.
 - `solvek-react/src/features/report-search/components/ReportSearchSections.tsx`: 검색 도우미, 칩, 결과 카드, 추천, 빈 상태 등 화면 섹션 컴포넌트입니다.
 - `solvek-react/src/features/report-search/data.ts`: 임시 보고서 데이터와 필터/추천/검색 도우미 옵션입니다.
 - `solvekdesignsystem-web/`: 프로토타입에서 사용하는 CSS 디자인시스템과 아이콘 자산입니다.
@@ -55,7 +65,7 @@ npm exec -- parcel serve index.html --host 0.0.0.0 --port 5173 --no-cache
 - 키워드별 보고서 결과 그룹
 - 결과 없음 상태
 - 보고서 선택 후 하단 채팅 CTA
-- 최대 2건 선택 제한 토스트
+- API 응답 기반 토스트
 - 선택 보고서 기반 채팅 화면
 - 채팅 화면의 선택 보고서 패널
 - 채팅 화면의 보고서 검색 모달
@@ -95,8 +105,32 @@ type Report = {
 - 실제 화면 흐름은 React TSX가 기준입니다. 디자인시스템 MD는 class와 디자인 규칙의 보조 자료입니다.
 - `solvekdesignsystem-web/README.md`와 `CLAUDE.md`에는 원본 디자인시스템의 확장 폴더 설명이 일부 남아 있습니다. 현재 전달본에는 `components/`, `docs/`, `solvek-web/` 폴더가 없으므로, 없는 파일 링크를 따라가지 말고 `css/`, `image/`, React TSX, 이 문서들을 기준으로 구현합니다.
 - 결과 없음 상태에서는 선택된 보고서를 초기화하고 하단 채팅 CTA를 숨깁니다.
-- 보고서 선택은 최대 2건까지 허용합니다.
-- 그룹 헤더의 `채팅하기`가 3건 이상을 대상으로 하면 앞 2건만 선택하고 토스트를 띄운 뒤 하단 `채팅하기`를 누르게 합니다.
+- 보고서 선택 개수는 프론트에서 임의로 제한하지 않습니다. 서버 성능과 백엔드 정책에 따라 채팅 세션 생성 API에서 허용 범위를 판단합니다.
+- 그룹 헤더의 `채팅하기`는 해당 그룹의 보고서 id 전체를 채팅 시작 흐름으로 전달합니다.
 - 챗봇 화면의 좌측 패널은 메인에서 선택한 보고서만 기본 목록으로 사용합니다.
 - 챗봇 화면에서는 최소 1건 이상 선택 상태를 유지합니다.
 - 원문 패널의 `similarityScore`는 버튼이 아니라 AI가 찾은 근거와 원문 페이지의 유사도 표시값입니다.
+
+## Toast Logic
+
+프론트가 임의로 보고서 개수를 제한해서 토스트를 띄우지 않습니다. 토스트는 API 응답 또는 명확한 클라이언트 오류가 있을 때만 표시합니다.
+
+- 보고서 카드 선택/해제: 토스트를 띄우지 않습니다. 사용자가 여러 건을 자유롭게 선택할 수 있어야 합니다.
+- 하단 `채팅하기`: 선택 id 목록 전체로 채팅 세션 생성 API를 호출합니다. API가 성공하면 채팅 화면으로 이동합니다.
+- 그룹 헤더 `채팅하기`: 그룹의 보고서 id 전체로 채팅 세션 생성 API를 호출합니다. 프론트에서 앞 2건 또는 5건으로 자르지 않습니다.
+- API가 선택 개수 초과를 반환할 때: API 응답의 메시지를 그대로 토스트에 표시합니다. 예: `선택 가능한 보고서는 최대 5건입니다.`
+- API가 서버 처리량 부족, 파일 인덱싱 미완료, 권한 문제처럼 채팅 세션을 만들 수 없는 사유를 반환할 때: API 응답의 사용자 표시용 메시지를 토스트에 표시합니다.
+- API 메시지가 없을 때: 프론트 공통 fallback 문구를 사용합니다. 예: `채팅을 시작할 수 없습니다. 잠시 후 다시 시도해주세요.`
+- 네트워크 실패 또는 timeout: `서버 연결이 원활하지 않습니다. 잠시 후 다시 시도해주세요.` 토스트를 표시합니다.
+- 결과 없음 상태: 선택 보고서와 하단 CTA만 초기화하고 토스트는 띄우지 않습니다.
+- 원문 요약 복사 성공: 챗봇 답변 영역의 `복사 완료` 토스트는 별도 UX입니다. 보고서 선택 제한과 무관합니다.
+
+권장 API 응답 형태:
+
+```ts
+type ChatSessionError = {
+  code: "REPORT_LIMIT_EXCEEDED" | "SERVER_BUSY" | "REPORT_NOT_READY" | "FORBIDDEN" | "UNKNOWN";
+  message: string;
+  maxReports?: number;
+};
+```

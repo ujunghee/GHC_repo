@@ -4,21 +4,26 @@
 
 ## Read This First
 
-1. `CLAUDE_CODE_IMPLEMENTATION_GUIDE.md`
-2. `PROTOTYPE_OVERVIEW.md`
-3. `DEVELOPER_HANDOFF.md`
-4. `solvek-react/src/features/report-search/README.md`
-5. `solvek-react/src/features/report-search/PROTOTYPE_FLOW.md`
-6. `solvek-react/src/features/report-search/COMPONENT_RULES.md`
-7. `solvek-react/src/features/report-chat/README.md`
-8. `solvek-react/src/features/report-chat/PROTOTYPE_FLOW.md`
-9. `solvek-react/src/features/report-chat/COMPONENT_RULES.md`
-10. `solvekdesignsystem-web/README.md`
-11. `solvekdesignsystem-web/CLAUDE.md`
+1. `UI_SOURCE_OF_TRUTH.md`
+2. `CLAUDE_CODE_IMPLEMENTATION_GUIDE.md`
+3. `PROTOTYPE_OVERVIEW.md`
+4. `DEVELOPER_HANDOFF.md`
+5. `solvek-react/src/features/report-search/README.md`
+6. `solvek-react/src/features/report-search/MAIN_UI_SCREEN_SPEC.md`
+7. `solvek-react/src/features/report-search/MAIN_UI_REPLACEMENT_HANDOFF.md`
+8. `solvek-react/src/features/report-search/PROTOTYPE_FLOW.md`
+9. `solvek-react/src/features/report-search/COMPONENT_RULES.md`
+10. `solvek-react/src/features/report-chat/README.md`
+11. `solvek-react/src/features/report-chat/CHAT_UI_SCREEN_SPEC.md`
+12. `solvek-react/src/features/report-chat/CHAT_UI_REPLACEMENT_HANDOFF.md`
+13. `solvek-react/src/features/report-chat/PROTOTYPE_FLOW.md`
+14. `solvek-react/src/features/report-chat/COMPONENT_RULES.md`
+15. `solvekdesignsystem-web/README.md`
+16. `solvekdesignsystem-web/CLAUDE.md`
 
 ## Product Goal
 
-가야역사문화권 발굴보고서를 검색하고, 최대 2건의 보고서를 선택해 AI 챗봇 대화를 시작하는 UI를 만든다. 챗봇 답변은 근거 원문과 지도 근거로 이어질 수 있어야 하며, 현재 구현 우선순위는 원문 패널이다.
+가야역사문화권 발굴보고서를 검색하고, 선택한 보고서로 AI 챗봇 대화를 시작하는 UI를 만든다. 이 git 자체가 UI 원본이며, 현재 React 화면과 CSS 디자인시스템을 기준으로 동일하게 구현한다. 선택 가능한 보고서 수는 프론트에서 임의로 고정하지 않고, 채팅 세션 생성 API 응답을 기준으로 처리한다. 챗봇 답변은 근거 원문과 지도 근거로 이어질 수 있어야 하며, 현재 구현 우선순위는 원문 패널이다.
 
 핵심 사용 흐름:
 
@@ -27,7 +32,7 @@
 3. 추가한 단서 칩을 클릭해 활성화한다.
 4. 활성화된 키워드별로 결과가 그룹화되어 표시된다.
 5. 사용자는 보고서를 직접 선택하거나 그룹 헤더의 `채팅하기`를 누른다.
-6. 보고서는 최대 2건까지만 챗봇으로 넘길 수 있다.
+6. 선택한 보고서 id 전체를 채팅 시작 흐름으로 넘긴다.
 7. 챗봇 화면에서 선택 보고서 목록, 질문 추천, 메시지 입력, 원문 패널을 사용한다.
 
 ## Technology Assumption
@@ -56,7 +61,7 @@
 - 보고서 카드 선택
 - 하단 `채팅하기` CTA
 - 결과 없음 상태
-- 최대 2건 선택 제한 토스트
+- API 응답 기반 토스트
 
 필수 UI:
 
@@ -69,7 +74,7 @@
 - 그룹 결과 헤더: `{키워드} {count}건` + `채팅하기`
 - 보고서 카드: 제목, 연도, 요약, 태그
 - 하단 CTA: 선택 보고서가 1건 이상이면 표시
-- 토스트: `최대 2건만 가능합니다`
+- 토스트: 채팅 세션 생성 API가 반환한 사용자 표시용 메시지
 
 ### 2. Report Chat
 
@@ -179,28 +184,26 @@ type ReportGroup = {
 
 프로토타입 데이터에 실제 매칭 결과가 없을 경우에는 화면 검증을 위해 현재 결과 후보 중 앞 3건을 임시로 표시할 수 있다. 실제 API 연결 후에는 백엔드가 그룹별 결과를 정확히 내려주는 것이 좋다.
 
-### Report Selection Limit
+### Report Selection And Chat Start
 
-메인 검색 화면에서 챗봇으로 넘길 보고서는 최대 2건이다.
+메인 검색 화면에서 챗봇으로 넘길 보고서 개수는 프론트에서 임의로 제한하지 않는다. 서버 성능과 백엔드 정책에 따라 채팅 세션 생성 API가 허용 여부를 판단한다.
 
 카드 클릭:
 
 - 선택 안 된 카드 클릭 시 선택
 - 선택된 카드 클릭 시 선택 해제
-- 이미 2건 선택된 상태에서 추가 선택하면 선택하지 않고 토스트 표시
+- 선택 개수 초과 여부는 카드 클릭 시 판단하지 않는다
 
 그룹 헤더의 `채팅하기`:
 
-- 그룹 결과가 1-2건이면 바로 챗봇으로 이동 가능
-- 그룹 결과가 3건 이상이면 바로 이동하지 않는다
-- 해당 그룹의 앞 2건만 선택 상태로 만든다
-- `최대 2건만 가능합니다` 토스트 표시
-- 사용자가 하단 고정 `채팅하기`를 눌러 이동한다
+- 그룹의 report id 전체를 채팅 세션 생성 흐름으로 전달한다
+- 프론트에서 앞 2건 또는 5건으로 자르지 않는다
+- API가 실패하면 응답 메시지를 토스트로 표시한다
 
 하단 고정 `채팅하기`:
 
 - `selectedReports.length > 0`일 때만 표시
-- 항상 선택된 보고서 중 최대 2건만 전달한다
+- 선택된 report id 전체를 채팅 세션 생성 흐름으로 전달한다
 
 ## Chat Feature Rules
 
@@ -398,13 +401,13 @@ Response:
 
 ### POST /api/chat/sessions
 
-목적: 선택한 최대 2건 보고서로 채팅 세션 생성
+목적: 선택한 보고서 id 목록으로 채팅 세션 생성
 
 Request:
 
 ```json
 {
-  "report_ids": [1, 10]
+  "report_ids": [1, 10, 12]
 }
 ```
 
@@ -414,6 +417,16 @@ Response:
 {
   "session_id": "session_001",
   "reports": []
+}
+```
+
+Error response:
+
+```json
+{
+  "code": "REPORT_LIMIT_EXCEEDED",
+  "message": "선택 가능한 보고서는 최대 5건입니다.",
+  "max_reports": 5
 }
 ```
 
@@ -563,7 +576,7 @@ React가 아니어도 상태 이름은 아래 개념을 유지한다.
 - `activeFilters`
 - `selectedReports`
 - `groupedReports`
-- `toastVisible`
+- `toastMessage`
 
 챗봇:
 
@@ -588,9 +601,10 @@ React가 아니어도 상태 이름은 아래 개념을 유지한다.
 - 칩 클릭 시 활성 toggle
 - 초기화 클릭 시 단서/활성 단서 모두 reset
 - 카드 클릭 시 보고서 선택 toggle
-- 선택 수가 2건을 넘으면 토스트 표시
-- 그룹 `채팅하기`가 3건 이상이면 앞 2건 선택 후 토스트 표시
-- 하단 `채팅하기`는 선택된 최대 2건으로 채팅 이동
+- 선택 수는 프론트에서 임의 제한하지 않음
+- 그룹 `채팅하기`는 그룹 보고서 id 전체로 채팅 세션 생성 시도
+- 하단 `채팅하기`는 선택된 보고서 id 전체로 채팅 세션 생성 시도
+- 채팅 세션 생성 API가 실패하면 응답의 사용자 표시용 메시지를 토스트로 표시
 - 챗봇 왼쪽 패널 체크박스는 최소 1건 유지
 - resize handle pointerdown 이후 pointermove/pointerup으로 너비 조절
 - 원문 버튼 클릭 시 오른쪽 SourcePanel 열기
@@ -660,8 +674,9 @@ static/
 - solvekdesignsystem-web/css/index.css와 기존 class를 우선 사용한다.
 - 의미 없는 식별용 class는 만들지 않는다.
 - 검색 메인과 챗봇 화면의 상태 흐름은 React TSX를 기준으로 유지한다.
-- 메인 검색에서 선택 가능한 보고서는 최대 2건이다.
-- 그룹 헤더의 채팅하기가 3건 이상을 대상으로 하면 앞 2건만 선택하고 토스트를 띄운 뒤 하단 채팅하기를 누르게 한다.
+- 메인 검색에서 선택 가능한 보고서 수는 프론트에서 임의 제한하지 않는다.
+- 그룹 헤더의 채팅하기는 그룹 보고서 id 전체로 채팅 세션 생성을 시도한다.
+- 채팅 세션 생성 실패 토스트는 API 응답 메시지를 기준으로 표시한다.
 - 칩 활성 상태는 blue 스타일만 쓰고 체크 아이콘은 표시하지 않는다.
 - 챗봇 왼쪽 패널은 최소 1건 이상 선택 상태를 유지한다.
 - 원문 패널은 DB 원문 이미지가 들어갈 수 있도록 image URL 기반으로 만든다.
@@ -681,8 +696,8 @@ static/
 - 단서 초기화 시 컨텐츠가 자연스럽게 위로 이동한다
 - 활성 키워드별 그룹 결과가 표시된다
 - 그룹 헤더에 `채팅하기`가 있다
-- 보고서는 최대 2건까지만 선택된다
-- 2건 초과 시 토스트가 표시된다
+- 보고서는 프론트 임의 제한 없이 선택된다
+- API가 선택 개수 초과를 반환하면 응답 메시지 토스트가 표시된다
 - 하단 `채팅하기`로 챗봇 화면에 진입한다
 
 챗봇 화면:

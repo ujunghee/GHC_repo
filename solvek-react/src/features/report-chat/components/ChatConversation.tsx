@@ -178,7 +178,7 @@ export function ChatConversation({
           ) : (
             <>
               <p className="body3-r-14 color-slate-500 mb-8 text-left">
-                선택한 보고서는 총 {selectedCount} 건 입니다. 최대 5건까지 대화할 수 있어요.
+                선택한 보고서는 총 {selectedCount} 건 입니다.
               </p>
               <p className="body2-m-16 color-slate-900 mb-24 text-left">도움이 필요한가요?</p>
 

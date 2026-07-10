@@ -1,27 +1,31 @@
 # GHC Report Search And Chat Prototype
 
-이 문서는 가야역사문화권 발굴보고서 검색/챗봇 프로토타입의 최상위 안내서입니다. 개발자 또는 개발자용 AI가 새 UI를 다시 만들 때는 이 문서를 먼저 읽고, 아래 문서를 순서대로 확인합니다.
+이 문서는 가야역사문화권 발굴보고서 검색/챗봇 프로토타입의 최상위 안내서입니다. 개발자 또는 개발자용 AI가 이 git을 기준으로 UI를 동일하게 만들 때는 `UI_SOURCE_OF_TRUTH.md`를 먼저 읽고, 아래 문서를 순서대로 확인합니다.
 
 ## Read Order
 
 1. `CLAUDE_CODE_IMPLEMENTATION_GUIDE.md`
-2. `PROTOTYPE_OVERVIEW.md`
-3. `DEVELOPER_HANDOFF.md`
-4. `solvek-react/src/features/report-search/README.md`
-5. `solvek-react/src/features/report-search/PROTOTYPE_FLOW.md`
-6. `solvek-react/src/features/report-search/COMPONENT_RULES.md`
-7. `solvek-react/src/features/report-chat/README.md`
-8. `solvek-react/src/features/report-chat/PROTOTYPE_FLOW.md`
-9. `solvek-react/src/features/report-chat/COMPONENT_RULES.md`
-10. `solvekdesignsystem-web/README.md`
-11. `solvekdesignsystem-web/CLAUDE.md`
+2. `UI_SOURCE_OF_TRUTH.md`
+3. `PROTOTYPE_OVERVIEW.md`
+4. `DEVELOPER_HANDOFF.md`
+5. `solvek-react/src/features/report-search/README.md`
+6. `solvek-react/src/features/report-search/MAIN_UI_SCREEN_SPEC.md`
+7. `solvek-react/src/features/report-search/MAIN_UI_REPLACEMENT_HANDOFF.md`
+8. `solvek-react/src/features/report-chat/README.md`
+9. `solvek-react/src/features/report-chat/CHAT_UI_SCREEN_SPEC.md`
+10. `solvek-react/src/features/report-chat/CHAT_UI_REPLACEMENT_HANDOFF.md`
+11. `solvekdesignsystem-web/README.md`
+12. `solvekdesignsystem-web/CLAUDE.md`
 
 ## Project Purpose
 
 이 프로토타입은 발굴보고서를 검색하고, 선택한 보고서 기반으로 챗봇 대화를 시작하는 화면 흐름을 검증하기 위한 전달본입니다.
 
+- 이 git 안의 React 코드가 UI 원본입니다.
+- 별도 캡처가 없어도 `UI_SOURCE_OF_TRUTH.md`의 원본 경로를 기준으로 화면을 복사합니다.
 - 메인 검색 화면에서 보고서를 검색/필터/선택합니다.
-- 선택한 보고서는 최대 2건까지 메인 화면에서 챗봇으로 전달합니다.
+- 선택한 보고서 id 전체를 메인 화면에서 챗봇 시작 흐름으로 전달합니다.
+- 채팅 가능한 최대 보고서 수는 프론트에서 고정하지 않고 채팅 세션 생성 API 응답을 기준으로 처리합니다.
 - 챗봇 화면에서는 전달받은 보고서 목록을 왼쪽 패널에 표시합니다.
 - 챗봇 답변의 근거 버튼을 누르면 오른쪽 원문 패널이 열립니다.
 - 실제 API와 DB 원문 이미지는 아직 연결 전이며, `data.ts`의 임시 데이터로 구조를 잡았습니다.
