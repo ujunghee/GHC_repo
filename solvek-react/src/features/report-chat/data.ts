@@ -1,4 +1,4 @@
-import type { AnswerFact, ChatMessage, MapDocument, SourceDocument } from "./types";
+import type { AnswerFact, ChatMessage, DrawingCandidate, MapDocument, SourceDocument } from "./types";
 import type { Report } from "../report-search/types";
 
 export const panelMinWidth = 240;
@@ -7,12 +7,12 @@ export const panelDefaultWidth = 427;
 export const panelCollapseDelay = 450;
 
 export const sourcePanelMinWidth = 360;
-export const sourcePanelMaxWidth = 720;
-export const sourcePanelDefaultWidth = 760;
+export const sourcePanelMaxWidth = 960;
+export const sourcePanelDefaultWidth = 840;
 export const sourcePanelWideBreakpoint = 1600;
 export const sourcePanelExtraWideBreakpoint = 2000;
-export const sourcePanelExtraWideDefaultWidth = 1000;
-export const sourcePanelReservedChatWidth = 360;
+export const sourcePanelExtraWideDefaultWidth = 1180;
+export const sourcePanelReservedChatWidth = 480;
 
 export function getRightPanelDefaultWidth(viewportWidth: number) {
   if (viewportWidth <= sourcePanelWideBreakpoint) return sourcePanelDefaultWidth;
@@ -30,10 +30,11 @@ export function getRightPanelMaxWidth(
   openReportPanelWidth: number,
   reservedChatWidth = sourcePanelReservedChatWidth,
 ) {
-  return Math.max(
+  const availableWidth = Math.max(
     sourcePanelMinWidth,
     viewportWidth - openReportPanelWidth - reservedChatWidth,
   );
+  return Math.min(sourcePanelMaxWidth, availableWidth);
 }
 
 export function getRightPanelWidth(viewportWidth: number, openReportPanelWidth: number) {
@@ -69,6 +70,35 @@ export function createAssistantMessage(id: number): ChatMessage {
     hasEvidence: true,
   };
 }
+
+export function createImageMatchAssistantMessage(id: number): ChatMessage {
+  return {
+    id,
+    role: "assistant",
+    text: "업로드한 이미지는 토기가마 도면으로 보입니다.\n선택한 보고서 안에는 a보고서 p.32의 도면과 가장 유사합니다.",
+    drawingCandidates,
+  };
+}
+
+export const drawingCandidates: DrawingCandidate[] = [
+  {
+    id: 1,
+    pageLabel: "p.032",
+    typeLabel: "도면",
+    similarity: 12,
+    reportTitle: "함안 윤내리 토기가마 I",
+    title: "도면 14. 1~2호 토기가마 평면도",
+  },
+  {
+    id: 2,
+    pageLabel: "p.032",
+    typeLabel: "도면",
+    similarity: 4,
+    reportTitle: "함안 윤내리 토기가마 I",
+    title: "도면 14. 1~2호 토기가마 평면도",
+    hasSource: true,
+  },
+];
 
 export const answerFacts: AnswerFact[] = [
   { label: "조사 위치", value: "함안 지역 일대 토기가마 유적", actions: ["source", "map"] },

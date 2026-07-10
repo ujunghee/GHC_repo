@@ -184,7 +184,7 @@ export function ChatSearchModal({
                   <div className="flex flex-col gap-24">
                     {groupedSearchReports.map((group) => (
                       <section key={group.label} aria-label={`${group.label} 보고서 그룹`}>
-                        <p className="body1-m-18 color-slate-900 mb-8">
+                        <p className="body2-m-16 color-slate-900 mb-8">
                           {group.label} <strong className="color-blue-500">{group.reports.length}</strong> 건
                         </p>
                         <ul className="flex flex-col gap-12">

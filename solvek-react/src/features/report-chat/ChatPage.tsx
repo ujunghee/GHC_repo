@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import {
   createAssistantMessage,
+  createImageMatchAssistantMessage,
   getSuggestionLabels,
   panelCollapseDelay,
   panelDefaultWidth,
@@ -89,7 +90,9 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
   const isPartiallyChecked = activePanelCount > 0 && activePanelCount < panelReports.length;
   const reportTitle = activeReports[0]?.title ?? "보고서 선택";
   const suggestionLabels = getSuggestionLabels(activeReports);
-  const hasSourceContent = messages.some((item) => item.role === "assistant" && item.hasEvidence);
+  const hasSourceContent = messages.some(
+    (item) => item.role === "assistant" && (item.hasEvidence || item.drawingCandidates?.length),
+  );
 
   useEffect(() => {
     const handleResize = () => setViewportWidth(window.innerWidth);
@@ -310,7 +313,7 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
         text: nextMessage,
         ...(imageUrl ? { imageUrl } : {}),
       },
-      createAssistantMessage(current.length + 2),
+      imageUrl ? createImageMatchAssistantMessage(current.length + 2) : createAssistantMessage(current.length + 2),
     ]);
     setMessage("");
   };

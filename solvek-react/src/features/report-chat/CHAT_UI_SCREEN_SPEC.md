@@ -159,8 +159,9 @@ solvekdesignsystem-web/css/component/chat-panel.css
 panelDefaultWidth = 427;
 panelMinWidth = 240;
 panelMaxWidth = 560;
-sourcePanelDefaultWidth = 760;
+sourcePanelDefaultWidth = 840;
 sourcePanelMinWidth = 360;
+sourcePanelMaxWidth = 960;
 ```
 
 새 UI가 다른 폭을 쓰면 `data.ts`의 panel width 상수를 조정해도 됩니다. 단, resize 기능은 유지합니다.
@@ -624,20 +625,29 @@ Functional responsibility:
 
 ## Typography Mapping
 
-기존 typography class를 우선 사용합니다.
+챗봇 화면의 텍스트는 최소 13px, 최대 16px 범위 안에서 기존 typography class를 우선 사용합니다.
 
 예:
 
-- `heading10-sb-20`
-- `body1-m-18`
 - `body2-sb-16`
 - `body2-m-16`
 - `body2-r-16`
+- `body3-sb-14`
 - `body3-r-14`
+- `body4-r-13`
 
 새 UI가 정확히 다른 값을 쓰면:
 
 - 새 값을 측정표에 적습니다.
+- 16px를 초과하거나 13px보다 작은 텍스트를 추가하지 않습니다.
+
+## Resize Minimum
+
+오른쪽 원문/지도 패널을 resize 하더라도 중앙 챗봇 영역은 최소 480px을 확보합니다.
+
+- `sourcePanelReservedChatWidth = 480`
+- 유사후보 카드는 56rem을 최대 폭으로 사용합니다.
+- 화면이 좁아지면 후보 카드 내부 썸네일과 텍스트 영역은 `flex-wrap`으로 줄바꿈되어 텍스트가 깨지지 않아야 합니다.
 - 기존 class로 맞지 않으면 챗봇 전용 class를 추가합니다.
 - font-size를 viewport width로 스케일하지 않습니다.
 - letter-spacing은 기본 `0`을 유지합니다.

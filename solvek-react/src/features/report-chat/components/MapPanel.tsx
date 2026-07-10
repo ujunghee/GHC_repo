@@ -1,6 +1,8 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import type { PointerEvent } from "react";
+import type { KeyboardEvent, PointerEvent } from "react";
+import * as L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 import { mapDocument } from "../data";
 import { springSoft, tapScale } from "../../report-search/motionConfig";
@@ -17,7 +19,7 @@ type MapPanelProps = {
   onResizeLeave?: () => void;
 };
 
-type MapTypeId = "general" | "satellite" | "terrain" | "cadastral";
+type MapTypeId = "general" | "soft" | "satellite" | "terrain";
 type MapToolId = "radius" | "distance" | "area" | "print";
 
 type CheckedLayerItem = {
@@ -26,13 +28,68 @@ type CheckedLayerItem = {
   pathKey: string;
 };
 
+type ReportOverlayState = {
+  visible: boolean;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: number;
+  opacity: number;
+};
+
+type ReportOverlayDrag =
+  | {
+      mode: "move";
+      startClientX: number;
+      startClientY: number;
+      startX: number;
+      startY: number;
+    }
+  | {
+      mode: "resize";
+      corner: "nw" | "ne" | "sw" | "se";
+      startClientX: number;
+      startClientY: number;
+      startX: number;
+      startY: number;
+      startWidth: number;
+      startHeight: number;
+      aspectRatio: number;
+    }
+  | {
+      mode: "rotate";
+      centerX: number;
+      centerY: number;
+      startAngle: number;
+      startRotation: number;
+    };
+
 const MAX_ACTIVE_LAYERS = 5;
+const INITIAL_MAP_CENTER: L.LatLngExpression = [35.272, 128.406];
+const INITIAL_MAP_ZOOM = 14;
+const MAP_MARKER_POSITION: L.LatLngExpression = [35.272, 128.406];
+const MAP_PIN_ICON_URL = "./image/icon/Pin.svg";
+const MAP_LOCATION_ADDRESS = mapDocument.location;
+const MAP_MARKER_REPORT_INFO = "함안 윤내리 토기가마 I · 도면 14. 1~2호 토기가마 평면도";
+const REPORT_OVERLAY_IMAGE_URL = "./image/sample/report-page-map.svg";
+const REPORT_OVERLAY_INITIAL: ReportOverlayState = {
+  visible: true,
+  x: 430,
+  y: 210,
+  width: 250,
+  height: 350,
+  rotation: -25,
+  opacity: 0.4,
+};
+const REPORT_OVERLAY_MIN_WIDTH = 120;
+const REPORT_OVERLAY_MIN_HEIGHT = 160;
 
 const mapTypes: Array<{ id: MapTypeId; label: string }> = [
   { id: "general", label: "일반" },
+  { id: "soft", label: "담백" },
   { id: "satellite", label: "위성" },
   { id: "terrain", label: "지형" },
-  { id: "cadastral", label: "지적" },
 ];
 
 const mapTools: Array<{ id: MapToolId; label: string }> = [
@@ -54,6 +111,7 @@ export function MapPanel({
   const [isSettingsExpanded, setIsSettingsExpanded] = useState(true);
   const [mapType, setMapType] = useState<MapTypeId>("general");
   const [activeTool, setActiveTool] = useState<MapToolId | null>(null);
+  const [displayLocation, setDisplayLocation] = useState(mapDocument.location);
   const [advancedTab, setAdvancedTab] = useState(mapDocument.advancedTabs[0]);
   const [layerRoots, setLayerRoots] = useState(() => {
     const initialRoots = cloneLayerTree(mapDocument.layerRoots);
@@ -73,7 +131,146 @@ export function MapPanel({
     return trimToMaxActiveLayers(initialRoots, initialOrder).order;
   });
   const checkedOrderRef = useRef(checkedOrder);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const leafletMapRef = useRef<L.Map | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
+  const reverseGeocodeTimerRef = useRef<number | null>(null);
+  const reverseGeocodeSeqRef = useRef(0);
+  const reportOverlayDragRef = useRef<ReportOverlayDrag | null>(null);
+  const reportOverlayRef = useRef<HTMLDivElement>(null);
+  const [reportOverlay, setReportOverlay] = useState<ReportOverlayState>(REPORT_OVERLAY_INITIAL);
   checkedOrderRef.current = checkedOrder;
+
+  useEffect(() => {
+    if (!mapContainerRef.current || leafletMapRef.current) return;
+
+    const map = L.map(mapContainerRef.current, {
+      center: INITIAL_MAP_CENTER,
+      zoom: INITIAL_MAP_ZOOM,
+      zoomControl: false,
+      attributionControl: false,
+    });
+
+    const tileConfig = getTileLayerConfig(mapType);
+    tileLayerRef.current = L.tileLayer(tileConfig.url, {
+      attribution: tileConfig.attribution,
+      maxZoom: tileConfig.maxZoom,
+    }).addTo(map);
+
+    L.circle(MAP_MARKER_POSITION, {
+      radius: 170,
+      color: "#E11D48",
+      weight: 2,
+      dashArray: "6 5",
+      fillColor: "#E11D48",
+      fillOpacity: 0.12,
+    }).addTo(map);
+
+    const markerIcon = L.icon({
+      iconUrl: MAP_PIN_ICON_URL,
+      iconSize: [28, 35],
+      iconAnchor: [14, 35],
+      tooltipAnchor: [0, -32],
+    });
+
+    const marker = L.marker(MAP_MARKER_POSITION, {
+      icon: markerIcon,
+      keyboard: true,
+      title: MAP_LOCATION_ADDRESS,
+    })
+      .bindTooltip(getMarkerTooltipHtml(MAP_LOCATION_ADDRESS), {
+        className: "map-panel__marker-tooltip",
+        direction: "top",
+        opacity: 1,
+        sticky: true,
+      })
+      .addTo(map);
+    markerRef.current = marker;
+
+    const updateLocationDisplay = (address: string) => {
+      setDisplayLocation(address);
+    };
+
+    const scheduleReverseGeocode = (center: L.LatLng) => {
+      if (reverseGeocodeTimerRef.current !== null) {
+        window.clearTimeout(reverseGeocodeTimerRef.current);
+      }
+
+      reverseGeocodeTimerRef.current = window.setTimeout(async () => {
+        const requestSeq = reverseGeocodeSeqRef.current + 1;
+        reverseGeocodeSeqRef.current = requestSeq;
+
+        const address = await reverseGeocodeAddress(center);
+        if (reverseGeocodeSeqRef.current !== requestSeq) return;
+
+        updateLocationDisplay(address ?? getFallbackMapAddress(center));
+      }, 550);
+    };
+
+    const syncLocation = () => {
+      const center = map.getCenter();
+      updateLocationDisplay(getFallbackMapAddress(center));
+      scheduleReverseGeocode(center);
+    };
+
+    map.on("moveend", syncLocation);
+    map.on("zoomend", syncLocation);
+    syncLocation();
+
+    leafletMapRef.current = map;
+
+    return () => {
+      if (reverseGeocodeTimerRef.current !== null) {
+        window.clearTimeout(reverseGeocodeTimerRef.current);
+        reverseGeocodeTimerRef.current = null;
+      }
+      map.off("moveend", syncLocation);
+      map.off("zoomend", syncLocation);
+      map.remove();
+      leafletMapRef.current = null;
+      tileLayerRef.current = null;
+      markerRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const map = leafletMapRef.current;
+    if (!map) return;
+
+    const tileConfig = getTileLayerConfig(mapType);
+    tileLayerRef.current?.remove();
+    tileLayerRef.current = L.tileLayer(tileConfig.url, {
+      attribution: tileConfig.attribution,
+      maxZoom: tileConfig.maxZoom,
+    }).addTo(map);
+  }, [mapType]);
+
+  useEffect(() => {
+    const map = leafletMapRef.current;
+    if (!map) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      map.invalidateSize();
+    });
+    const timer = window.setTimeout(() => map.invalidateSize(), 260);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [embedded, width, isResizing, isSettingsExpanded]);
+
+  useEffect(() => {
+    if (!mapContainerRef.current || typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(() => {
+      leafletMapRef.current?.invalidateSize();
+    });
+
+    observer.observe(mapContainerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const checkedLayers = useMemo(() => {
     const items = collectCheckedLayers(layerRoots);
@@ -128,37 +325,317 @@ export function MapPanel({
     });
   };
 
-  const panelContent = (
-    <div className="map-panel h-full">
-      {isSettingsExpanded && (
-        <MapSettingsPanel
-          document={mapDocument}
-          checkedLayers={checkedLayers}
-          layerRoots={layerRoots}
-          advancedTab={advancedTab}
-          openNodes={openNodes}
-          onAdvancedTabChange={setAdvancedTab}
-          onToggleNode={toggleNode}
-          onToggleLayerChecked={toggleLayerChecked}
-          onCollapse={() => setIsSettingsExpanded(false)}
-        />
-      )}
+  const updateReportOverlay = (next: Partial<ReportOverlayState>) => {
+    setReportOverlay((current) => ({ ...current, ...next }));
+  };
 
+  const startReportOverlayMove = (event: PointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    reportOverlayDragRef.current = {
+      mode: "move",
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      startX: reportOverlay.x,
+      startY: reportOverlay.y,
+    };
+  };
+
+  const startReportOverlayResize =
+    (corner: "nw" | "ne" | "sw" | "se") => (event: PointerEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.currentTarget.setPointerCapture(event.pointerId);
+      reportOverlayDragRef.current = {
+        mode: "resize",
+        corner,
+        startClientX: event.clientX,
+        startClientY: event.clientY,
+        startX: reportOverlay.x,
+        startY: reportOverlay.y,
+        startWidth: reportOverlay.width,
+        startHeight: reportOverlay.height,
+        aspectRatio: reportOverlay.width / reportOverlay.height,
+      };
+    };
+
+  const startReportOverlayRotate = (event: PointerEvent<HTMLButtonElement>) => {
+    const overlayRect = reportOverlayRef.current?.getBoundingClientRect();
+    if (!overlayRect) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+
+    const centerX = overlayRect.left + overlayRect.width / 2;
+    const centerY = overlayRect.top + overlayRect.height / 2;
+    reportOverlayDragRef.current = {
+      mode: "rotate",
+      centerX,
+      centerY,
+      startAngle: getPointerAngle(event.clientX, event.clientY, centerX, centerY),
+      startRotation: reportOverlay.rotation,
+    };
+  };
+
+  const moveReportOverlayPointer = (event: PointerEvent<HTMLElement>) => {
+    const drag = reportOverlayDragRef.current;
+    if (!drag) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const deltaX = event.clientX - drag.startClientX;
+    const deltaY = event.clientY - drag.startClientY;
+
+    if (drag.mode === "move") {
+      updateReportOverlay({
+        x: drag.startX + deltaX,
+        y: drag.startY + deltaY,
+      });
+      return;
+    }
+
+    if (drag.mode === "rotate") {
+      const nextAngle = getPointerAngle(event.clientX, event.clientY, drag.centerX, drag.centerY);
+      updateReportOverlay({ rotation: Math.round(drag.startRotation + nextAngle - drag.startAngle) });
+      return;
+    }
+
+    if (drag.mode === "resize") {
+      const widthFromX =
+        drag.corner === "se" || drag.corner === "ne"
+          ? drag.startWidth + deltaX
+          : drag.startWidth - deltaX;
+      const heightFromY =
+        drag.corner === "se" || drag.corner === "sw"
+          ? drag.startHeight + deltaY
+          : drag.startHeight - deltaY;
+      const widthByHeight = heightFromY * drag.aspectRatio;
+      const nextWidth = Math.abs(deltaY) > Math.abs(deltaX) ? widthByHeight : widthFromX;
+      const clampedWidth = Math.max(REPORT_OVERLAY_MIN_WIDTH, nextWidth);
+      const nextHeight = Math.max(REPORT_OVERLAY_MIN_HEIGHT, clampedWidth / drag.aspectRatio);
+      const nextX =
+        drag.corner === "nw" || drag.corner === "sw"
+          ? drag.startX + drag.startWidth - clampedWidth
+          : drag.startX;
+      const nextY =
+        drag.corner === "nw" || drag.corner === "ne"
+          ? drag.startY + drag.startHeight - nextHeight
+          : drag.startY;
+
+      updateReportOverlay({
+        x: nextX,
+        y: nextY,
+        width: clampedWidth,
+        height: nextHeight,
+      });
+    }
+  };
+
+  const endReportOverlayPointer = (event: PointerEvent<HTMLElement>) => {
+    if (!reportOverlayDragRef.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    reportOverlayDragRef.current = null;
+  };
+
+  const handleReportOverlayKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Delete", "Backspace"].includes(event.key)) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (event.key === "Delete" || event.key === "Backspace") {
+      updateReportOverlay({ visible: false });
+      return;
+    }
+
+    const step = event.shiftKey ? 16 : 4;
+    const next = { x: reportOverlay.x, y: reportOverlay.y };
+    if (event.key === "ArrowLeft") next.x -= step;
+    if (event.key === "ArrowRight") next.x += step;
+    if (event.key === "ArrowUp") next.y -= step;
+    if (event.key === "ArrowDown") next.y += step;
+    updateReportOverlay(next);
+  };
+
+  const nudgeReportOverlay = (deltaX: number, deltaY: number) => {
+    updateReportOverlay({ x: reportOverlay.x + deltaX, y: reportOverlay.y + deltaY });
+  };
+
+  const resizeReportOverlay = (delta: number) => {
+    const aspectRatio = reportOverlay.width / reportOverlay.height;
+    const nextWidth = Math.max(REPORT_OVERLAY_MIN_WIDTH, reportOverlay.width + delta);
+    updateReportOverlay({
+      width: nextWidth,
+      height: Math.max(REPORT_OVERLAY_MIN_HEIGHT, nextWidth / aspectRatio),
+    });
+  };
+
+  const panelContent = (
+    <div className={`map-panel map-panel--${mapType} h-full`}>
       <div className="map-panel__viewport">
         <div className="map-panel__canvas" aria-hidden="true">
-          <span className="map-panel__marker-area" />
-          <span className="map-panel__marker-pin" />
+          <div ref={mapContainerRef} className="map-panel__leaflet" />
         </div>
 
-        {!isSettingsExpanded && (
+        {reportOverlay.visible && (
+          <div
+            ref={reportOverlayRef}
+            className="map-report-overlay"
+            role="button"
+            tabIndex={0}
+            aria-label="보고서 도면 이미지. 방향키로 이동하고 Delete 키로 삭제할 수 있습니다."
+            onPointerDown={startReportOverlayMove}
+            onPointerMove={moveReportOverlayPointer}
+            onPointerUp={endReportOverlayPointer}
+            onPointerCancel={endReportOverlayPointer}
+            onKeyDown={handleReportOverlayKeyDown}
+            style={{
+              left: `${reportOverlay.x}px`,
+              top: `${reportOverlay.y}px`,
+              width: `${reportOverlay.width}px`,
+              height: `${reportOverlay.height}px`,
+              transform: `rotate(${reportOverlay.rotation}deg)`,
+            }}
+          >
+            <img
+              src={REPORT_OVERLAY_IMAGE_URL}
+              alt="보고서 도면 3. 조사지역 지질도"
+              draggable={false}
+              style={{ opacity: reportOverlay.opacity }}
+            />
+            {(["nw", "ne", "sw", "se"] as const).map((corner) => (
+              <button
+                key={`resize-${corner}`}
+                className={`map-report-overlay__resize map-report-overlay__resize--${corner}`}
+                type="button"
+                aria-label="보고서 도면 이미지 크기 조정"
+                onPointerDown={startReportOverlayResize(corner)}
+                onPointerMove={moveReportOverlayPointer}
+                onPointerUp={endReportOverlayPointer}
+                onPointerCancel={endReportOverlayPointer}
+              />
+            ))}
+            {(["nw", "ne", "sw", "se"] as const).map((corner) => (
+              <button
+                key={`rotate-${corner}`}
+                className={`map-report-overlay__rotate map-report-overlay__rotate--${corner}`}
+                type="button"
+                aria-label="보고서 도면 이미지 회전"
+                onPointerDown={startReportOverlayRotate}
+                onPointerMove={moveReportOverlayPointer}
+                onPointerUp={endReportOverlayPointer}
+                onPointerCancel={endReportOverlayPointer}
+              />
+            ))}
+            <button
+              className="map-report-overlay__delete"
+              type="button"
+              aria-label="보고서 도면 이미지 삭제"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                event.stopPropagation();
+                updateReportOverlay({ visible: false });
+              }}
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        {isSettingsExpanded ? (
+          <MapSettingsPanel
+            document={mapDocument}
+            displayLocation={displayLocation}
+            checkedLayers={checkedLayers}
+            layerRoots={layerRoots}
+            advancedTab={advancedTab}
+            openNodes={openNodes}
+            onAdvancedTabChange={setAdvancedTab}
+            onToggleNode={toggleNode}
+            onToggleLayerChecked={toggleLayerChecked}
+            onCollapse={() => setIsSettingsExpanded(false)}
+          />
+        ) : (
           <MapSettingsPopup
             document={mapDocument}
+            displayLocation={displayLocation}
             checkedLayers={checkedLayers}
             onExpand={() => setIsSettingsExpanded(true)}
           />
         )}
 
-        <div className="map-panel__map-type absolute z-index-2" style={{ left: "2rem", bottom: "2rem" }}>
+        {reportOverlay.visible && (
+          <div className="map-image-adjust-panel" aria-label="이미지 조정">
+            <div className="map-image-adjust-panel__head">
+              <h3 className="body2-sb-16 color-slate-900">이미지 조정</h3>
+              <button
+                className="map-panel__icon-btn"
+                type="button"
+                aria-label="이미지 조정 초기화"
+                onClick={() => setReportOverlay(REPORT_OVERLAY_INITIAL)}
+              >
+                <i className="applied-reset-icon" aria-hidden="true"></i>
+              </button>
+            </div>
+            <label className="map-image-adjust-panel__row">
+              <span className="body3-r-14 color-slate-700">투명도</span>
+              <input
+                type="range"
+                min="0.15"
+                max="1"
+                step="0.05"
+                value={reportOverlay.opacity}
+                onChange={(event) => updateReportOverlay({ opacity: Number(event.target.value) })}
+              />
+              <span className="body3-sb-14 color-slate-900">{Math.round(reportOverlay.opacity * 100)}%</span>
+            </label>
+            <div className="map-image-adjust-panel__row">
+              <span className="body3-r-14 color-slate-700">위치</span>
+              <span className="body3-r-14 color-slate-600">드래그 또는 방향키</span>
+            </div>
+            <div className="map-image-adjust-panel__row">
+              <span className="body3-r-14 color-slate-700">미세 조정</span>
+              <div className="map-image-adjust-panel__buttons">
+                <button type="button" onClick={() => nudgeReportOverlay(-8, 0)} aria-label="왼쪽 이동">←</button>
+                <button type="button" onClick={() => nudgeReportOverlay(0, -8)} aria-label="위로 이동">↑</button>
+                <button type="button" onClick={() => nudgeReportOverlay(0, 8)} aria-label="아래로 이동">↓</button>
+                <button type="button" onClick={() => nudgeReportOverlay(8, 0)} aria-label="오른쪽 이동">→</button>
+              </div>
+            </div>
+            <div className="map-image-adjust-panel__row">
+              <span className="body3-r-14 color-slate-700">크기</span>
+              <div className="map-image-adjust-panel__buttons">
+                <button type="button" onClick={() => resizeReportOverlay(20)} aria-label="이미지 확대">＋</button>
+                <button type="button" onClick={() => resizeReportOverlay(-20)} aria-label="이미지 축소">－</button>
+              </div>
+            </div>
+            <div className="map-image-adjust-panel__row">
+              <span className="body3-r-14 color-slate-700">회전</span>
+              <div className="map-image-adjust-panel__buttons">
+                <button type="button" onClick={() => updateReportOverlay({ rotation: reportOverlay.rotation - 5 })} aria-label="반시계 방향 회전">↺</button>
+                <button type="button" onClick={() => updateReportOverlay({ rotation: reportOverlay.rotation + 5 })} aria-label="시계 방향 회전">↻</button>
+              </div>
+              <span className="body3-sb-14 color-slate-900">{reportOverlay.rotation}°</span>
+            </div>
+            <div className="map-image-adjust-panel__foot">
+              <button className="slate-50-button-32" type="button" onClick={() => setReportOverlay(REPORT_OVERLAY_INITIAL)}>
+                초기화
+              </button>
+              <button className="map-image-adjust-panel__delete slate-50-button-32" type="button" onClick={() => updateReportOverlay({ visible: false })}>
+                이미지 삭제
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div
+          className="map-panel__map-type absolute"
+          style={{ left: isSettingsExpanded ? "27.4rem" : "2rem", bottom: "2rem" }}
+        >
           <div className="radio-toggle-group" role="radiogroup" aria-label="지도 유형">
             {mapTypes.map((item) => (
               <label key={item.id} className="radio-toggle-label">
@@ -179,10 +656,22 @@ export function MapPanel({
         <div className="map-panel__controls">
           <div className="map-control" aria-label="지도 도구">
             <div className="map-control__group">
-              <motion.button className="map-control__btn" type="button" aria-label="확대" {...tapScale}>
+              <motion.button
+                className="map-control__btn"
+                type="button"
+                aria-label="확대"
+                onClick={() => leafletMapRef.current?.zoomIn()}
+                {...tapScale}
+              >
                 <i className="plus-icon" aria-hidden="true"></i>
               </motion.button>
-              <motion.button className="map-control__btn" type="button" aria-label="축소" {...tapScale}>
+              <motion.button
+                className="map-control__btn"
+                type="button"
+                aria-label="축소"
+                onClick={() => leafletMapRef.current?.zoomOut()}
+                {...tapScale}
+              >
                 <i className="minus-icon" aria-hidden="true"></i>
               </motion.button>
             </div>
@@ -235,10 +724,12 @@ export function MapPanel({
 
 function MapSettingsPopup({
   document,
+  displayLocation,
   checkedLayers,
   onExpand,
 }: {
   document: MapDocument;
+  displayLocation: string;
   checkedLayers: CheckedLayerItem[];
   onExpand: () => void;
 }) {
@@ -257,7 +748,7 @@ function MapSettingsPopup({
         </motion.button>
       </div>
       <div className="map-settings-popup__body">
-        <p className="map-settings-popup__location body1-sb-18 color-slate-900">{document.location}</p>
+        <p className="map-settings-popup__location body2-sb-16 color-slate-900">{displayLocation}</p>
         <p className="map-settings-popup__section-title body2-sb-16 color-slate-900">기본 레이어</p>
         <ul className="map-settings-popup__layers">
           {document.baseLayers.map((layer) => (
@@ -292,6 +783,7 @@ function MapSettingsPopup({
 
 function MapSettingsPanel({
   document,
+  displayLocation,
   checkedLayers,
   layerRoots,
   advancedTab,
@@ -302,6 +794,7 @@ function MapSettingsPanel({
   onCollapse,
 }: {
   document: MapDocument;
+  displayLocation: string;
   checkedLayers: CheckedLayerItem[];
   layerRoots: MapLayerNode[];
   advancedTab: string;
@@ -327,7 +820,7 @@ function MapSettingsPanel({
       </div>
 
       <div className="map-settings-panel__body">
-        <p className="map-settings-panel__location heading10-sb-20 color-slate-900">{document.location}</p>
+        <p className="map-settings-panel__location body2-sb-16 color-slate-900">{displayLocation}</p>
 
         <section className="map-settings-panel__section">
           <p className="map-settings-panel__section-title body2-sb-16 color-slate-900">기본 레이어</p>
@@ -553,6 +1046,108 @@ function MapLayerTreeNode({
 
 function getLayerCheckboxId(path: number[]) {
   return `map-layer-${path.join("-")}`;
+}
+
+function getTileLayerConfig(type: MapTypeId) {
+  if (type === "terrain") {
+    return {
+      url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+      attribution: "Map data: OpenStreetMap, SRTM | OpenTopoMap",
+      maxZoom: 17,
+    };
+  }
+
+  if (type === "satellite") {
+    return {
+      url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      attribution: "Tiles: Esri",
+      maxZoom: 19,
+    };
+  }
+
+  if (type === "soft") {
+    return {
+      url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      attribution: "OpenStreetMap contributors",
+      maxZoom: 19,
+    };
+  }
+
+  return {
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: "OpenStreetMap contributors",
+    maxZoom: 19,
+  };
+}
+
+function getPointerAngle(clientX: number, clientY: number, centerX: number, centerY: number) {
+  return (Math.atan2(clientY - centerY, clientX - centerX) * 180) / Math.PI;
+}
+
+function getMarkerTooltipHtml(address: string) {
+  return `
+    <div class="map-marker-tooltip__eyebrow">대표 주소</div>
+    <div class="map-marker-tooltip__address">${escapeHtml(address)}</div>
+    <div class="map-marker-tooltip__meta">${escapeHtml(MAP_MARKER_REPORT_INFO)}</div>
+  `;
+}
+
+function getFallbackMapAddress(center: L.LatLng) {
+  const isNearHaman = center.lat >= 35.0 && center.lat <= 35.5 && center.lng >= 128.1 && center.lng <= 128.7;
+  if (isNearHaman) return "함안군 가야읍 일대 주소 확인 중";
+  return "현재 지도 중심 주소 확인 중";
+}
+
+async function reverseGeocodeAddress(center: L.LatLng) {
+  const params = new URLSearchParams({
+    format: "jsonv2",
+    lat: center.lat.toString(),
+    lon: center.lng.toString(),
+    zoom: "18",
+    addressdetails: "1",
+    "accept-language": "ko",
+  });
+
+  try {
+    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params.toString()}`);
+    if (!response.ok) return null;
+
+    const data = (await response.json()) as {
+      display_name?: string;
+      address?: Record<string, string | undefined>;
+    };
+
+    return formatReverseGeocodeAddress(data) ?? data.display_name ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function formatReverseGeocodeAddress(data: { display_name?: string; address?: Record<string, string | undefined> }) {
+  const address = data.address;
+  if (!address) return null;
+
+  const region = address.state ?? address.province;
+  const city = address.city ?? address.county ?? address.municipality;
+  const town = address.town ?? address.village ?? address.suburb ?? address.quarter;
+  const road = address.road;
+  const houseNumber = address.house_number;
+  const postcode = address.postcode;
+
+  const parts = [region, city, town, road].filter(Boolean);
+  if (houseNumber) parts.push(`${houseNumber}번지`);
+  if (parts.length > 0) return parts.join(" ");
+
+  return postcode ? `${postcode} 인근 주소` : null;
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function shouldShowCheckedCount(_node: MapLayerNode, depth: number, checkedCount: number) {

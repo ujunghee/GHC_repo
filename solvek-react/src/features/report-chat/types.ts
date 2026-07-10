@@ -6,6 +6,18 @@ export type ChatMessage = {
   text: string;
   imageUrl?: string;
   hasEvidence?: boolean;
+  drawingCandidates?: DrawingCandidate[];
+};
+
+export type DrawingCandidate = {
+  id: number;
+  pageLabel: string;
+  typeLabel: string;
+  similarity: number;
+  reportTitle: string;
+  title: string;
+  thumbnailUrl?: string;
+  hasSource?: boolean;
 };
 
 export type AnswerEvidenceAction = "source" | "map";

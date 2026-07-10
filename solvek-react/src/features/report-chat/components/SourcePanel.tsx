@@ -38,9 +38,12 @@ export function SourcePanel({
         >
           {sourceDocument.similarityScore}%
         </span>
+        <span className="radius-full px-10 h-28 flex align-center justify-center body3-r-14 bg-green-50 color-green-500">50%</span>
+        <span className="radius-full px-10 h-28 flex align-center justify-center body3-r-14 bg-yellow-50 color-yellow-700">30%</span>
+        <span className="radius-full px-10 h-28 flex align-center justify-center body3-r-14 bg-orange-50 color-orange-500">10%</span>
       </div>
 
-      <h2 className="heading10-sb-20 color-slate-900 flex align-center gap-4">
+      <h2 className="body2-sb-16 color-slate-900 flex align-center gap-4">
         {sourceDocument.pageLabel}
         <span className="color-slate-200" style={{ fontSize: 14, margin: "0 0.4rem" }}>|</span>
         {title || sourceDocument.title}

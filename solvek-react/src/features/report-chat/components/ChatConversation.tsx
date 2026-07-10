@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { answerFacts } from "../data";
 import type { ChatMessage } from "../types";
 import { springSnappy, springSoft, tapScale } from "../../report-search/motionConfig";
+import { ChatAttachPreview } from "./ChatAttachPreview";
 import type { Report } from "../../report-search/types";
 
 type AttachedImage = {
@@ -162,7 +163,7 @@ export function ChatConversation({
       </AnimatePresence>
 
       <header className="px-24 py-24">
-        <h1 className="heading10-sb-20 color-slate-900">
+        <h1 className="body2-sb-16 color-slate-900">
           {reportTitle}{selectedCount > 1 ? " 외 " : " "}
           <strong className="color-blue-500">{selectedCount}건</strong>
         </h1>
@@ -172,7 +173,7 @@ export function ChatConversation({
         <div className="w-full px-16" style={{ maxWidth: "76.4rem", paddingTop: "3.2rem" }}>
           {selectedCount === 0 ? (
             <div className="text-center" style={{ paddingTop: "12rem" }}>
-              <p className="heading10-sb-20 color-slate-900 mb-8">보고서를 선택해주세요</p>
+              <p className="body2-sb-16 color-slate-900 mb-8">보고서를 선택해주세요</p>
               <p className="body2-r-16 color-slate-500">왼쪽 목록에서 대화할 보고서를 1건 이상 선택해야 합니다.</p>
             </div>
           ) : (
@@ -224,6 +225,13 @@ export function ChatConversation({
                         {item.role === "assistant" && item.hasEvidence && (
                           <EvidenceSummary activeReports={activeReports} onOpenSource={onOpenSource} onOpenMap={onOpenMap} />
                         )}
+                        {item.role === "assistant" && item.drawingCandidates && (
+                          <DrawingCandidateSummary
+                            candidates={item.drawingCandidates}
+                            onOpenSource={onOpenSource}
+                            onOpenMap={onOpenMap}
+                          />
+                        )}
                       </div>
                     </motion.div>
                   ))}
@@ -250,18 +258,7 @@ export function ChatConversation({
 
           {attachedImage ? (
             <div className="search-62 search-62--with-attach px-16 bg-white">
-              <div className="chat-attach-preview">
-                <img className="chat-attach-preview__image" src={attachedImage.url} alt={attachedImage.name} />
-                <motion.button
-                  className="chat-attach-preview__remove"
-                  type="button"
-                  aria-label="첨부 이미지 제거"
-                  onClick={removeAttachedImage}
-                  {...tapScale}
-                >
-                  <i className="chips-close-icon" aria-hidden="true"></i>
-                </motion.button>
-              </div>
+              <ChatAttachPreview url={attachedImage.url} name={attachedImage.name} onRemove={removeAttachedImage} />
               <div className="chat-compose__footer">
                 <label className="blind" htmlFor="chat-message-input">
                   채팅 메시지
@@ -321,6 +318,96 @@ export function ChatConversation({
           )}
         </div>
       </form>
+    </div>
+  );
+}
+
+function DrawingCandidateSummary({
+  candidates,
+  onOpenSource,
+  onOpenMap,
+}: {
+  candidates: NonNullable<ChatMessage["drawingCandidates"]>;
+  onOpenSource: () => void;
+  onOpenMap: () => void;
+}) {
+  const [activeCandidateId, setActiveCandidateId] = useState<number | null>(null);
+  const [activeCandidateAction, setActiveCandidateAction] = useState<"map" | "source" | null>(null);
+
+  return (
+    <div className="mt-32 w-full" style={{ maxWidth: "56rem" }}>
+      <p className="body2-sb-16 color-slate-900 mb-16">
+        유사후보 <strong className="color-blue-500">{candidates.length}</strong> 건
+      </p>
+
+      <div className="flex flex-col gap-20">
+        {candidates.map((candidate) => {
+          const isMapActive = activeCandidateId === candidate.id && activeCandidateAction === "map";
+          const isSourceActive = activeCandidateId === candidate.id && activeCandidateAction === "source";
+
+          return (
+            <div
+              className={`border ${activeCandidateId === candidate.id ? "border-blue-500" : "border-slate-300"} radius-md-8 bg-white p-16 flex flex-wrap gap-16`}
+              key={candidate.id}
+            >
+              <div
+                className="bg-slate-50 radius-md-8 flex flex-center overflow-hidden flex-none"
+                style={{ width: "15rem", height: "15rem" }}
+                aria-hidden="true"
+              >
+                {candidate.thumbnailUrl ? (
+                  <img className="w-full h-full" src={candidate.thumbnailUrl} alt="" style={{ objectFit: "cover" }} />
+                ) : (
+                  <i className="not-file" style={{ width: "3.2rem", height: "3.2rem", margin: 0 }}></i>
+                )}
+              </div>
+
+              <div className="flex-1" style={{ flexBasis: "28rem", minWidth: 0, paddingTop: "0.2rem" }}>
+                <div className="flex align-center gap-8 mb-12">
+                  <span className="body3-m-14 color-slate-700">{candidate.pageLabel}</span>
+                  <span className="border-l border-slate-300" style={{ height: "1.8rem" }} aria-hidden="true"></span>
+                  <span className="body3-sb-14 color-slate-900">{candidate.typeLabel}</span>
+                  <span className="body4-r-13 color-orange-500">유사도 {candidate.similarity}%</span>
+                </div>
+
+                <p className="body3-m-14 color-slate-700 mb-6">{candidate.reportTitle}</p>
+                <p className="body2-sb-16 color-slate-900 mb-20">{candidate.title}</p>
+
+                <div className="flex align-center gap-8 flex-wrap">
+                  <motion.button
+                    className={`${isMapActive ? "blue-button-32" : "slate-50-button-32"} gap-8`}
+                    type="button"
+                    onClick={() => {
+                      setActiveCandidateId(candidate.id);
+                      setActiveCandidateAction("map");
+                      onOpenMap();
+                    }}
+                    {...tapScale}
+                  >
+                    <i className="map-icon" aria-hidden="true" style={isMapActive ? { filter: "brightness(0) invert(1)" } : undefined}></i>
+                    <span>지도에서 보기</span>
+                  </motion.button>
+
+                  {candidate.hasSource && (
+                    <motion.button
+                      className={isSourceActive ? "blue-button-32" : "slate-50-button-32"}
+                      type="button"
+                      onClick={() => {
+                        setActiveCandidateId(candidate.id);
+                        setActiveCandidateAction("source");
+                        onOpenSource();
+                      }}
+                      {...tapScale}
+                    >
+                      <span>원문 보기</span>
+                    </motion.button>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
