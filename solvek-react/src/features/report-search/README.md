@@ -1,6 +1,6 @@
 # 발굴보고서 메인 검색 화면 README
 
-> 최신 기준 문서입니다. 새 UI를 그대로 입혀야 할 때는 `MAIN_UI_SCREEN_SPEC.md`를 먼저 읽고, 이어서 `MAIN_UI_REPLACEMENT_HANDOFF.md`를 읽습니다. 기능/API 중심 재구현은 `MAIN_SEARCH_FINAL_HANDOFF.md`, `MAIN_SCREEN_SPEC.md`, `PROTOTYPE_FLOW.md`, `COMPONENT_RULES.md`를 함께 확인합니다.
+> 최신 기준 문서입니다. 새 UI를 그대로 입혀야 할 때는 `MAIN_UI_SCREEN_SPEC.md`를 먼저 읽고, 이어서 `MAIN_UI_REPLACEMENT_HANDOFF.md`를 읽습니다. 기능/API 중심 재구현은 `MAIN_SCREEN_SPEC.md`, `PROTOTYPE_FLOW.md`, `COMPONENT_RULES.md`를 함께 확인합니다.
 
 ## 목적
 
@@ -15,7 +15,8 @@
 - `motionConfig.ts`: 공통 인터랙션 값입니다.
 - `MAIN_UI_SCREEN_SPEC.md`: 새 메인 UI 화면을 CSS, React 구분, 치수, 반응형, asset 기준으로 복사하기 위한 화면 정의서입니다.
 - `MAIN_UI_REPLACEMENT_HANDOFF.md`: 새 메인 UI 화면을 덮어쓸 때 현재 검색/선택/채팅 CTA 기능을 보존하기 위한 인수인계 문서입니다.
-- `MAIN_SEARCH_FINAL_HANDOFF.md`: 현재 완성된 메인 화면의 모든 기능, 컴포넌트, 이벤트, 상태, API 연결 기준을 모은 최종 전달 문서입니다.
+- `MAIN_SEARCH_FINAL_HANDOFF.md`: 구버전 참고 문서입니다. 과거 선택 개수 제한 규칙이 남아 있으므로 최신 구현 기준으로 사용하지 않습니다.
+- `MAIN_SEARCH_FINAL_HANDOFF_UPDATED.md`: 구버전 참고 문서입니다. 과거 선택 개수 제한 규칙이 남아 있으므로 최신 구현 기준으로 사용하지 않습니다.
 - `MAIN_SCREEN_SPEC.md`: 메인 화면 전체 기능, UI, API, CSS/JS 규칙을 정리한 상세 전달 문서입니다.
 - `PROTOTYPE_FLOW.md`: 사용자 흐름과 상태 전환 규칙입니다.
 - `COMPONENT_RULES.md`: 컴포넌트별 책임과 재구현 규칙입니다.
@@ -62,17 +63,15 @@ type Report = {
 
 1. `MAIN_UI_SCREEN_SPEC.md`
 2. `MAIN_UI_REPLACEMENT_HANDOFF.md`
-3. `MAIN_SEARCH_FINAL_HANDOFF.md`
-4. `MAIN_SCREEN_SPEC.md`
-5. `PROTOTYPE_FLOW.md`
-6. `COMPONENT_RULES.md`
+3. `MAIN_SCREEN_SPEC.md`
+4. `PROTOTYPE_FLOW.md`
+5. `COMPONENT_RULES.md`
 
 기능/API 기준으로만 재구현하는 경우:
 
-1. `MAIN_SEARCH_FINAL_HANDOFF.md`
-2. `MAIN_SCREEN_SPEC.md`
-3. `PROTOTYPE_FLOW.md`
-4. `COMPONENT_RULES.md`
+1. `MAIN_SCREEN_SPEC.md`
+2. `PROTOTYPE_FLOW.md`
+3. `COMPONENT_RULES.md`
 
 ---
 

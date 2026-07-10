@@ -1,12 +1,18 @@
-# 메인 검색 화면 최신 문서 안내
+# 메인 검색 화면 구버전 문서 안내
 
-메인 검색 화면을 새로 구현하거나 AI에게 동일 구현을 맡길 때는 아래 문서를 최우선으로 사용한다.
+> 이 문서는 더 이상 최신 기준이 아닙니다.
+> 과거 `최대 2건` 선택 제한과 선택 제한 토스트 규칙이 포함되어 있으므로 개발자 AI에게 최우선 기준으로 주지 마세요.
+> 최신 기준은 저장소 루트의 `UI_SOURCE_OF_TRUTH.md`와 아래 문서입니다.
 
-- `MAIN_SEARCH_FINAL_HANDOFF_UPDATED.md`
+- `MAIN_UI_SCREEN_SPEC.md`
+- `MAIN_UI_REPLACEMENT_HANDOFF.md`
+- `MAIN_SCREEN_SPEC.md`
+- `PROTOTYPE_FLOW.md`
+- `COMPONENT_RULES.md`
 
-기존 `MAIN_SEARCH_FINAL_HANDOFF.md`, `README.md`, `MAIN_SCREEN_SPEC.md`, `PROTOTYPE_FLOW.md`, `COMPONENT_RULES.md`는 이전 작업 흐름이 섞여 있거나 일부 환경에서 한글 인코딩이 깨져 보일 수 있다. 최신 기준은 `MAIN_SEARCH_FINAL_HANDOFF_UPDATED.md`다.
+`MAIN_SEARCH_FINAL_HANDOFF_UPDATED.md`와 `MAIN_SEARCH_FINAL_HANDOFF.md`는 구버전 참고용입니다. 보고서 선택 개수는 프론트에서 임의 제한하지 않고, 채팅 세션 생성 API 응답 기준으로 처리합니다.
 
-최신 문서에 포함된 내용:
+구버전 문서에 포함된 내용:
 
 - 메인 화면 전체 구조
 - 검색바 UI와 focus shadow 규칙
@@ -17,7 +23,7 @@
 - 추천 보고서 Swiper
 - 결과 계산 로직
 - 그룹 결과 로직
-- 보고서 선택 제한과 토스트
+- API 응답 기반 토스트
 - 하단 fixed 채팅 CTA
 - 빈 상태
 - 반응형 규칙
