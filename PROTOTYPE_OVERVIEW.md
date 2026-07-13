@@ -1,21 +1,16 @@
 # GHC Report Search And Chat Prototype
 
-이 문서는 가야역사문화권 발굴보고서 검색/챗봇 프로토타입의 최상위 안내서입니다. 개발자 또는 개발자용 AI가 이 git을 기준으로 UI를 동일하게 만들 때는 `UI_SOURCE_OF_TRUTH.md`를 먼저 읽고, 아래 문서를 순서대로 확인합니다.
+이 문서는 가야역사문화권 발굴보고서 검색/AI 챗봇 프로토타입의 최상위 안내서입니다. 개발자 또는 개발자용 AI가 이 git을 기준으로 UI를 동일하게 만들 때는 아래 순서로 읽습니다.
 
 ## Read Order
 
-1. `CLAUDE_CODE_IMPLEMENTATION_GUIDE.md`
+1. `AI_DEVELOPER_CHATBOT_HANDOFF.md`
 2. `UI_SOURCE_OF_TRUTH.md`
-3. `PROTOTYPE_OVERVIEW.md`
-4. `DEVELOPER_HANDOFF.md`
-5. `solvek-react/src/features/report-search/README.md`
-6. `solvek-react/src/features/report-search/MAIN_UI_SCREEN_SPEC.md`
-7. `solvek-react/src/features/report-search/MAIN_UI_REPLACEMENT_HANDOFF.md`
-8. `solvek-react/src/features/report-chat/README.md`
-9. `solvek-react/src/features/report-chat/CHAT_UI_SCREEN_SPEC.md`
-10. `solvek-react/src/features/report-chat/CHAT_UI_REPLACEMENT_HANDOFF.md`
-11. `solvekdesignsystem-web/README.md`
-12. `solvekdesignsystem-web/CLAUDE.md`
+3. `DEVELOPER_HANDOFF.md`
+4. `solvek-react/src/features/report-search/README.md`
+5. `solvek-react/src/features/report-chat/README.md`
+6. 필요한 화면별 상세 스펙: `*_UI_SCREEN_SPEC.md`, `*_UI_REPLACEMENT_HANDOFF.md`, `PROTOTYPE_FLOW.md`, `COMPONENT_RULES.md`
+7. 디자인시스템: `solvekdesignsystem-web/css/index.css`, `solvekdesignsystem-web/README.md`, `solvekdesignsystem-web/CLAUDE.md`
 
 ## Project Purpose
 
@@ -27,8 +22,9 @@
 - 선택한 보고서 id 전체를 메인 화면에서 챗봇 시작 흐름으로 전달합니다.
 - 채팅 가능한 최대 보고서 수는 프론트에서 고정하지 않고 채팅 세션 생성 API 응답을 기준으로 처리합니다.
 - 챗봇 화면에서는 전달받은 보고서 목록을 왼쪽 패널에 표시합니다.
-- 챗봇 답변의 근거 버튼을 누르면 오른쪽 원문 패널이 열립니다.
-- 실제 API와 DB 원문 이미지는 아직 연결 전이며, `data.ts`의 임시 데이터로 구조를 잡았습니다.
+- 챗봇 답변의 근거 버튼을 누르면 오른쪽 원문 또는 지도 패널이 열립니다.
+- 이미지 업로드 질문을 보내면 AI 유사후보 카드가 표시되고, 후보의 `지도에서 보기`로 지도 위 도면 이미지 배치 UX에 진입합니다.
+- 실제 API, PDF 추출 이미지, GIS 레이어, reverse geocode는 아직 mock 구조이며, `data.ts`와 각 컴포넌트의 state/handler 흐름을 실제 API 응답으로 치환합니다.
 
 ## Repository Map
 
@@ -39,6 +35,7 @@
 | `solvek-react/src/features/report-search/` | 발굴보고서 검색 메인 화면 |
 | `solvek-react/src/features/report-chat/` | 선택 보고서 기반 챗봇 화면 |
 | `solvekdesignsystem-web/` | SolveK CSS 디자인시스템 및 아이콘 자산 |
+| `AI_DEVELOPER_CHATBOT_HANDOFF.md` | 챗봇/유사후보/지도 배치/API 연결 최종 전달 문서 |
 | `DEVELOPER_HANDOFF.md` | 개발자 전달용 요약 및 API 연결 메모 |
 
 ## Screen Flow
@@ -56,7 +53,7 @@ App.tsx
       ├─ 선택 보고서 패널
       ├─ 채팅 본문
       ├─ 보고서 검색 모달
-      └─ 원문 패널
+      └─ 원문/지도 패널
 ```
 
 ## Design System Usage
@@ -97,6 +94,22 @@ type SourceDocument = {
 };
 ```
 
+이미지 유사후보와 지도 배치에 필요한 핵심 타입입니다.
+
+```ts
+type DrawingCandidate = {
+  id: number;
+  pageLabel: string;
+  typeLabel: string;
+  similarity: number;
+  reportTitle: string;
+  title: string;
+  thumbnailUrl?: string;
+  mapOverlayImageUrl?: string;
+  hasSource?: boolean;
+};
+```
+
 ## Implementation Notes
 
 - `App.tsx`는 화면 전환만 담당합니다.
@@ -104,3 +117,4 @@ type SourceDocument = {
 - 챗봇 상태와 패널 resize는 `ChatPage.tsx`가 관리합니다.
 - 세부 UI는 `components/` 폴더의 컴포넌트로 분리합니다.
 - 실제 API 연결 시 `data.ts`를 직접 수정하기보다 service/hook을 만들어 페이지 컨테이너에서 데이터를 주입합니다.
+- 보고서 PDF 페이지 rasterizing, 도면 crop, thumbnail 생성, 지도 배치용 이미지 생성은 프론트가 아니라 서버/API 책임입니다.

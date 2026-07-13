@@ -7,12 +7,12 @@ export const panelDefaultWidth = 427;
 export const panelCollapseDelay = 450;
 
 export const sourcePanelMinWidth = 360;
-export const sourcePanelMaxWidth = 960;
-export const sourcePanelDefaultWidth = 840;
+export const sourcePanelMaxWidth = 1440;
+export const sourcePanelDefaultWidth = 920;
 export const sourcePanelWideBreakpoint = 1600;
 export const sourcePanelExtraWideBreakpoint = 2000;
-export const sourcePanelExtraWideDefaultWidth = 1180;
-export const sourcePanelReservedChatWidth = 480;
+export const sourcePanelExtraWideDefaultWidth = 1400;
+export const sourcePanelReservedChatWidth = 420;
 
 export function getRightPanelDefaultWidth(viewportWidth: number) {
   if (viewportWidth <= sourcePanelWideBreakpoint) return sourcePanelDefaultWidth;

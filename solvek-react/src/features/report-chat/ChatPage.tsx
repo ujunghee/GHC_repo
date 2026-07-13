@@ -15,13 +15,13 @@ import {
   getRightPanelWidth,
   sourcePanelMinWidth,
 } from "./data";
-import type { ChatMessage, ChatPageProps, RightPanelMode } from "./types";
+import type { ChatMessage, ChatPageProps, DrawingCandidate, RightPanelMode } from "./types";
 import { reportData } from "../report-search/data";
 import { buildGroupedReports, filterReportsByKeyword } from "../report-search/searchUtils";
 import { springSoft, tapScale } from "../report-search/motionConfig";
 import { ChatConversation } from "./components/ChatConversation";
 import { ChatSearchModal } from "./components/ChatSearchModal";
-import { MapPanel } from "./components/MapPanel";
+import { MapPanel, type MapOverlayRequest } from "./components/MapPanel";
 import { ReportChatSidePanel } from "./components/ReportChatSidePanel";
 import { ResizeHandle } from "./components/ResizeHandle";
 import { SourcePanel } from "./components/SourcePanel";
@@ -42,6 +42,7 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
   const [isSourcePanelResizing, setIsSourcePanelResizing] = useState(false);
   const [isSourcePanelResizeHover, setIsSourcePanelResizeHover] = useState(false);
   const [activeSourceTitle, setActiveSourceTitle] = useState(sourceDocument.title);
+  const [mapOverlayRequest, setMapOverlayRequest] = useState<MapOverlayRequest | null>(null);
   const isRightPanelOpen = rightPanelMode !== "none";
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -278,8 +279,22 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
     setRightPanelMode("source");
   };
 
-  const openMapPanel = () => {
+  const openMapPanel = (candidate?: DrawingCandidate) => {
     if (isChatCompact) return;
+
+    if (candidate) {
+      setMapOverlayRequest({
+        requestId: `${candidate.id}-${Date.now()}`,
+        candidateId: candidate.id,
+        imageUrl: candidate.mapOverlayImageUrl ?? "./image/sample/report-page-map.svg",
+        title: candidate.title,
+        reportTitle: candidate.reportTitle,
+        pageLabel: candidate.pageLabel,
+      });
+    } else {
+      setMapOverlayRequest(null);
+    }
+
     setLastRightPanelMode("map");
     setRightPanelMode("map");
   };
@@ -425,7 +440,7 @@ export function ChatPage({ reports, onBack }: ChatPageProps) {
                 <SourcePanel embedded title={activeSourceTitle} />
               </div>
               <div className={rightPanelMode === "map" ? "h-full" : "hidden"} aria-hidden={rightPanelMode !== "map"}>
-                <MapPanel embedded />
+                <MapPanel embedded overlayRequest={mapOverlayRequest} />
               </div>
             </div>
           </motion.aside>

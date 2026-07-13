@@ -1,5 +1,36 @@
 # UI Source Of Truth
 
+## Latest Source Rule
+
+현재 git 자체가 UI 원본입니다. 개발자 또는 개발자 AI가 화면을 동일하게 구현해야 한다면 별도 캡처보다 이 저장소의 React 컴포넌트와 CSS를 우선해야 합니다.
+
+챗봇, 이미지 유사후보, 지도 위 도면 이미지 배치 UX까지 포함한 최신 상세 인수인계는 아래 문서가 최우선입니다.
+
+```txt
+AI_DEVELOPER_CHATBOT_HANDOFF.md
+```
+
+원본 기준:
+
+```txt
+UI 원본 = solvek-react/src/features/** 의 React 컴포넌트
+스타일 원본 = solvekdesignsystem-web/css/index.css 와 하위 CSS
+아이콘/이미지 원본 = solvekdesignsystem-web/image/**
+챗봇 원본 = solvek-react/src/features/report-chat/**
+메인 검색 원본 = solvek-react/src/features/report-search/**
+```
+
+챗봇에서 특히 유지해야 하는 최신 기능:
+
+- 이미지 업로드 후 AI 유사후보 표시
+- 후보 카드의 `지도에서 보기` 클릭 시에만 지도 위 도면 배치 시작
+- 적용 전 이미지 이동/비율 유지 resize/회전/투명도/삭제/초기화
+- 적용 완료 시 기존 토스트 UI로 `적용 완료` 표시
+- 적용 완료 후 지도 좌표에 이미지 고정
+- 적용 완료 후 `수정`/`삭제` 관리 패널 제공
+- PDF에서 추출한 도면/페이지 이미지를 API로 받아 사용
+- 보고서 선택 수 제한은 프론트 하드코딩 금지
+
 이 저장소 자체가 메인 검색 화면과 챗봇 화면의 UI 원본입니다.
 
 개발자 또는 개발자 AI는 별도 이미지 캡처가 없어도 이 git 안의 React 코드, CSS 디자인시스템, 문서를 기준으로 화면을 동일하게 복사해야 합니다.

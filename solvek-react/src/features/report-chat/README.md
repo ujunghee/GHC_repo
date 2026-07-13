@@ -1,5 +1,49 @@
 # Report Chat Feature
 
+## Latest Handoff
+
+챗봇 화면의 최신 구현 기준은 루트 문서 `AI_DEVELOPER_CHATBOT_HANDOFF.md`를 최우선으로 따릅니다.
+
+이 feature는 AI 챗봇 기반 보고서 질의 화면입니다. 현재 prototype은 mock data를 사용하지만, 실제 구현에서는 다음 API/데이터로 치환해야 합니다.
+
+- 보고서 선택 목록: 메인 검색에서 전달된 report ids
+- 챗봇 답변: AI chat message API
+- 근거/원문: source document API
+- 이미지 업로드: upload API
+- 유사후보: 이미지 검색/API 또는 PDF 추출/벡터 검색 결과
+- 후보 thumbnail/source/map image: 보고서 PDF에서 추출한 페이지 또는 도면 이미지 URL
+- 지도/레이어/주소: GIS layer API 및 reverse geocode API
+
+중요한 UI 원칙:
+
+- 현재 React 컴포넌트와 CSS가 UI 원본입니다.
+- 캡처 이미지 없이도 이 git만으로 동일 화면을 복사 구현해야 합니다.
+- 기존 디자인시스템 class를 유지합니다.
+- 보고서 선택 최대 개수를 프론트에서 임의 제한하지 않습니다.
+- API가 반환한 제한/오류 메시지만 토스트로 표시합니다.
+
+최신 이미지 비교 UX:
+
+1. 사용자가 이미지를 첨부하고 메시지를 전송합니다.
+2. AI가 유사후보를 반환합니다.
+3. 후보 카드에는 썸네일, 페이지, 유형, 유사도, 보고서명, 도면명이 표시됩니다.
+4. `지도에서 보기`를 누른 후보만 지도 위 이미지 배치 모드로 진입합니다.
+5. 지도 위 이미지 조정 후 `이미지 적용 완료`를 누릅니다.
+6. 기존 복사 토스트와 같은 UI로 `적용 완료`가 표시됩니다.
+7. 이미지는 지도 좌표에 고정됩니다.
+8. 적용 후 관리 패널에서 `수정` 또는 `삭제`할 수 있습니다.
+
+주요 원본 파일:
+
+- `ChatPage.tsx`
+- `components/ChatConversation.tsx`
+- `components/MapPanel.tsx`
+- `components/SourcePanel.tsx`
+- `components/ReportChatSidePanel.tsx`
+- `components/ChatSearchModal.tsx`
+- `data.ts`
+- `types.ts`
+
 선택한 발굴보고서를 기준으로 질문하고, AI 답변의 근거 원문을 확인하는 챗봇 화면입니다. 메인 검색 화면에서 `채팅하기`를 누르면 `App.tsx`가 선택한 보고서 id를 `Report[]`로 변환해 `ChatPage`에 전달합니다.
 
 메인 검색 화면은 사용자가 선택한 보고서 id를 그대로 챗봇 화면에 전달합니다. 선택 가능한 최대 보고서 수는 프론트에서 고정하지 않고, 채팅 세션 생성 API의 정책과 응답 메시지를 기준으로 처리합니다.

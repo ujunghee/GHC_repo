@@ -1,0 +1,53 @@
+<svg width="760" height="1064" viewBox="0 0 760 1064" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="760" height="1064" fill="#F8F5E7"/>
+  <rect x="14" y="12" width="732" height="890" fill="#EEE6B8" stroke="#2F3540" stroke-width="1"/>
+  <g opacity="0.78" stroke-linecap="round">
+    <path d="M4 140C88 108 158 118 224 166C300 222 360 218 430 156C498 96 598 92 748 150" stroke="#655B48" stroke-width="8"/>
+    <path d="M0 280C98 226 184 232 254 296C328 364 414 356 508 290C596 228 668 226 760 260" stroke="#655B48" stroke-width="7"/>
+    <path d="M18 436C94 380 178 382 256 438C344 502 454 508 548 442C620 392 688 392 758 428" stroke="#655B48" stroke-width="7"/>
+    <path d="M12 620C112 568 198 582 276 650C342 706 426 710 506 650C590 586 676 584 760 632" stroke="#655B48" stroke-width="8"/>
+    <path d="M0 770C90 724 178 728 272 790C354 844 446 842 526 786C616 724 682 718 760 752" stroke="#655B48" stroke-width="7"/>
+  </g>
+  <g opacity="0.72" stroke="#403729" stroke-width="2.5" fill="none">
+    <path d="M72 40C58 92 80 134 138 164C188 190 206 232 184 286C158 350 176 394 236 422C310 456 334 508 300 584C272 646 294 696 356 734C430 780 454 846 408 928"/>
+    <path d="M246 18C216 86 228 146 284 198C348 256 360 332 316 398C272 462 292 538 372 590C438 632 466 690 442 762C420 834 454 884 546 916"/>
+    <path d="M548 24C500 94 512 154 588 204C656 250 666 312 616 388C570 456 586 524 668 574C716 604 738 646 724 700"/>
+    <path d="M18 516C104 488 190 498 276 546C374 600 464 598 548 542C624 492 692 482 748 510"/>
+    <path d="M32 704C134 668 222 672 308 718C394 764 476 760 550 712C626 662 692 656 746 684"/>
+  </g>
+  <g opacity="0.58" stroke="#B03B3B" stroke-width="2" fill="#E7A0A0">
+    <path d="M58 118C114 86 190 94 250 138C190 184 112 180 58 118Z"/>
+    <path d="M402 88C464 42 554 56 628 112C556 168 464 158 402 88Z"/>
+    <path d="M74 348C146 304 238 314 312 374C236 434 132 414 74 348Z"/>
+    <path d="M438 336C524 282 632 302 704 374C630 448 514 426 438 336Z"/>
+    <path d="M86 556C174 514 282 538 338 610C250 668 140 638 86 556Z"/>
+    <path d="M484 578C574 526 682 548 732 630C650 686 544 660 484 578Z"/>
+    <path d="M296 796C404 732 554 762 630 872C510 944 372 910 296 796Z"/>
+  </g>
+  <g opacity="0.52" fill="#F2DF73">
+    <path d="M0 34C74 12 156 28 222 88C130 114 62 110 0 86V34Z"/>
+    <path d="M616 28C672 12 724 18 760 42V202C708 168 664 116 616 28Z"/>
+    <path d="M0 826C96 790 192 806 288 878C182 924 82 910 0 864V826Z"/>
+  </g>
+  <g font-family="Arial, sans-serif" font-weight="700" text-anchor="middle">
+    <text x="372" y="454" font-size="28" fill="#111827" stroke="#FFFFFF" stroke-width="4" paint-order="stroke">시굴조사지역</text>
+    <text x="360" y="548" font-size="28" fill="#111827" stroke="#FFFFFF" stroke-width="4" paint-order="stroke">발굴조사지역</text>
+  </g>
+  <path d="M386 500L406 488L412 502L392 514Z" fill="#E60023" stroke="#005DFF" stroke-width="2"/>
+  <path d="M392 514L388 548" stroke="#111827" stroke-width="2"/>
+  <rect x="18" y="904" width="724" height="106" fill="#FFFFFF" stroke="#2F3540"/>
+  <text x="380" y="930" font-family="Arial, sans-serif" font-size="20" fill="#111827" text-anchor="middle">- 범례 -</text>
+  <rect x="116" y="948" width="72" height="36" fill="#EEE076" stroke="#6B6048" stroke-width="2"/>
+  <rect x="344" y="948" width="78" height="36" fill="#8E1F2C" stroke="#6B6048" stroke-width="2"/>
+  <rect x="594" y="948" width="72" height="36" fill="#E96E82" stroke="#6B6048" stroke-width="2"/>
+  <g font-family="Arial, sans-serif" font-size="14" fill="#111827" text-anchor="middle">
+    <text x="152" y="1002">신기하성층</text>
+    <text x="152" y="1020">RECENT RIVER DEPOSIT</text>
+    <text x="383" y="1002">함안층</text>
+    <text x="383" y="1020">HAMAN FORMATION</text>
+    <text x="630" y="1002">화강섬록암</text>
+    <text x="630" y="1020">GRANODIORITE</text>
+  </g>
+  <text x="22" y="1040" font-family="Arial, sans-serif" font-size="22" fill="#111827">도면 3. 조사지역 지질도(1/10,000)</text>
+  <text x="72" y="1060" font-family="Arial, sans-serif" font-size="14" fill="#111827">출처:한국지질자원연구원 국가지질자원정보센터</text>
+</svg>

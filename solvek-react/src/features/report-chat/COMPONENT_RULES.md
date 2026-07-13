@@ -19,11 +19,12 @@
 기능:
 - 왼쪽 선택 보고서 패널 열림/닫힘
 - 왼쪽 패널 너비 resize
-- 오른쪽 원문 패널 열림/닫힘
-- 오른쪽 원문 패널 너비 resize
+- 오른쪽 원문/지도 패널 열림/닫힘
+- 오른쪽 원문/지도 패널 너비 resize
 - 챗봇 메시지 상태 관리
 - 보고서 검색 모달 상태 관리
 - 검색 모달 단서/칩 상태 관리
+- 이미지 업로드 유사후보와 지도 도면 배치 요청 관리
 
 규칙:
 - 카드, 버튼 목록, 원문 패널 내부 마크업을 직접 넣지 않습니다.
@@ -59,12 +60,15 @@
 - 사용자/AI 메시지 표시
 - 답변 근거 요약 표시
 - 입력창 submit 처리
+- 이미지 첨부, drag/drop, preview, 첨부 삭제 처리
+- 이미지 기반 유사후보 카드 표시
 
 규칙:
 - 답변 생성은 직접 하지 않고 `onSend`, `onSubmit`으로 상위에 위임합니다.
 - 원문/지도 근거 버튼은 답변 항목 옆에 표시합니다.
 - `원문` 버튼은 `onOpenSource`를 호출합니다.
-- `지도` 버튼은 추후 지도 패널 또는 지도 화면 연결 지점으로 남깁니다.
+- 일반 `지도` 버튼은 `onOpenMap()`을 호출합니다.
+- 이미지 유사후보의 `지도에서 보기` 버튼은 `onOpenMap(candidate)`를 호출해 지도 위 이미지 배치 모드로 진입합니다.
 
 ### `ChatSearchModal`
 
@@ -104,6 +108,27 @@
 - DB 원문이 붙으면 `pageImageUrl` 또는 뷰어 URL을 넣습니다.
 - 원문 영역은 남은 높이를 채워야 합니다.
 
+### `MapPanel`
+
+용도:
+- AI 답변의 지도 근거와 이미지 유사후보의 도면 배치 UX를 오른쪽 패널에 표시합니다.
+
+기능:
+- Leaflet 지도 표시
+- 지도 설정 패널, 레이어 checkbox/tree, 지도 타입 토글
+- `Pin.svg` 기반 대표 마커와 hover tooltip
+- 이미지 비교 후보의 도면/페이지 이미지를 지도 위에 배치
+- 적용 전 이미지 이동, 비율 유지 resize, 회전, 투명도 조정, 키보드 이동
+- `이미지 적용 완료` 후 지도 좌표에 고정
+- 적용 후 관리 패널에서 `수정` 또는 `삭제`
+
+규칙:
+- 지도 위 이미지는 이미지 유사후보의 `지도에서 보기`를 눌렀을 때만 표시합니다.
+- 적용 전에는 편집 overlay를 사용하고, 적용 후에는 Leaflet pane 내부 custom DOM overlay로 고정합니다.
+- 적용 완료 후에는 조정 핸들, 회전, 드래그, 키보드 이동, X 삭제 버튼을 비활성화합니다.
+- 적용 완료 토스트는 기존 `복사 완료` 토스트와 같은 UI class/motion을 사용합니다.
+- 실제 서비스에서는 `mapOverlayImageUrl`을 보고서 PDF에서 추출한 도면/페이지 이미지 API로 받아 사용합니다.
+
 ### `ResizeHandle`
 
 용도:
@@ -128,8 +153,10 @@
 | `messages` | `ChatPage` | 채팅 메시지 목록 |
 | `isPanelOpen` | `ChatPage` | 왼쪽 패널 열림 여부 |
 | `panelWidth` | `ChatPage` | 왼쪽 패널 너비 |
-| `isSourcePanelOpen` | `ChatPage` | 원문 패널 열림 여부 |
-| `sourcePanelWidth` | `ChatPage` | 원문 패널 너비 |
+| `rightPanelMode` | `ChatPage` | 오른쪽 패널 상태: `none`, `source`, `map` |
+| `lastRightPanelMode` | `ChatPage` | 오른쪽 패널 재오픈 시 복원할 마지막 모드 |
+| `sourcePanelWidth` | `ChatPage` | 오른쪽 원문/지도 패널 너비 |
+| `mapOverlayRequest` | `ChatPage` | 이미지 유사후보에서 지도 배치를 요청한 후보 정보 |
 | `searchQuery` | `ChatPage` | 검색 모달 검색어 |
 | `searchClues` | `ChatPage` | 검색 모달 단서 목록 |
 | `checkedSearchClues` | `ChatPage` | 검색 모달에서 체크된 단서 |
@@ -142,7 +169,9 @@
 - 검색 모달에서 보고서를 체크하면 왼쪽 패널 목록에도 추가합니다.
 - 검색 모달에서 체크된 보고서는 목록 상단에 올라오지만 스크롤은 위로 이동하지 않습니다.
 - 답변 전에는 원문 패널 토글 아이콘을 표시하지 않습니다.
-- 답변에 근거가 생긴 뒤에만 오른쪽 상단 원문 패널 아이콘을 표시합니다.
+- 답변에 근거 또는 유사후보가 생긴 뒤에만 오른쪽 상단 패널 아이콘을 표시합니다.
+- 유사후보 카드의 `지도에서 보기`/`원문 보기`를 누르면 해당 카드 border와 클릭한 버튼을 blue-500 상태로 표시합니다.
+- 이미지 유사후보 외의 일반 지도 버튼은 지도 패널만 열고, 도면 이미지 overlay를 자동 표시하지 않습니다.
 
 ## Styling Rules
 
@@ -163,6 +192,8 @@
 
 - 채팅 전송 API는 `sendMessage` 또는 별도 hook에서 호출합니다.
 - AI 답변은 최소 `text`, `hasEvidence`, `evidence` 계열 데이터를 포함해야 합니다.
+- 이미지 검색 답변은 `drawingCandidates`를 포함할 수 있습니다.
 - 근거가 있는 답변만 원문 패널 버튼을 표시합니다.
 - 원문 이미지는 `SourcePanel`에 URL 또는 viewer payload로 전달합니다.
-- 지도 근거는 `AnswerEvidenceAction = "map"` 분기에서 지도 패널 또는 지도 화면으로 연결합니다.
+- 지도 근거는 `rightPanelMode = "map"`으로 연결합니다.
+- 이미지 후보의 `thumbnailUrl`, `sourcePageImageUrl`, `mapOverlayImageUrl`은 PDF 추출/이미지 검색 API에서 내려주는 URL을 사용합니다.

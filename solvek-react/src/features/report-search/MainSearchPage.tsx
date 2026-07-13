@@ -227,7 +227,7 @@ export function MainSearchPage({ onStartChat }: MainSearchPageProps) {
               <motion.div
                 key="helper-popup"
                 id="helper-popup"
-                className="map-search-dropdown align-start z-index-10"
+                className="map-search-dropdown align-start"
                 role="dialog"
                 aria-label="검색 도우미 단서 추가"
                 initial={{ opacity: 0, y: -10, scale: 0.98 }}

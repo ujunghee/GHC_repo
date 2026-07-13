@@ -23,7 +23,7 @@ export function ResizeHandle({ side, label, active, hovered, onPointerDown, onMo
       onMouseLeave={onMouseLeave}
       style={{
         [side]: "-0.8rem",
-        zIndex: 1000,
+        zIndex: 1200,
         width: "1.6rem",
         cursor: "col-resize",
         touchAction: "none",

@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { answerFacts } from "../data";
-import type { ChatMessage } from "../types";
+import type { ChatMessage, DrawingCandidate } from "../types";
 import { springSnappy, springSoft, tapScale } from "../../report-search/motionConfig";
 import { ChatAttachPreview } from "./ChatAttachPreview";
 import type { Report } from "../../report-search/types";
@@ -22,7 +22,7 @@ type ChatConversationProps = {
   onMessageChange: (value: string) => void;
   onSend: (text: string, imageUrl?: string) => void;
   onOpenSource: () => void;
-  onOpenMap: () => void;
+  onOpenMap: (candidate?: DrawingCandidate) => void;
 };
 
 const ATTACHED_PLACEHOLDER = "이 이미지가 보고서 어디에 나오는지 찾아줘";
@@ -329,7 +329,7 @@ function DrawingCandidateSummary({
 }: {
   candidates: NonNullable<ChatMessage["drawingCandidates"]>;
   onOpenSource: () => void;
-  onOpenMap: () => void;
+  onOpenMap: (candidate: DrawingCandidate) => void;
 }) {
   const [activeCandidateId, setActiveCandidateId] = useState<number | null>(null);
   const [activeCandidateAction, setActiveCandidateAction] = useState<"map" | "source" | null>(null);
@@ -380,7 +380,7 @@ function DrawingCandidateSummary({
                     onClick={() => {
                       setActiveCandidateId(candidate.id);
                       setActiveCandidateAction("map");
-                      onOpenMap();
+                      onOpenMap(candidate);
                     }}
                     {...tapScale}
                   >

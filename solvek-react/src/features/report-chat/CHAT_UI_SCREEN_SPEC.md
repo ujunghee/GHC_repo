@@ -1,5 +1,22 @@
 # Chat UI Screen Spec
 
+## Latest Implementation Notes
+
+최신 챗봇 UI와 이미지 비교/지도 배치 UX는 루트의 `AI_DEVELOPER_CHATBOT_HANDOFF.md`를 최우선 기준으로 합니다.
+
+이 화면 스펙을 읽는 개발자 AI는 아래를 반드시 유지해야 합니다.
+
+- 현재 git의 React 컴포넌트를 UI 원본으로 사용합니다.
+- `solvekdesignsystem-web/css/index.css`와 기존 component CSS를 스타일 원본으로 사용합니다.
+- 이미지 업로드 후 유사후보 UI는 `ChatConversation.tsx`의 `DrawingCandidateSummary`가 원본입니다.
+- 지도 이미지 배치 UI는 `MapPanel.tsx`와 `map-panel.css`가 원본입니다.
+- `지도에서 보기` 클릭 시에만 이미지 배치 모드가 시작됩니다.
+- 이미지는 PDF에서 추출된 도면/페이지 이미지 URL을 API로 받아 사용합니다.
+- 적용 전에는 이동/비율 유지 resize/회전/투명도/삭제/초기화가 가능합니다.
+- 적용 완료 후에는 지도 좌표에 고정되고, 관리 패널의 `수정`/`삭제`만 제공합니다.
+- `적용 완료` 토스트는 기존 `복사 완료` 토스트 UI를 그대로 사용합니다.
+- 보고서 선택 최대 개수는 프론트에서 임의 제한하지 않습니다.
+
 이 문서는 사용자가 제공한 챗봇 UI 원본 화면을 React/CSS로 복사하듯 구현하기 위한 화면 정의서입니다.
 
 `CHAT_UI_REPLACEMENT_HANDOFF.md`가 기능 보존 계약이라면, 이 문서는 시각 구현 계약입니다.
@@ -159,9 +176,9 @@ solvekdesignsystem-web/css/component/chat-panel.css
 panelDefaultWidth = 427;
 panelMinWidth = 240;
 panelMaxWidth = 560;
-sourcePanelDefaultWidth = 840;
+sourcePanelDefaultWidth = 920;
 sourcePanelMinWidth = 360;
-sourcePanelMaxWidth = 960;
+sourcePanelMaxWidth = 1440;
 ```
 
 새 UI가 다른 폭을 쓰면 `data.ts`의 panel width 상수를 조정해도 됩니다. 단, resize 기능은 유지합니다.
@@ -643,9 +660,9 @@ Functional responsibility:
 
 ## Resize Minimum
 
-오른쪽 원문/지도 패널을 resize 하더라도 중앙 챗봇 영역은 최소 480px을 확보합니다.
+오른쪽 원문/지도 패널을 resize 하더라도 중앙 챗봇 영역은 최소 420px을 확보합니다.
 
-- `sourcePanelReservedChatWidth = 480`
+- `sourcePanelReservedChatWidth = 420`
 - 유사후보 카드는 56rem을 최대 폭으로 사용합니다.
 - 화면이 좁아지면 후보 카드 내부 썸네일과 텍스트 영역은 `flex-wrap`으로 줄바꿈되어 텍스트가 깨지지 않아야 합니다.
 - 기존 class로 맞지 않으면 챗봇 전용 class를 추가합니다.

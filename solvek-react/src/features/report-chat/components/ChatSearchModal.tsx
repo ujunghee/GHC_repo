@@ -48,13 +48,13 @@ export function ChatSearchModal({
 
   return (
     <motion.div
-      className="fixed top-0 left-0 w-full h-full flex align-center justify-center z-index-10"
+      className="fixed top-0 left-0 w-full h-full flex align-center justify-center z-index-100"
       role="presentation"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.24 }}
-      style={{ background: "rgba(15, 23, 42, 0.68)" }}
+      style={{ background: "rgba(15, 23, 42, 0.68)", zIndex: 1300 }}
       onMouseDown={onClose}
     >
       <motion.section
@@ -114,7 +114,7 @@ export function ChatSearchModal({
             {searchHelperOpen && (
               <motion.div
                 key="chat-helper-popup"
-                className="map-search-dropdown align-start z-index-10"
+                className="map-search-dropdown align-start"
                 role="dialog"
                 aria-label="검색 도우미 단서 추가"
                 initial={{ opacity: 0, y: -10, scale: 0.98 }}

@@ -17,6 +17,7 @@ export type DrawingCandidate = {
   reportTitle: string;
   title: string;
   thumbnailUrl?: string;
+  mapOverlayImageUrl?: string;
   hasSource?: boolean;
 };
 

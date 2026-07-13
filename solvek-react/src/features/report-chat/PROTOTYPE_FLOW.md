@@ -1,5 +1,61 @@
 # Report Chat Prototype Flow
 
+## Latest Flow Summary
+
+최신 상세 기준은 루트의 `AI_DEVELOPER_CHATBOT_HANDOFF.md`를 우선합니다.
+
+이 챗봇은 AI 기반 보고서 질의 화면이며, 특히 이미지 업로드 후 보고서 PDF에서 추출한 도면/페이지 이미지와 비교해 유사후보를 제시하고, 후보 이미지를 지도 위에 배치하는 UX를 포함합니다.
+
+## Image Match And Map Placement Flow
+
+1. 사용자가 채팅 입력창의 파일 첨부 버튼으로 이미지를 업로드합니다.
+2. 업로드된 이미지는 preview로 표시됩니다.
+3. 사용자가 메시지를 전송합니다.
+4. 실제 구현에서는 upload API가 `imageFileId`, `previewUrl`을 반환하고, chat/image-search API가 유사후보를 반환해야 합니다.
+5. assistant 메시지는 업로드 이미지에 대한 해석 문구와 유사후보 목록을 표시합니다.
+6. 유사후보 카드는 `pageLabel`, `typeLabel`, `similarity`, `reportTitle`, `title`, `thumbnailUrl`을 표시합니다.
+7. 후보 카드의 `지도에서 보기`를 클릭하면 우측 지도 패널이 열립니다.
+8. 클릭한 후보만 active 상태가 되며 카드 border와 버튼이 blue-500 상태가 됩니다.
+9. 지도 패널은 후보의 `mapOverlayImageUrl`을 지도 위 편집 가능한 이미지로 표시합니다.
+10. 사용자는 이미지를 드래그 이동, 모서리 resize, 회전, 투명도 조정, 키보드 이동할 수 있습니다.
+11. resize는 이미지 비율을 유지해야 합니다.
+12. 모서리 resize 점 위에서는 resize가 우선이고, 점 바깥 모서리 회전 영역에서는 cursor만 회전 아이콘으로 바뀝니다.
+13. `이미지 적용 완료`를 누르면 기존 `복사 완료` 토스트와 같은 UI로 `적용 완료`가 표시됩니다.
+14. 적용 완료 후 이미지는 지도 좌표에 고정됩니다.
+15. 적용 완료 후에는 조정 핸들, 회전, 키보드 이동, X 삭제 버튼이 비활성화됩니다.
+16. 우하단 관리 패널에서 `수정` 또는 `삭제`를 제공합니다.
+17. `수정`을 누르면 현재 지도 위치 기준으로 다시 편집 모드가 됩니다.
+18. `삭제`를 누르면 적용된 지도 이미지 overlay와 편집 상태가 모두 제거됩니다.
+
+## Expected API Flow
+
+```txt
+POST /chat/uploads
+  -> imageFileId, previewUrl
+
+POST /chat/image-search
+  -> message, drawingCandidates[]
+
+GET /reports/{reportId}/drawings/{drawingId}/image
+  -> mapOverlayImageUrl
+
+GET /reports/{reportId}/pages/{pageNumber}
+  -> source page image or PDF viewer URL
+```
+
+프론트는 PDF를 직접 파싱하지 않습니다. PDF 페이지 rasterizing, 도면 crop, thumbnail 생성, 지도 배치용 이미지 생성은 서버/API 책임입니다.
+
+## Toast Flow
+
+토스트는 기존 공통 토스트 UI를 사용합니다.
+
+- 원문 복사 성공: `복사 완료`
+- 지도 이미지 적용 성공: `적용 완료`
+- API 오류: API가 반환한 `message`
+- 네트워크 오류: fallback 오류 문구
+
+보고서 선택 개수 변경, 후보 카드 선택, 지도 패널 열기, 원문 패널 열기에는 토스트를 띄우지 않습니다.
+
 이 문서는 `ChatPage.tsx`와 `components/` 기준의 챗봇 화면 흐름입니다.
 
 ## Entry Flow

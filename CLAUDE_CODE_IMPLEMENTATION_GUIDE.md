@@ -1,29 +1,30 @@
 # Claude Code Implementation Guide
 
-이 문서는 Python 백엔드 개발자와 Claude Code가 현재 React 프로토타입을 기준으로 새 UI를 재구현하기 위한 최우선 구현 지시서입니다. 개발을 시작할 때는 이 파일을 먼저 읽고, 세부 화면별 문서는 아래 순서로 확인합니다.
+이 문서는 Python 백엔드 개발자와 Claude Code가 현재 React 프로토타입을 기준으로 새 UI를 재구현하기 위한 구현 지시서입니다. 최신 챗봇/이미지/지도 배치 기준은 루트의 `AI_DEVELOPER_CHATBOT_HANDOFF.md`가 최우선입니다.
 
 ## Read This First
 
-1. `UI_SOURCE_OF_TRUTH.md`
-2. `CLAUDE_CODE_IMPLEMENTATION_GUIDE.md`
-3. `PROTOTYPE_OVERVIEW.md`
-4. `DEVELOPER_HANDOFF.md`
-5. `solvek-react/src/features/report-search/README.md`
-6. `solvek-react/src/features/report-search/MAIN_UI_SCREEN_SPEC.md`
-7. `solvek-react/src/features/report-search/MAIN_UI_REPLACEMENT_HANDOFF.md`
-8. `solvek-react/src/features/report-search/PROTOTYPE_FLOW.md`
-9. `solvek-react/src/features/report-search/COMPONENT_RULES.md`
-10. `solvek-react/src/features/report-chat/README.md`
-11. `solvek-react/src/features/report-chat/CHAT_UI_SCREEN_SPEC.md`
-12. `solvek-react/src/features/report-chat/CHAT_UI_REPLACEMENT_HANDOFF.md`
-13. `solvek-react/src/features/report-chat/PROTOTYPE_FLOW.md`
-14. `solvek-react/src/features/report-chat/COMPONENT_RULES.md`
-15. `solvekdesignsystem-web/README.md`
-16. `solvekdesignsystem-web/CLAUDE.md`
+1. `AI_DEVELOPER_CHATBOT_HANDOFF.md`
+2. `UI_SOURCE_OF_TRUTH.md`
+3. `DEVELOPER_HANDOFF.md`
+4. `PROTOTYPE_OVERVIEW.md`
+5. `CLAUDE_CODE_IMPLEMENTATION_GUIDE.md`
+6. `solvek-react/src/features/report-search/README.md`
+7. `solvek-react/src/features/report-search/MAIN_UI_SCREEN_SPEC.md`
+8. `solvek-react/src/features/report-search/MAIN_UI_REPLACEMENT_HANDOFF.md`
+9. `solvek-react/src/features/report-search/PROTOTYPE_FLOW.md`
+10. `solvek-react/src/features/report-search/COMPONENT_RULES.md`
+11. `solvek-react/src/features/report-chat/README.md`
+12. `solvek-react/src/features/report-chat/CHAT_UI_SCREEN_SPEC.md`
+13. `solvek-react/src/features/report-chat/CHAT_UI_REPLACEMENT_HANDOFF.md`
+14. `solvek-react/src/features/report-chat/PROTOTYPE_FLOW.md`
+15. `solvek-react/src/features/report-chat/COMPONENT_RULES.md`
+16. `solvekdesignsystem-web/README.md`
+17. `solvekdesignsystem-web/CLAUDE.md`
 
 ## Product Goal
 
-가야역사문화권 발굴보고서를 검색하고, 선택한 보고서로 AI 챗봇 대화를 시작하는 UI를 만든다. 이 git 자체가 UI 원본이며, 현재 React 화면과 CSS 디자인시스템을 기준으로 동일하게 구현한다. 선택 가능한 보고서 수는 프론트에서 임의로 고정하지 않고, 채팅 세션 생성 API 응답을 기준으로 처리한다. 챗봇 답변은 근거 원문과 지도 근거로 이어질 수 있어야 하며, 현재 구현 우선순위는 원문 패널이다.
+가야역사문화권 발굴보고서를 검색하고, 선택한 보고서로 AI 챗봇 대화를 시작하는 UI를 만든다. 이 git 자체가 UI 원본이며, 현재 React 화면과 CSS 디자인시스템을 기준으로 동일하게 구현한다. 선택 가능한 보고서 수는 프론트에서 임의로 고정하지 않고, 채팅 세션 생성 API 응답을 기준으로 처리한다. 챗봇 답변은 근거 원문, 지도 근거, 이미지 업로드 기반 유사후보, 지도 위 도면 이미지 배치 UX로 이어질 수 있어야 한다.
 
 핵심 사용 흐름:
 
@@ -33,7 +34,8 @@
 4. 활성화된 키워드별로 결과가 그룹화되어 표시된다.
 5. 사용자는 보고서를 직접 선택하거나 그룹 헤더의 `채팅하기`를 누른다.
 6. 선택한 보고서 id 전체를 채팅 시작 흐름으로 넘긴다.
-7. 챗봇 화면에서 선택 보고서 목록, 질문 추천, 메시지 입력, 원문 패널을 사용한다.
+7. 챗봇 화면에서 선택 보고서 목록, 질문 추천, 메시지 입력, 원문/지도 패널을 사용한다.
+8. 이미지를 업로드해 질문하면 AI가 PDF에서 추출한 도면/페이지 이미지 후보를 반환하고, 사용자는 후보 이미지를 지도 위에 맞춰 적용/수정/삭제할 수 있다.
 
 ## Technology Assumption
 
@@ -98,8 +100,12 @@
 - 메시지 입력창: 첨부 아이콘, 검색/전송 아이콘
 - AI 답변 근거: `원문 p.12 ~ 16`, `지도`
 - 원문 버튼 클릭 시 오른쪽 원문 패널 표시
-- 오른쪽 상단 layout icon으로 원문 패널 접기/펼치기
-- 원문 패널 resize 가능
+- 이미지 첨부 후 전송 시 AI 유사후보 카드 표시
+- 유사후보 `지도에서 보기` 클릭 시 오른쪽 지도 패널과 도면 이미지 배치 UX 표시
+- 지도 이미지 적용 전에는 이동/비율 유지 resize/회전/투명도/삭제/초기화 가능
+- `이미지 적용 완료` 후에는 기존 토스트 UI로 `적용 완료` 표시, 지도 좌표 고정, 수정/삭제 관리 패널 제공
+- 오른쪽 상단 layout icon으로 원문/지도 패널 접기/펼치기
+- 오른쪽 원문/지도 패널 resize 가능
 
 ## Search Feature Rules
 
@@ -340,8 +346,13 @@ GET  /api/reports
 POST /api/report-groups
 POST /api/chat/sessions
 POST /api/chat/messages
+POST /api/chat/uploads
+POST /api/chat/image-search
 GET  /api/reports/{report_id}/pages/{page}
+GET  /api/reports/{report_id}/pages/{page}/image
+GET  /api/reports/{report_id}/drawings/{drawing_id}/image
 GET  /api/reports/{report_id}/map
+GET  /api/maps/reverse-geocode
 ```
 
 ### GET /api/reports
@@ -472,6 +483,70 @@ Response:
   ]
 }
 ```
+
+### POST /api/chat/uploads
+
+목적: 챗봇 입력창에 첨부한 이미지를 업로드하고 preview URL을 반환
+
+Request:
+
+```txt
+multipart/form-data
+file: image/*
+```
+
+Response:
+
+```json
+{
+  "image_file_id": "upload_001",
+  "preview_url": "/media/uploads/upload_001.png",
+  "mime_type": "image/png",
+  "width": 1200,
+  "height": 900
+}
+```
+
+### POST /api/chat/image-search
+
+목적: 업로드 이미지와 선택 보고서 PDF에서 추출한 도면/페이지 이미지를 비교해 유사후보 반환
+
+Request:
+
+```json
+{
+  "session_id": "session_001",
+  "image_file_id": "upload_001",
+  "active_report_ids": [1, 10],
+  "message": "이 이미지가 보고서 어디에 나오는지 찾아줘"
+}
+```
+
+Response:
+
+```json
+{
+  "message": "업로드한 이미지는 토기가마 도면으로 보입니다.",
+  "candidates": [
+    {
+      "id": "drawing_001",
+      "report_id": 1,
+      "report_title": "함안 우거리 토기가마",
+      "page_number": 32,
+      "page_label": "p.032",
+      "type_label": "도면",
+      "title": "도면 14. 1~2호 토기가마 평면도",
+      "similarity": 12,
+      "thumbnail_url": "/media/reports/1/drawings/drawing_001-thumb.png",
+      "map_overlay_image_url": "/media/reports/1/drawings/drawing_001-map.png",
+      "source_page_image_url": "/media/reports/1/pages/32.png",
+      "has_source": true
+    }
+  ]
+}
+```
+
+PDF 페이지 rasterizing, 도면 crop, thumbnail 생성, 지도 배치용 이미지 생성은 서버/API 책임입니다. 프론트는 URL을 받아 현재 UI에 렌더링합니다.
 
 ### GET /api/reports/{report_id}/pages/{page}
 

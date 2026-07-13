@@ -1,13 +1,34 @@
 # GHC Prototype Developer Handoff
 
-이 저장소는 가야역사문화권 발굴보고서 검색/챗봇 프로토타입 전달본입니다. 개발자가 새 UI 화면을 다시 만들거나 개발자용 AI에게 구현을 맡길 때는 `PROTOTYPE_OVERVIEW.md`를 먼저 읽고, 이 문서를 전달 체크리스트로 사용합니다.
+## Latest AI Developer Handoff
+
+가장 최신 챗봇 UI, 이미지 유사후보, 지도 도면 배치, PDF 이미지 추출/API 연결 지침은 아래 문서를 최우선으로 읽어야 합니다.
+
+```txt
+AI_DEVELOPER_CHATBOT_HANDOFF.md
+```
+
+개발자 또는 개발자 AI에게 “이 git 파일을 참고해서 UI 화면을 그대로 복사해서 사용해줘”라고 전달할 때는 위 문서를 함께 전달하세요. 이 문서는 현재 git의 React/CSS를 UI 원본으로 삼고, AI 챗봇 API, PDF에서 추출한 이미지, 지도 위 이미지 배치/수정/삭제 UX까지 최신 상태로 정리합니다.
+
+최신 구현 기준:
+
+- 화면 원본: 현재 git의 React 컴포넌트
+- 스타일 원본: `solvekdesignsystem-web/css/index.css` 및 component CSS
+- 챗봇 기능 원본: `solvek-react/src/features/report-chat/`
+- 이미지 비교 후보: API가 PDF에서 추출한 도면/페이지 이미지 URL을 반환
+- 지도 배치 이미지: 이미지 비교 후보의 `지도에서 보기`에서만 등장
+- 적용 완료 후: 지도 좌표에 고정, 수정/삭제 관리 UX 제공
+- 토스트: 기존 `복사 완료` 토스트 UI와 동일한 클래스/모션 사용
+- 보고서 선택 최대 개수: 프론트에서 임의 제한 금지, API 정책으로 처리
+
+이 저장소는 가야역사문화권 발굴보고서 검색/챗봇 프로토타입 전달본입니다. 개발자가 새 UI 화면을 다시 만들거나 개발자용 AI에게 구현을 맡길 때는 아래 읽기 순서를 전달 체크리스트로 사용합니다.
 
 ## Read Order
 
-1. `UI_SOURCE_OF_TRUTH.md`
-2. `CLAUDE_CODE_IMPLEMENTATION_GUIDE.md`
-3. `PROTOTYPE_OVERVIEW.md`
-4. `DEVELOPER_HANDOFF.md`
+1. `AI_DEVELOPER_CHATBOT_HANDOFF.md`
+2. `UI_SOURCE_OF_TRUTH.md`
+3. `DEVELOPER_HANDOFF.md`
+4. `PROTOTYPE_OVERVIEW.md`
 5. `solvek-react/src/features/report-search/README.md`
 6. `solvek-react/src/features/report-search/MAIN_UI_SCREEN_SPEC.md`
 7. `solvek-react/src/features/report-search/MAIN_UI_REPLACEMENT_HANDOFF.md`
@@ -18,18 +39,19 @@
 12. `solvek-react/src/features/report-chat/CHAT_UI_REPLACEMENT_HANDOFF.md`
 13. `solvek-react/src/features/report-chat/PROTOTYPE_FLOW.md`
 14. `solvek-react/src/features/report-chat/COMPONENT_RULES.md`
-15. `solvekdesignsystem-web/README.md`
-16. `solvekdesignsystem-web/CLAUDE.md`
+15. `solvekdesignsystem-web/css/index.css`
+16. `solvekdesignsystem-web/README.md`
+17. `solvekdesignsystem-web/CLAUDE.md`
 
 ## Project Map
 
 - `solvek-react/`: 현재 동작하는 React 프로토타입입니다.
 - `UI_SOURCE_OF_TRUTH.md`: 이 git 자체가 UI 원본임을 명시하고 메인/챗봇 원본 React 파일과 CSS 경로를 안내하는 최상위 문서입니다.
 - `solvek-react/src/App.tsx`: 앱 루트입니다. 메인 검색 화면과 보고서 채팅 화면 전환을 관리합니다.
-- `solvek-react/src/features/report-chat/ChatPage.tsx`: 선택한 보고서 기반 채팅 화면 초안입니다.
+- `solvek-react/src/features/report-chat/ChatPage.tsx`: 선택한 보고서 기반 채팅 화면 컨테이너입니다.
 - `solvek-react/src/features/report-chat/CHAT_UI_SCREEN_SPEC.md`: 사용자가 제공한 새 챗봇 UI 화면을 CSS/React 구분/치수/반응형 기준으로 복사하기 위한 화면 정의서입니다.
 - `solvek-react/src/features/report-chat/CHAT_UI_REPLACEMENT_HANDOFF.md`: 사용자가 제공한 새 챗봇 UI 화면을 기능 손상 없이 덮어쓰기 위한 최우선 상세 인수인계 문서입니다.
-- `solvek-react/src/features/report-chat/components/`: 채팅 본문, 선택 보고서 패널, 검색 모달, 원문 패널 컴포넌트입니다.
+- `solvek-react/src/features/report-chat/components/`: 채팅 본문, 선택 보고서 패널, 검색 모달, 원문/지도 패널 컴포넌트입니다.
 - `solvek-react/src/features/report-search/MainSearchPage.tsx`: 발굴보고서 검색 메인 화면의 상태와 화면 흐름입니다.
 - `solvek-react/src/features/report-search/MAIN_UI_SCREEN_SPEC.md`: 사용자가 제공한 새 메인 UI 화면을 CSS/React 구분/치수/반응형 기준으로 복사하기 위한 화면 정의서입니다.
 - `solvek-react/src/features/report-search/MAIN_UI_REPLACEMENT_HANDOFF.md`: 새 메인 UI 화면을 기능 손상 없이 덮어쓰기 위한 인수인계 문서입니다.
@@ -71,9 +93,12 @@ npm exec -- parcel serve index.html --host 0.0.0.0 --port 5173 --no-cache
 - 채팅 화면의 보고서 검색 모달
 - 채팅 답변의 근거 버튼
 - 오른쪽 원문 패널과 유사도 표시
+- 오른쪽 지도 패널, 지도 설정, 레이어, 마커 tooltip
+- 이미지 업로드 기반 AI 유사후보 카드
+- 유사후보의 `지도에서 보기` 기반 도면 이미지 배치/적용/수정/삭제
 - 채팅 메시지 영역과 메시지 입력 영역
 
-현재 `채팅하기` 버튼은 선택한 보고서 id를 `App.tsx`로 넘기고, `App.tsx`가 해당 id에 맞는 `Report[]`를 찾아 `ChatPage`로 전달합니다. 실제 AI 답변 API는 아직 연결 전이며, 채팅 화면에는 백엔드 연결 전용 placeholder 응답이 들어 있습니다.
+현재 `채팅하기` 버튼은 선택한 보고서 id를 `App.tsx`로 넘기고, `App.tsx`가 해당 id에 맞는 `Report[]`를 찾아 `ChatPage`로 전달합니다. 실제 AI 답변/API/PDF 추출/GIS 데이터는 아직 mock 구조이며, 현재 React state/handler 흐름을 유지한 채 API 응답으로 치환해야 합니다.
 
 ## Backend Contract Draft
 
@@ -97,7 +122,11 @@ type Report = {
 - `POST /search-history`: 최근 검색어 저장
 - `POST /chat/sessions`: 선택 보고서 기반 채팅 세션 생성
 - `POST /chat/messages`: 질문 전송 및 답변/근거 수신
+- `POST /chat/uploads`: 챗봇 이미지 첨부 업로드
+- `POST /chat/image-search`: 업로드 이미지와 보고서 PDF 추출 이미지 유사후보 검색
 - `GET /reports/{id}/pages/{page}`: 원문 이미지 또는 뷰어 URL 조회
+- `GET /reports/{id}/drawings/{drawingId}/image`: 지도 배치용 도면/페이지 이미지 URL 조회
+- `GET /maps/reverse-geocode?lat=&lng=`: 지도 중심 좌표 기반 주소 조회
 
 ## Important Notes For AI Implementation
 
@@ -110,6 +139,8 @@ type Report = {
 - 챗봇 화면의 좌측 패널은 메인에서 선택한 보고서만 기본 목록으로 사용합니다.
 - 챗봇 화면에서는 최소 1건 이상 선택 상태를 유지합니다.
 - 원문 패널의 `similarityScore`는 버튼이 아니라 AI가 찾은 근거와 원문 페이지의 유사도 표시값입니다.
+- 지도 위 도면 이미지는 이미지 유사후보의 `지도에서 보기`를 눌렀을 때만 표시합니다.
+- PDF 페이지 rasterizing, 도면 crop, thumbnail 생성, 지도 배치용 이미지 생성은 서버/API 책임입니다.
 
 ## Toast Logic
 

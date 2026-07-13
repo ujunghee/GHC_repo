@@ -1,19 +1,28 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import type { KeyboardEvent, PointerEvent } from "react";
 import * as L from "leaflet";
-import "leaflet/dist/leaflet.css";
 
 import { mapDocument } from "../data";
 import { springSoft, tapScale } from "../../report-search/motionConfig";
 import type { MapDocument, MapLayerNode } from "../types";
 import { ResizeHandle } from "./ResizeHandle";
 
+export type MapOverlayRequest = {
+  requestId: string;
+  candidateId: number;
+  imageUrl: string;
+  title: string;
+  reportTitle: string;
+  pageLabel: string;
+};
+
 type MapPanelProps = {
   embedded?: boolean;
   width?: number;
   isResizing?: boolean;
   isResizeHover?: boolean;
+  overlayRequest?: MapOverlayRequest | null;
   onResizeStart?: (event: PointerEvent<HTMLDivElement>) => void;
   onResizeEnter?: () => void;
   onResizeLeave?: () => void;
@@ -65,6 +74,12 @@ type ReportOverlayDrag =
       startRotation: number;
     };
 
+type AppliedReportOverlay = {
+  container: HTMLDivElement;
+  bounds: L.LatLngBounds;
+  update: () => void;
+};
+
 const MAX_ACTIVE_LAYERS = 5;
 const INITIAL_MAP_CENTER: L.LatLngExpression = [35.272, 128.406];
 const INITIAL_MAP_ZOOM = 14;
@@ -74,7 +89,7 @@ const MAP_LOCATION_ADDRESS = mapDocument.location;
 const MAP_MARKER_REPORT_INFO = "함안 윤내리 토기가마 I · 도면 14. 1~2호 토기가마 평면도";
 const REPORT_OVERLAY_IMAGE_URL = "./image/sample/report-page-map.svg";
 const REPORT_OVERLAY_INITIAL: ReportOverlayState = {
-  visible: true,
+  visible: false,
   x: 430,
   y: 210,
   width: 250,
@@ -104,6 +119,7 @@ export function MapPanel({
   width = 0,
   isResizing = false,
   isResizeHover = false,
+  overlayRequest = null,
   onResizeStart,
   onResizeEnter,
   onResizeLeave,
@@ -139,8 +155,40 @@ export function MapPanel({
   const reverseGeocodeSeqRef = useRef(0);
   const reportOverlayDragRef = useRef<ReportOverlayDrag | null>(null);
   const reportOverlayRef = useRef<HTMLDivElement>(null);
+  const appliedReportImageOverlayRef = useRef<AppliedReportOverlay | null>(null);
+  const applyToastTimerRef = useRef<number | null>(null);
   const [reportOverlay, setReportOverlay] = useState<ReportOverlayState>(REPORT_OVERLAY_INITIAL);
+  const [isImageAdjustExpanded, setIsImageAdjustExpanded] = useState(false);
+  const [isReportOverlayApplied, setIsReportOverlayApplied] = useState(false);
+  const [isApplyToastVisible, setIsApplyToastVisible] = useState(false);
   checkedOrderRef.current = checkedOrder;
+
+  useEffect(() => {
+    if (!overlayRequest) {
+      removeAppliedReportImageOverlay();
+      setReportOverlay((current) => ({ ...current, visible: false }));
+      setIsImageAdjustExpanded(false);
+      setIsReportOverlayApplied(false);
+      setIsApplyToastVisible(false);
+      return;
+    }
+
+    removeAppliedReportImageOverlay();
+    setReportOverlay({ ...REPORT_OVERLAY_INITIAL, visible: true });
+    setIsImageAdjustExpanded(true);
+    setIsReportOverlayApplied(false);
+    setIsApplyToastVisible(false);
+  }, [overlayRequest?.requestId]);
+
+  useEffect(() => {
+    return () => {
+      if (applyToastTimerRef.current !== null) {
+        window.clearTimeout(applyToastTimerRef.current);
+      }
+
+      removeAppliedReportImageOverlay();
+    };
+  }, []);
 
   useEffect(() => {
     if (!mapContainerRef.current || leafletMapRef.current) return;
@@ -329,6 +377,112 @@ export function MapPanel({
     setReportOverlay((current) => ({ ...current, ...next }));
   };
 
+  const removeAppliedReportImageOverlay = () => {
+    const appliedOverlay = appliedReportImageOverlayRef.current;
+    const map = leafletMapRef.current;
+
+    if (appliedOverlay && map) {
+      map.off("zoomend viewreset resize moveend", appliedOverlay.update);
+      appliedOverlay.container.remove();
+    }
+
+    appliedReportImageOverlayRef.current = null;
+  };
+
+  const createAppliedReportImageOverlay = (bounds: L.LatLngBounds) => {
+    const map = leafletMapRef.current;
+    if (!map) return;
+
+    removeAppliedReportImageOverlay();
+
+    const container = document.createElement("div");
+    const image = document.createElement("img");
+    container.className = "map-applied-report-overlay";
+    image.src = overlayRequest?.imageUrl ?? REPORT_OVERLAY_IMAGE_URL;
+    image.alt = "";
+    image.draggable = false;
+    image.style.opacity = String(reportOverlay.opacity);
+    image.style.transform = `rotate(${reportOverlay.rotation}deg)`;
+    container.appendChild(image);
+    map.getPanes().overlayPane.appendChild(container);
+
+    const update = () => {
+      const northWestPoint = map.latLngToLayerPoint(bounds.getNorthWest());
+      const southEastPoint = map.latLngToLayerPoint(bounds.getSouthEast());
+      L.DomUtil.setPosition(container, northWestPoint);
+      container.style.width = `${Math.max(1, southEastPoint.x - northWestPoint.x)}px`;
+      container.style.height = `${Math.max(1, southEastPoint.y - northWestPoint.y)}px`;
+    };
+
+    update();
+    map.on("zoomend viewreset resize moveend", update);
+    appliedReportImageOverlayRef.current = { container, bounds, update };
+  };
+
+  const resetReportOverlay = () => {
+    removeAppliedReportImageOverlay();
+    setReportOverlay({ ...REPORT_OVERLAY_INITIAL, visible: true });
+    setIsReportOverlayApplied(false);
+    setIsImageAdjustExpanded(true);
+  };
+
+  const deleteReportOverlay = () => {
+    removeAppliedReportImageOverlay();
+    setReportOverlay((current) => ({ ...current, visible: false }));
+    setIsImageAdjustExpanded(false);
+    setIsReportOverlayApplied(false);
+    setIsApplyToastVisible(false);
+  };
+
+  const applyReportOverlay = () => {
+    const map = leafletMapRef.current;
+    if (map) {
+      const northWest = map.containerPointToLatLng(L.point(reportOverlay.x, reportOverlay.y));
+      const southEast = map.containerPointToLatLng(
+        L.point(reportOverlay.x + reportOverlay.width, reportOverlay.y + reportOverlay.height),
+      );
+      const bounds = L.latLngBounds(northWest, southEast);
+      createAppliedReportImageOverlay(bounds);
+    }
+
+    setIsReportOverlayApplied(true);
+    setIsImageAdjustExpanded(false);
+    setIsApplyToastVisible(true);
+
+    if (applyToastTimerRef.current !== null) {
+      window.clearTimeout(applyToastTimerRef.current);
+    }
+
+    applyToastTimerRef.current = window.setTimeout(() => {
+      setIsApplyToastVisible(false);
+      applyToastTimerRef.current = null;
+    }, 1600);
+  };
+
+  const editAppliedReportOverlay = () => {
+    const map = leafletMapRef.current;
+    const bounds = appliedReportImageOverlayRef.current?.bounds;
+
+    if (map && bounds) {
+      const northWestPoint = map.latLngToContainerPoint(bounds.getNorthWest());
+      const southEastPoint = map.latLngToContainerPoint(bounds.getSouthEast());
+
+      setReportOverlay((current) => ({
+        ...current,
+        visible: true,
+        x: northWestPoint.x,
+        y: northWestPoint.y,
+        width: Math.max(REPORT_OVERLAY_MIN_WIDTH, southEastPoint.x - northWestPoint.x),
+        height: Math.max(REPORT_OVERLAY_MIN_HEIGHT, southEastPoint.y - northWestPoint.y),
+      }));
+    }
+
+    removeAppliedReportImageOverlay();
+    setIsReportOverlayApplied(false);
+    setIsImageAdjustExpanded(true);
+    setIsApplyToastVisible(false);
+  };
+
   const startReportOverlayMove = (event: PointerEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -386,6 +540,12 @@ export function MapPanel({
     event.preventDefault();
     event.stopPropagation();
 
+    if (drag.mode === "rotate") {
+      const nextAngle = getPointerAngle(event.clientX, event.clientY, drag.centerX, drag.centerY);
+      updateReportOverlay({ rotation: Math.round(drag.startRotation + nextAngle - drag.startAngle) });
+      return;
+    }
+
     const deltaX = event.clientX - drag.startClientX;
     const deltaY = event.clientY - drag.startClientY;
 
@@ -394,12 +554,6 @@ export function MapPanel({
         x: drag.startX + deltaX,
         y: drag.startY + deltaY,
       });
-      return;
-    }
-
-    if (drag.mode === "rotate") {
-      const nextAngle = getPointerAngle(event.clientX, event.clientY, drag.centerX, drag.centerY);
-      updateReportOverlay({ rotation: Math.round(drag.startRotation + nextAngle - drag.startAngle) });
       return;
     }
 
@@ -448,7 +602,7 @@ export function MapPanel({
     event.stopPropagation();
 
     if (event.key === "Delete" || event.key === "Backspace") {
-      updateReportOverlay({ visible: false });
+      deleteReportOverlay();
       return;
     }
 
@@ -481,7 +635,31 @@ export function MapPanel({
           <div ref={mapContainerRef} className="map-panel__leaflet" />
         </div>
 
-        {reportOverlay.visible && (
+        <AnimatePresence>
+          {isApplyToastVisible && (
+            <motion.div
+              key="map-apply-toast"
+              className="toast active bg-blue-50 radius-md-8 shadow-lg px-16 py-8 flex align-center gap-6 z-index-10"
+              role="status"
+              initial={{ opacity: 0, y: -32, x: "-50%" }}
+              animate={{ opacity: 1, y: 0, x: "-50%" }}
+              exit={{ opacity: 0, y: -24, x: "-50%" }}
+              transition={springSoft}
+              style={{
+                position: "absolute",
+                top: "3.2rem",
+                left: "50%",
+                zIndex: 1300,
+                visibility: "visible",
+                transition: "none",
+              }}
+            >
+              <span className="body2-sb-16 color-blue-500">적용 완료</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {reportOverlay.visible && !isReportOverlayApplied && (
           <div
             ref={reportOverlayRef}
             className="map-report-overlay"
@@ -502,7 +680,7 @@ export function MapPanel({
             }}
           >
             <img
-              src={REPORT_OVERLAY_IMAGE_URL}
+              src={overlayRequest?.imageUrl ?? REPORT_OVERLAY_IMAGE_URL}
               alt="보고서 도면 3. 조사지역 지질도"
               draggable={false}
               style={{ opacity: reportOverlay.opacity }}
@@ -538,7 +716,7 @@ export function MapPanel({
               onPointerDown={(event) => event.stopPropagation()}
               onClick={(event) => {
                 event.stopPropagation();
-                updateReportOverlay({ visible: false });
+                deleteReportOverlay();
               }}
             >
               ×
@@ -568,17 +746,17 @@ export function MapPanel({
           />
         )}
 
-        {reportOverlay.visible && (
+        {reportOverlay.visible && isImageAdjustExpanded && (
           <div className="map-image-adjust-panel" aria-label="이미지 조정">
             <div className="map-image-adjust-panel__head">
               <h3 className="body2-sb-16 color-slate-900">이미지 조정</h3>
               <button
                 className="map-panel__icon-btn"
                 type="button"
-                aria-label="이미지 조정 초기화"
-                onClick={() => setReportOverlay(REPORT_OVERLAY_INITIAL)}
+                aria-label="이미지 조정 접기"
+                onClick={() => setIsImageAdjustExpanded(false)}
               >
-                <i className="applied-reset-icon" aria-hidden="true"></i>
+                <i className="align-corner-icon" aria-hidden="true"></i>
               </button>
             </div>
             <label className="map-image-adjust-panel__row">
@@ -621,20 +799,57 @@ export function MapPanel({
               </div>
               <span className="body3-sb-14 color-slate-900">{reportOverlay.rotation}°</span>
             </div>
-            <div className="map-image-adjust-panel__foot">
-              <button className="slate-50-button-32" type="button" onClick={() => setReportOverlay(REPORT_OVERLAY_INITIAL)}>
+            <div className="map-image-adjust-panel__foot flex">
+              <button className="slate-50-button-32 flex-1" type="button" onClick={resetReportOverlay}>
                 초기화
               </button>
-              <button className="map-image-adjust-panel__delete slate-50-button-32" type="button" onClick={() => updateReportOverlay({ visible: false })}>
+              <button className="map-image-adjust-panel__delete slate-50-button-32 flex-1" type="button" onClick={deleteReportOverlay}>
                 이미지 삭제
+              </button>
+              <button className="map-image-adjust-panel__apply blue-button-32 flex-1" type="button" onClick={applyReportOverlay}>
+                이미지 적용 완료
               </button>
             </div>
           </div>
         )}
 
+        {reportOverlay.visible && isReportOverlayApplied && (
+          <div className="map-image-manage-panel" aria-label="적용된 이미지 관리">
+            <div>
+              <p className="body3-sb-14 color-slate-900">이미지 적용 완료</p>
+              <p className="body4-r-13 color-slate-600">지도 위치에 고정됨</p>
+            </div>
+            <div className="map-image-manage-panel__actions">
+              <button className="slate-50-button-32" type="button" onClick={editAppliedReportOverlay}>
+                수정
+              </button>
+              <button className="map-image-adjust-panel__delete slate-50-button-32" type="button" onClick={deleteReportOverlay}>
+                삭제
+              </button>
+            </div>
+          </div>
+        )}
+
+        {reportOverlay.visible && !isImageAdjustExpanded && !isReportOverlayApplied && (
+          <button
+            className="map-image-adjust-panel map-image-adjust-panel--collapsed"
+            type="button"
+            aria-label={isReportOverlayApplied ? "적용된 이미지 다시 조정" : "이미지 조정 펼치기"}
+            onClick={() => {
+              setIsImageAdjustExpanded(true);
+              setIsReportOverlayApplied(false);
+            }}
+          >
+            <span className="body2-sb-16 color-slate-900">
+              {isReportOverlayApplied ? "이미지 적용 완료" : "이미지 조정"}
+            </span>
+            <i className="align-corner-icon" aria-hidden="true"></i>
+          </button>
+        )}
+
         <div
           className="map-panel__map-type absolute"
-          style={{ left: isSettingsExpanded ? "27.4rem" : "2rem", bottom: "2rem" }}
+          style={{ left: isSettingsExpanded ? "27.4rem" : "1.6rem", bottom: "1.6rem" }}
         >
           <div className="radio-toggle-group" role="radiogroup" aria-label="지도 유형">
             {mapTypes.map((item) => (
