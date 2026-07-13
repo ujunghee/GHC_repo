@@ -1,6 +1,8 @@
 # Claude Code Implementation Guide
 
-이 문서는 Python 백엔드 개발자와 Claude Code가 현재 React 프로토타입을 기준으로 새 UI를 재구현하기 위한 구현 지시서입니다. 최신 챗봇/이미지/지도 배치 기준은 루트의 `AI_DEVELOPER_CHATBOT_HANDOFF.md`가 최우선입니다.
+이 문서는 Python 백엔드 개발자와 Claude Code가 현재 React 프로토타입을 기준으로 UI를 이식하기 위한 구현 지시서입니다. 최신 챗봇/이미지/지도 배치 기준은 루트의 `AI_DEVELOPER_CHATBOT_HANDOFF.md`가 최우선입니다.
+
+기존 챗봇 저장소에 적용하는 작업이라면 GHC를 별도 앱으로 새로 만들거나 iframe으로 얹지 않습니다. 기존 챗봇의 로그인, 사용자 세션, 대화방, 대화 기록, 질문 전송, AI 응답 스트리밍, 중단/재생성/복사, 파일 업로드, 오류/로딩 처리, 백엔드 API, DB 연결은 유지하고, 기존 챗봇 UI만 이 저장소의 React/CSS 화면으로 교체합니다. `data.ts` mock 응답은 운영 데이터로 사용하지 말고 기존 챗봇 API 응답을 GHC UI 타입으로 변환하는 adapter를 만듭니다.
 
 ## Read This First
 
@@ -35,7 +37,7 @@
 5. 사용자는 보고서를 직접 선택하거나 그룹 헤더의 `채팅하기`를 누른다.
 6. 선택한 보고서 id 전체를 채팅 시작 흐름으로 넘긴다.
 7. 챗봇 화면에서 선택 보고서 목록, 질문 추천, 메시지 입력, 원문/지도 패널을 사용한다.
-8. 이미지를 업로드해 질문하면 AI가 PDF에서 추출한 도면/페이지 이미지 후보를 반환하고, 사용자는 후보 이미지를 지도 위에 맞춰 적용/수정/삭제할 수 있다.
+8. 이미지를 업로드해 질문하면 AI가 PDF에서 추출한 도면/페이지 이미지 후보를 반환하고, 사용자는 후보 이미지를 지도 위에서 적용 상태로 확인한 뒤 필요할 때만 수정/삭제할 수 있다.
 
 ## Technology Assumption
 
@@ -47,7 +49,7 @@
 - Django + templates + static CSS/JS
 - FastAPI/Django API + 별도 프론트엔드
 
-어떤 방식을 쓰더라도 화면 구조, CSS class, 상태 흐름은 이 문서와 React TSX를 기준으로 맞춘다.
+어떤 방식을 쓰더라도 화면 구조, CSS class, 상태 흐름은 이 문서와 React TSX를 기준으로 맞춘다. 단, 기존 챗봇이 이미 있다면 API/세션/스트리밍/업로드 service는 기존 코드를 유지하고 UI 이벤트만 연결한다.
 
 ## Required Screens
 
@@ -102,8 +104,11 @@
 - 원문 버튼 클릭 시 오른쪽 원문 패널 표시
 - 이미지 첨부 후 전송 시 AI 유사후보 카드 표시
 - 유사후보 `지도에서 보기` 클릭 시 오른쪽 지도 패널과 도면 이미지 배치 UX 표시
-- 지도 이미지 적용 전에는 이동/비율 유지 resize/회전/투명도/삭제/초기화 가능
-- `이미지 적용 완료` 후에는 기존 토스트 UI로 `적용 완료` 표시, 지도 좌표 고정, 수정/삭제 관리 패널 제공
+- 지도 이미지 최초 진입 시 적용 완료 상태로 지도 좌표 고정
+- `이미지 수정`을 눌렀을 때만 이동/비율 유지 resize/회전/투명도/삭제/초기화 가능
+- `이미지 적용 완료` 후에는 기존 토스트 UI로 `적용 완료` 표시, 지도 좌표 고정, 이미지 수정/이미지 삭제 관리 패널 제공
+- 채팅 입력창 첨부 이미지는 고정 preview만 제공하고 지도 편집 기능을 붙이지 않음
+- 최소화된 지도 설정 popup은 헤더 drag로 위치 이동 가능
 - 오른쪽 상단 layout icon으로 원문/지도 패널 접기/펼치기
 - 오른쪽 원문/지도 패널 resize 가능
 
@@ -743,9 +748,12 @@ static/
 개발자가 Claude Code에 줄 수 있는 프롬프트 예시:
 
 ```txt
-이 저장소의 CLAUDE_CODE_IMPLEMENTATION_GUIDE.md를 최우선으로 읽고, React 프로토타입의 기능을 Python 백엔드 기반 UI로 재구현해줘.
+이 저장소의 AI_DEVELOPER_CHATBOT_HANDOFF.md와 CLAUDE_CODE_IMPLEMENTATION_GUIDE.md를 최우선으로 읽고, 기존 챗봇 기능은 유지한 채 React 프로토타입의 UI를 이식해줘.
 
 중요 조건:
+- 기존 챗봇의 API, DB, AI, 세션, 스트리밍, 파일 업로드, 로그인, 대화 기록 기능은 유지한다.
+- GHC_repo를 별도 앱으로 새로 개발하거나 iframe으로 얹지 않는다.
+- data.ts mock 응답은 운영 데이터로 쓰지 않고 기존 챗봇 API 응답을 GHC UI 타입으로 변환하는 adapter를 만든다.
 - solvekdesignsystem-web/css/index.css와 기존 class를 우선 사용한다.
 - 의미 없는 식별용 class는 만들지 않는다.
 - 검색 메인과 챗봇 화면의 상태 흐름은 React TSX를 기준으로 유지한다.

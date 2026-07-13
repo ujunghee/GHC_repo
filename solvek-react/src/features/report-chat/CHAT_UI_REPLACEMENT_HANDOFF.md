@@ -9,17 +9,65 @@
 - 이미지 업로드 기반 AI 유사후보
 - PDF에서 추출한 도면/페이지 이미지 사용
 - 유사후보 카드의 `지도에서 보기`
-- 지도 위 이미지 배치/수정/삭제
+- 지도 위 이미지 최초 적용 완료 상태 표시
+- 관리 패널의 `이미지 수정`/`이미지 삭제`
 - 적용 완료 후 지도 좌표 고정
 - 기존 토스트 UI를 재사용한 `적용 완료`
+- 채팅 첨부 이미지는 고정 preview만 제공
+- 최소화된 지도 설정 popup drag 이동
 - 보고서 선택 수 프론트 임의 제한 금지
 
 이 문서는 챗봇 화면 UI를 사용자가 제공한 새 화면 파일로 덮어쓸 때, 현재 개발된 기능을 손상하지 않도록 다음 개발자 또는 AI가 반드시 따라야 하는 바톤터치 문서입니다.
 
+## 기존 챗봇 위 UI 교체 작업 정의
+
+이 문서는 GHC 화면을 새 앱으로 만들기 위한 문서가 아닙니다. 기존 챗봇 저장소가 따로 있다면 그 저장소의 기능 로직을 유지하고, 기존 챗봇의 UI만 이 저장소의 화면으로 교체합니다.
+
+유지해야 할 기존 챗봇 기능:
+
+- 로그인과 사용자 세션
+- 대화방 생성과 대화 기록
+- 질문 전송과 AI 응답 스트리밍
+- 응답 중단, 재생성, 복사
+- 파일 업로드
+- 오류, 로딩, empty 상태 처리
+- 백엔드 API와 DB 연결
+- 인증 토큰과 사용자 권한 처리
+
+교체할 부분:
+
+- 챗봇 화면 레이아웃
+- 왼쪽 보고서 패널
+- 중앙 대화 영역과 입력창
+- 추천 질문
+- 오른쪽 원문/지도 패널
+- 보고서 검색 모달
+- CSS와 아이콘
+
+금지:
+
+- GHC를 기존 챗봇과 별도 앱으로 새로 개발하지 않습니다.
+- 기존 챗봇 화면 위에 iframe으로 얹지 않습니다.
+- 기존 챗봇 API, 세션, 스트리밍, 파일 업로드, 대화 기록 기능을 삭제하거나 전체 재작성하지 않습니다.
+- `data.ts` mock 응답을 실제 운영 데이터로 사용하지 않습니다.
+
+통합 구조:
+
+```txt
+기존 챗봇
+├─ API·DB·AI·세션·스트리밍 ── 유지
+├─ 기존 상태관리·서비스      ── 유지
+└─ 기존 임의 UI              ── 교체
+                               ↓
+                       GHC React/CSS UI
+```
+
+기존 챗봇이 React라면 이 폴더의 컴포넌트를 이식하고, Vue/Svelte라면 동일한 화면 구조와 이벤트 계약을 해당 프레임워크로 옮깁니다. Django/Jinja 또는 순수 HTML/JS라면 React 부분 마운트 또는 HTML/CSS 재구현을 선택합니다. Streamlit/Gradio라면 기본 컴포넌트만으로 동일 UI 구현이 어려우므로 별도 프론트엔드 또는 커스텀 컴포넌트가 필요할 수 있습니다.
+
 핵심 원칙:
 
 - 새 UI 파일은 시각 기준입니다. 픽셀, 레이아웃, 여백, 타이포, 색, 버튼 배치, 패널 모양은 사용자가 준 화면을 최대한 그대로 복제합니다.
-- 현재 React 코드의 상태, 이벤트, 데이터 흐름은 기능 기준입니다. UI를 바꿔도 아래 state, handler, props, 접근성, API 연결 지점은 유지해야 합니다.
+- 현재 React 코드의 상태, 이벤트, 데이터 흐름은 GHC UI를 이해하기 위한 기준입니다. 실제 통합에서는 기존 챗봇의 API/상태관리/세션/스트리밍 로직을 유지하고 GHC UI 이벤트에 연결해야 합니다.
 - 챗봇 기능을 다시 만들지 말고, 현재 기능 위에 새 UI를 입힙니다.
 - 화면이 비슷해 보여도 기능이 끊기면 실패입니다. 반대로 기능이 살아도 사용자가 준 UI와 다르면 실패입니다.
 
@@ -482,6 +530,8 @@ type ChatMessage = {
 - drag/drop으로 이미지 첨부 가능
 - drag 중 overlay 표시
 - unmount 또는 교체 시 object URL revoke
+- 첨부 preview는 이동/회전/resize/투명도 조정을 지원하지 않음
+- 지도 위 도면 이미지 편집 기능을 첨부 preview에 붙이면 안 됨
 
 유지해야 할 상수:
 
@@ -590,6 +640,11 @@ type SourceDocument = {
 - `MapPanel`은 source와 같은 오른쪽 패널 영역에 들어갑니다.
 - `onOpenMap`이 호출되면 `rightPanelMode`가 `"map"`이 됩니다.
 - `MapPanel` 내부의 레이어 tree, active layer, map type, advanced tab 기능은 유지해야 합니다.
+- 이미지 후보의 `지도에서 보기` 최초 진입 시 후보 이미지는 편집 overlay가 아니라 적용 완료 상태로 지도 위에 표시합니다.
+- 우하단 관리 패널은 `이미지 적용 완료 / 지도 위치에 고정됨`, `이미지 수정`, `이미지 삭제`를 제공합니다.
+- `이미지 수정`을 눌렀을 때만 이동/회전/resize/투명도 조정 편집 UI를 표시합니다.
+- `이미지 적용 완료`를 누르면 기존 toast UI로 `적용 완료`를 표시하고 다시 지도 좌표에 고정합니다.
+- 최소화된 지도 설정 popup은 헤더 drag로 위치 이동할 수 있어야 합니다.
 
 주의:
 
@@ -619,6 +674,18 @@ type SourceDocument = {
 ## API Integration Notes
 
 현재는 프로토타입 데이터입니다.
+
+실제 기존 챗봇과 통합할 때는 `data.ts`를 운영 데이터로 쓰지 말고 adapter 계층을 둡니다. adapter는 기존 챗봇 API 응답, 스트리밍 chunk, 업로드 응답, 근거/원문/PDF 응답을 이 화면이 기대하는 타입으로 변환합니다.
+
+권장 adapter 연결:
+
+- 기존 chat room/session → `selectedReports`, `panelReportIds`, `activeReportIds`
+- 기존 message history → `ChatMessage[]`
+- 기존 streaming answer chunk → assistant message text 누적 업데이트
+- 기존 upload response → `imageFileId`, `previewUrl`, `imageUrl`
+- 기존 evidence/source response → `answerFacts`, `SourceDocument`
+- 기존 image search/PDF extraction response → `DrawingCandidate[]`
+- 기존 API error → toast message
 
 교체 지점:
 
@@ -733,17 +800,22 @@ UI 교체 전:
 아래 프롬프트를 다음 개발 AI에게 그대로 전달할 수 있습니다.
 
 ```txt
-사용자가 제공한 챗봇 UI 화면 파일을 시각 기준으로 삼아 현재 React 챗봇 화면에 그대로 입혀줘.
+기존에 개발된 챗봇의 API, 상태관리, 세션, 메시지 송수신, 스트리밍, 파일 업로드 기능은 유지해줘.
+기존 챗봇 UI만 GHC_repo의 solvek-react/src/features/report-chat/ 화면으로 교체해줘.
+GHC_repo를 별도 앱으로 새로 개발하거나 기존 챗봇 위에 iframe으로 얹지 마.
+기존 기능 로직을 GHC UI 컴포넌트의 이벤트와 연결하는 방식으로 통합해줘.
 
 반드시 먼저 읽을 문서:
-1. solvek-react/src/features/report-chat/CHAT_UI_REPLACEMENT_HANDOFF.md
-2. solvek-react/src/features/report-chat/README.md
-3. solvek-react/src/features/report-chat/COMPONENT_RULES.md
-4. solvek-react/src/features/report-search/COMPONENT_RULES.md
+1. AI_DEVELOPER_CHATBOT_HANDOFF.md
+2. UI_SOURCE_OF_TRUTH.md
+3. solvek-react/src/features/report-chat/CHAT_UI_REPLACEMENT_HANDOFF.md
+4. solvek-react/src/features/report-chat/CHAT_UI_SCREEN_SPEC.md
+5. solvek-react/src/features/report-chat/COMPONENT_RULES.md
 
 절대 지켜야 할 조건:
-- 새 UI는 사용자가 준 화면과 최대한 동일하게 구현한다.
-- 현재 개발된 기능은 삭제하지 않는다.
+- 기존 챗봇의 로그인, 사용자 세션, 대화방 생성, 대화 기록, 질문 전송, AI 응답 스트리밍, 중단, 재생성, 복사, 파일 업로드, 오류/로딩 처리, 백엔드 API, DB 연결을 삭제하지 않는다.
+- 새 UI는 GHC React/CSS 화면과 최대한 동일하게 구현한다.
+- data.ts의 목업 응답은 사용하지 말고 기존 챗봇 API 응답을 GHC UI 타입으로 변환하는 adapter를 만들어 연결한다.
 - ChatPage의 state/handler 계약을 유지한다.
 - ReportChatSidePanel, ChatConversation, ChatSearchModal, SourcePanel, MapPanel의 역할 경계를 유지한다.
 - 보고서 선택 개수 제한을 프론트에 하드코딩하지 않는다.

@@ -374,10 +374,9 @@
   bottom: 1.6rem;
   z-index: 900;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 1.2rem;
-  width: 26rem;
+  width: fit-content;
   padding: 1.4rem;
   border: 1px solid var(--slate-300);
   border-radius: var(--radius-md-8);
@@ -448,6 +447,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.6rem;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.map-settings-popup__head:active {
+  cursor: grabbing;
 }
 
 .map-settings-popup__body {

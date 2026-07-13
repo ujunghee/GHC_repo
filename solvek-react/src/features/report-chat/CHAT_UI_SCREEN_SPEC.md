@@ -6,15 +6,21 @@
 
 이 화면 스펙을 읽는 개발자 AI는 아래를 반드시 유지해야 합니다.
 
+- 기존 챗봇 저장소에 적용하는 경우, 기존 API/DB/AI/세션/스트리밍/업로드/대화 기록은 유지하고 UI만 교체합니다.
+- GHC를 별도 앱으로 새로 개발하거나 iframe으로 얹지 않습니다.
+- `data.ts` mock 응답은 운영 데이터로 쓰지 않고 기존 챗봇 API 응답을 GHC UI 타입으로 변환하는 adapter를 만듭니다.
 - 현재 git의 React 컴포넌트를 UI 원본으로 사용합니다.
 - `solvekdesignsystem-web/css/index.css`와 기존 component CSS를 스타일 원본으로 사용합니다.
 - 이미지 업로드 후 유사후보 UI는 `ChatConversation.tsx`의 `DrawingCandidateSummary`가 원본입니다.
 - 지도 이미지 배치 UI는 `MapPanel.tsx`와 `map-panel.css`가 원본입니다.
 - `지도에서 보기` 클릭 시에만 이미지 배치 모드가 시작됩니다.
 - 이미지는 PDF에서 추출된 도면/페이지 이미지 URL을 API로 받아 사용합니다.
-- 적용 전에는 이동/비율 유지 resize/회전/투명도/삭제/초기화가 가능합니다.
-- 적용 완료 후에는 지도 좌표에 고정되고, 관리 패널의 `수정`/`삭제`만 제공합니다.
+- `지도에서 보기` 최초 진입 시 이미지는 적용 완료 상태로 지도 좌표에 고정됩니다.
+- 관리 패널의 `이미지 수정`을 누른 경우에만 이동/비율 유지 resize/회전/투명도/삭제/초기화가 가능합니다.
+- 적용 완료 상태에서는 지도 좌표에 고정되고, 관리 패널의 `이미지 수정`/`이미지 삭제`만 제공합니다.
 - `적용 완료` 토스트는 기존 `복사 완료` 토스트 UI를 그대로 사용합니다.
+- 채팅 입력창 첨부 이미지는 고정 preview이며 이동/회전/resize 편집 UI를 제공하지 않습니다.
+- 최소화된 지도 설정 popup은 헤더 drag로 위치 이동할 수 있습니다.
 - 보고서 선택 최대 개수는 프론트에서 임의 제한하지 않습니다.
 
 이 문서는 사용자가 제공한 챗봇 UI 원본 화면을 React/CSS로 복사하듯 구현하기 위한 화면 정의서입니다.
@@ -318,6 +324,12 @@ React mapping:
 - attach file input: `fileInputRef`
 - attach preview: `attachedImage`
 - drag overlay: `isDragging && canAttach`
+
+첨부 preview 주의:
+
+- 첨부 preview는 업로드 전 확인용 썸네일입니다.
+- 첨부 preview에서는 이동/회전/resize/투명도 조정/모서리 핸들을 제공하지 않습니다.
+- 지도 위 도면 이미지 편집 기능과 첨부 preview UI를 같은 컴포넌트나 class로 섞지 않습니다.
 
 ### Search Modal
 

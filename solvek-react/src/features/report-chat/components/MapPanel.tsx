@@ -80,6 +80,13 @@ type AppliedReportOverlay = {
   update: () => void;
 };
 
+type SettingsPopupDrag = {
+  startClientX: number;
+  startClientY: number;
+  startX: number;
+  startY: number;
+};
+
 const MAX_ACTIVE_LAYERS = 5;
 const INITIAL_MAP_CENTER: L.LatLngExpression = [35.272, 128.406];
 const INITIAL_MAP_ZOOM = 14;
@@ -99,6 +106,10 @@ const REPORT_OVERLAY_INITIAL: ReportOverlayState = {
 };
 const REPORT_OVERLAY_MIN_WIDTH = 120;
 const REPORT_OVERLAY_MIN_HEIGHT = 160;
+const SETTINGS_POPUP_DEFAULT_POSITION = { x: 16, y: 16 };
+const SETTINGS_POPUP_WIDTH = 280;
+const SETTINGS_POPUP_MIN_VISIBLE = 80;
+const SETTINGS_POPUP_MARGIN = 8;
 
 const mapTypes: Array<{ id: MapTypeId; label: string }> = [
   { id: "general", label: "일반" },
@@ -154,6 +165,7 @@ export function MapPanel({
   const reverseGeocodeTimerRef = useRef<number | null>(null);
   const reverseGeocodeSeqRef = useRef(0);
   const reportOverlayDragRef = useRef<ReportOverlayDrag | null>(null);
+  const settingsPopupDragRef = useRef<SettingsPopupDrag | null>(null);
   const reportOverlayRef = useRef<HTMLDivElement>(null);
   const appliedReportImageOverlayRef = useRef<AppliedReportOverlay | null>(null);
   const applyToastTimerRef = useRef<number | null>(null);
@@ -161,6 +173,8 @@ export function MapPanel({
   const [isImageAdjustExpanded, setIsImageAdjustExpanded] = useState(false);
   const [isReportOverlayApplied, setIsReportOverlayApplied] = useState(false);
   const [isApplyToastVisible, setIsApplyToastVisible] = useState(false);
+  const [isMapReady, setIsMapReady] = useState(false);
+  const [settingsPopupPosition, setSettingsPopupPosition] = useState(SETTINGS_POPUP_DEFAULT_POSITION);
   checkedOrderRef.current = checkedOrder;
 
   useEffect(() => {
@@ -173,11 +187,17 @@ export function MapPanel({
       return;
     }
 
+    const initialOverlay = { ...REPORT_OVERLAY_INITIAL, visible: true };
     removeAppliedReportImageOverlay();
-    setReportOverlay({ ...REPORT_OVERLAY_INITIAL, visible: true });
-    setIsImageAdjustExpanded(true);
-    setIsReportOverlayApplied(false);
+    setReportOverlay(initialOverlay);
+    setIsImageAdjustExpanded(false);
+    setIsReportOverlayApplied(true);
     setIsApplyToastVisible(false);
+
+    const map = leafletMapRef.current;
+    if (map) {
+      createAppliedReportImageOverlay(getReportOverlayBounds(initialOverlay), initialOverlay);
+    }
   }, [overlayRequest?.requestId]);
 
   useEffect(() => {
@@ -267,6 +287,7 @@ export function MapPanel({
     syncLocation();
 
     leafletMapRef.current = map;
+    setIsMapReady(true);
 
     return () => {
       if (reverseGeocodeTimerRef.current !== null) {
@@ -279,8 +300,16 @@ export function MapPanel({
       leafletMapRef.current = null;
       tileLayerRef.current = null;
       markerRef.current = null;
+      setIsMapReady(false);
     };
   }, []);
+
+  useEffect(() => {
+    if (!overlayRequest || !isReportOverlayApplied || appliedReportImageOverlayRef.current || !leafletMapRef.current) return;
+
+    const initialOverlay = reportOverlay.visible ? reportOverlay : { ...REPORT_OVERLAY_INITIAL, visible: true };
+    createAppliedReportImageOverlay(getReportOverlayBounds(initialOverlay), initialOverlay);
+  }, [isMapReady, overlayRequest?.requestId, isReportOverlayApplied]);
 
   useEffect(() => {
     const map = leafletMapRef.current;
@@ -389,7 +418,70 @@ export function MapPanel({
     appliedReportImageOverlayRef.current = null;
   };
 
-  const createAppliedReportImageOverlay = (bounds: L.LatLngBounds) => {
+  const getReportOverlayBounds = (overlay: ReportOverlayState) => {
+    const map = leafletMapRef.current;
+    if (!map) return L.latLngBounds(INITIAL_MAP_CENTER, INITIAL_MAP_CENTER);
+
+    const northWest = map.containerPointToLatLng(L.point(overlay.x, overlay.y));
+    const southEast = map.containerPointToLatLng(L.point(overlay.x + overlay.width, overlay.y + overlay.height));
+
+    return L.latLngBounds(northWest, southEast);
+  };
+
+  const clampSettingsPopupPosition = (x: number, y: number) => {
+    const viewportRect = mapContainerRef.current?.getBoundingClientRect();
+    if (!viewportRect) return { x, y };
+
+    return {
+      x: Math.min(
+        Math.max(SETTINGS_POPUP_MARGIN, x),
+        Math.max(SETTINGS_POPUP_MARGIN, viewportRect.width - SETTINGS_POPUP_WIDTH - SETTINGS_POPUP_MARGIN),
+      ),
+      y: Math.min(
+        Math.max(SETTINGS_POPUP_MARGIN, y),
+        Math.max(SETTINGS_POPUP_MARGIN, viewportRect.height - SETTINGS_POPUP_MIN_VISIBLE),
+      ),
+    };
+  };
+
+  const startSettingsPopupDrag = (event: PointerEvent<HTMLElement>) => {
+    if (event.button !== 0) return;
+
+    const target = event.target as HTMLElement;
+    if (target.closest("button, input, label, a")) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+
+    settingsPopupDragRef.current = {
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      startX: settingsPopupPosition.x,
+      startY: settingsPopupPosition.y,
+    };
+  };
+
+  const moveSettingsPopupDrag = (event: PointerEvent<HTMLElement>) => {
+    const drag = settingsPopupDragRef.current;
+    if (!drag) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const nextX = drag.startX + event.clientX - drag.startClientX;
+    const nextY = drag.startY + event.clientY - drag.startClientY;
+    setSettingsPopupPosition(clampSettingsPopupPosition(nextX, nextY));
+  };
+
+  const endSettingsPopupDrag = (event: PointerEvent<HTMLElement>) => {
+    if (!settingsPopupDragRef.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    settingsPopupDragRef.current = null;
+  };
+
+  const createAppliedReportImageOverlay = (bounds: L.LatLngBounds, overlay = reportOverlay) => {
     const map = leafletMapRef.current;
     if (!map) return;
 
@@ -401,8 +493,8 @@ export function MapPanel({
     image.src = overlayRequest?.imageUrl ?? REPORT_OVERLAY_IMAGE_URL;
     image.alt = "";
     image.draggable = false;
-    image.style.opacity = String(reportOverlay.opacity);
-    image.style.transform = `rotate(${reportOverlay.rotation}deg)`;
+    image.style.opacity = String(overlay.opacity);
+    image.style.transform = `rotate(${overlay.rotation}deg)`;
     container.appendChild(image);
     map.getPanes().overlayPane.appendChild(container);
 
@@ -437,12 +529,7 @@ export function MapPanel({
   const applyReportOverlay = () => {
     const map = leafletMapRef.current;
     if (map) {
-      const northWest = map.containerPointToLatLng(L.point(reportOverlay.x, reportOverlay.y));
-      const southEast = map.containerPointToLatLng(
-        L.point(reportOverlay.x + reportOverlay.width, reportOverlay.y + reportOverlay.height),
-      );
-      const bounds = L.latLngBounds(northWest, southEast);
-      createAppliedReportImageOverlay(bounds);
+      createAppliedReportImageOverlay(getReportOverlayBounds(reportOverlay));
     }
 
     setIsReportOverlayApplied(true);
@@ -742,6 +829,10 @@ export function MapPanel({
             document={mapDocument}
             displayLocation={displayLocation}
             checkedLayers={checkedLayers}
+            position={settingsPopupPosition}
+            onDragStart={startSettingsPopupDrag}
+            onDragMove={moveSettingsPopupDrag}
+            onDragEnd={endSettingsPopupDrag}
             onExpand={() => setIsSettingsExpanded(true)}
           />
         )}
@@ -821,10 +912,10 @@ export function MapPanel({
             </div>
             <div className="map-image-manage-panel__actions">
               <button className="slate-50-button-32" type="button" onClick={editAppliedReportOverlay}>
-                수정
+                이미지 수정
               </button>
               <button className="map-image-adjust-panel__delete slate-50-button-32" type="button" onClick={deleteReportOverlay}>
-                삭제
+                이미지 삭제
               </button>
             </div>
           </div>
@@ -941,16 +1032,31 @@ function MapSettingsPopup({
   document,
   displayLocation,
   checkedLayers,
+  position,
+  onDragStart,
+  onDragMove,
+  onDragEnd,
   onExpand,
 }: {
   document: MapDocument;
   displayLocation: string;
   checkedLayers: CheckedLayerItem[];
+  position: { x: number; y: number };
+  onDragStart: (event: PointerEvent<HTMLElement>) => void;
+  onDragMove: (event: PointerEvent<HTMLElement>) => void;
+  onDragEnd: (event: PointerEvent<HTMLElement>) => void;
   onExpand: () => void;
 }) {
   return (
-    <section className="map-settings-popup" aria-label="지도 설정">
-      <div className="map-settings-popup__head">
+    <section
+      className="map-settings-popup"
+      aria-label="지도 설정"
+      style={{ left: `${position.x}px`, top: `${position.y}px` }}
+      onPointerMove={onDragMove}
+      onPointerUp={onDragEnd}
+      onPointerCancel={onDragEnd}
+    >
+      <div className="map-settings-popup__head" onPointerDown={onDragStart}>
         <h2 className="body2-sb-16 color-slate-900">지도 설정</h2>
         <motion.button
           className="map-panel__icon-btn"

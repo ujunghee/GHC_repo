@@ -4,6 +4,8 @@
 
 현재 git 자체가 UI 원본입니다. 개발자 또는 개발자 AI가 화면을 동일하게 구현해야 한다면 별도 캡처보다 이 저장소의 React 컴포넌트와 CSS를 우선해야 합니다.
 
+단, 여기서 “UI 원본”은 GHC를 별도 앱으로 새로 만들라는 뜻이 아닙니다. 기존 챗봇의 API, 세션, 스트리밍, 파일 업로드, 대화 기록, DB 연결은 유지하고, 기존 챗봇의 표현 계층만 이 저장소의 UI로 교체하라는 뜻입니다.
+
 챗봇, 이미지 유사후보, 지도 위 도면 이미지 배치 UX까지 포함한 최신 상세 인수인계는 아래 문서가 최우선입니다.
 
 ```txt
@@ -22,6 +24,10 @@ UI 원본 = solvek-react/src/features/** 의 React 컴포넌트
 
 챗봇에서 특히 유지해야 하는 최신 기능:
 
+- 기존 챗봇 로그인, 사용자 세션, 대화방, 대화 기록, 질문 전송, AI 응답 스트리밍, 중단/재생성/복사, 파일 업로드 기능 보존
+- 기존 챗봇 UI만 `solvek-react/src/features/report-chat/` 화면으로 교체
+- 기존 챗봇 API 응답을 GHC UI 타입으로 변환하는 adapter 구성
+- `data.ts` mock 응답은 운영 데이터로 사용하지 않음
 - 이미지 업로드 후 AI 유사후보 표시
 - 후보 카드의 `지도에서 보기` 클릭 시에만 지도 위 도면 배치 시작
 - 적용 전 이미지 이동/비율 유지 resize/회전/투명도/삭제/초기화
@@ -41,7 +47,8 @@ UI 원본 = solvek-react/src/features/** 의 React 컴포넌트
 
 ```txt
 UI 원본 = 현재 git의 React 화면 코드
-기능 원본 = 현재 git의 React state/handler/props 흐름
+기능 원본 = 기존 챗봇의 API/DB/AI/세션/스트리밍/업로드 로직
+UI 이벤트 참고 = 현재 git의 React state/handler/props 흐름
 스타일 원본 = solvekdesignsystem-web/css/index.css와 연결된 class
 문서 원본 = 각 *_UI_SCREEN_SPEC.md와 *_UI_REPLACEMENT_HANDOFF.md
 ```
@@ -163,6 +170,10 @@ http://192.168.0.75:5173/
 
 - “캡처가 없으니 임의로 디자인을 새로 만든다”라고 판단하지 않습니다.
 - 이 git의 React 화면을 참고용으로만 보고 새 UI를 창작하지 않습니다.
+- GHC 저장소를 기존 챗봇과 분리된 별도 앱으로 새로 개발하지 않습니다.
+- 기존 챗봇 화면 위에 iframe으로 얹지 않습니다.
+- 기존 챗봇 API, 세션, 스트리밍, 업로드, 대화 기록 기능을 삭제하거나 전체 재작성하지 않습니다.
+- `data.ts` mock 응답을 실제 API 응답처럼 사용하지 않습니다.
 - 기존 CSS class를 버리고 새 스타일 체계를 만들지 않습니다.
 - 메인/챗봇 컴포넌트 경계를 무시하지 않습니다.
 - 보고서 선택 최대 개수를 프론트에 다시 하드코딩하지 않습니다.
@@ -181,7 +192,10 @@ http://192.168.0.75:5173/
 챗봇은 CHAT_UI_SCREEN_SPEC.md와 CHAT_UI_REPLACEMENT_HANDOFF.md를 읽어라.
 
 UI는 현재 git의 React 화면과 동일하게 만들고,
-기능은 현재 React의 state/handler/props 흐름을 유지해라.
+기존 챗봇의 API, DB, AI, 세션, 스트리밍, 파일 업로드, 로그인, 대화 기록 기능은 유지해라.
+기존 챗봇 UI만 이 git의 `solvek-react/src/features/report-chat/` 화면으로 교체해라.
+GHC_repo를 별도 앱으로 새로 개발하거나 iframe으로 얹지 마라.
+기존 챗봇 API 응답을 GHC UI 타입으로 변환하는 adapter를 만들어 연결해라.
 검색, 단서, 보고서 선택, 채팅 진입, 채팅 입력, 파일 첨부, 원문/지도 패널, resize 기능을 삭제하지 마라.
 보고서 선택 개수 제한은 프론트에 하드코딩하지 마라.
 작업 후 npm run build로 검증해라.

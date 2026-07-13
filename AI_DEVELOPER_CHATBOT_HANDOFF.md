@@ -1,18 +1,82 @@
 # AI Developer Chatbot UI Handoff
 
-이 문서는 개발자 또는 개발자 AI에게 이 git을 기준으로 챗봇 UI를 동일하게 복사 구현하고, 실제 백엔드/API/PDF 처리 기능에 연결하기 위한 최신 인수인계 문서입니다.
+이 문서는 개발자 또는 개발자 AI에게 이 git을 기준으로 챗봇 UI를 동일하게 복사 구현하고, 기존에 개발된 챗봇의 백엔드/API/세션/스트리밍/파일 업로드 기능에 연결하기 위한 최신 인수인계 문서입니다.
+
+가장 중요한 전제:
+
+```txt
+이 작업은 GHC 앱을 새로 만드는 작업이 아니다.
+이 작업은 기존 챗봇 위에 iframe을 얹는 작업도 아니다.
+기존 챗봇의 기능 로직은 유지하고, 표현 계층(UI)만 GHC React/CSS 화면으로 교체하는 작업이다.
+```
 
 핵심 원칙은 다음과 같습니다.
 
 ```txt
 화면 원본 = 현재 git의 React 컴포넌트와 solvekdesignsystem-web CSS
-기능 원본 = 현재 React state / props / handler 흐름
-데이터 원본 = 현재 data.ts의 mock 구조를 실제 API 응답으로 치환
+기능 원본 = 기존 챗봇의 API / DB / AI / 세션 / 스트리밍 / 업로드 로직
+UI 이벤트 참고 = 현재 React state / props / handler 흐름
+목업 참고 = 현재 data.ts 구조는 타입/화면 예시일 뿐, 운영 데이터 원본이 아님
 이미지 원본 = 보고서 PDF에서 추출한 페이지/도면 이미지 URL 또는 blob
 AI 응답 원본 = 챗봇 API가 반환하는 answer, evidence, source, drawingCandidates
 ```
 
 별도 캡처 이미지를 기준으로 재창작하지 말고, 이 git의 UI 코드를 그대로 원본으로 삼아야 합니다.
+
+## 기존 챗봇 통합 범위
+
+개발자 또는 개발자 AI는 이 저장소만 보고 별도 앱을 새로 만들면 안 됩니다. 반드시 기존 챗봇 저장소도 함께 읽고, 기존 기능을 GHC UI 이벤트에 연결해야 합니다.
+
+유지해야 할 기존 기능:
+
+- 로그인과 사용자 세션
+- 대화방 생성과 대화 기록
+- 질문 전송과 AI 응답 스트리밍
+- 응답 중단, 재생성, 복사
+- 파일 업로드와 업로드 진행/오류 처리
+- 로딩, empty, error 상태
+- 백엔드 API와 DB 연결
+- 권한, 인증 토큰, 사용자별 접근 제어
+
+교체할 부분:
+
+- 챗봇 화면 레이아웃
+- 왼쪽 보고서 패널
+- 중앙 대화 영역과 입력창
+- 추천 질문
+- 오른쪽 원문/지도 패널
+- 보고서 검색 모달
+- CSS class 조합과 아이콘 배치
+
+구조는 아래처럼 이해합니다.
+
+```txt
+기존 챗봇
+├─ API·DB·AI·세션·스트리밍 ── 유지
+├─ 기존 상태관리·서비스      ── 유지
+└─ 기존 임의 UI              ── 교체
+                               ↓
+                       GHC React/CSS UI
+```
+
+금지 사항:
+
+- GHC 저장소를 기존 챗봇과 분리된 별도 앱으로 새로 개발하지 않습니다.
+- 기존 챗봇 화면 위에 iframe으로 GHC 화면을 얹지 않습니다.
+- 기존 챗봇 API, 세션, 스트리밍, 업로드 서비스를 삭제하거나 전체 재작성하지 않습니다.
+- `data.ts`의 mock 응답을 운영 데이터처럼 사용하지 않습니다.
+- 기존 챗봇의 로그인/권한/대화 이력을 우회하지 않습니다.
+
+## 프론트엔드 기술별 이식 방식
+
+기존 챗봇의 프론트엔드 기술에 따라 이식 방식이 달라집니다.
+
+- 기존 챗봇이 React라면 `solvek-react/src/features/report-chat/` 컴포넌트를 가장 쉽게 이식할 수 있습니다.
+- Vue 또는 Svelte라면 JSX를 그대로 쓰지 말고, 화면 구조와 이벤트 계약을 해당 프레임워크 컴포넌트로 옮깁니다.
+- Django/Jinja 또는 순수 HTML/JS라면 React를 부분 마운트하거나, 동일한 HTML/CSS 구조로 재구현합니다.
+- Streamlit 또는 Gradio라면 기본 컴포넌트만으로 동일 UI 구현이 어렵기 때문에 별도 프론트엔드 또는 커스텀 컴포넌트가 필요할 수 있습니다.
+
+어떤 기술이든 최종 목표는 같습니다. 기존 챗봇의 기능 로직은 유지하고, 사용자에게 보이는 표현 계층만 GHC UI로 교체합니다.
 
 ## 반드시 먼저 읽을 파일
 
@@ -166,7 +230,41 @@ sendMessage(text, imageUrl?)
 - `imageUrl`이 없으면 `createAssistantMessage`
 - `imageUrl`이 있으면 `createImageMatchAssistantMessage`
 
-실제 구현에서는 이 부분을 챗봇 API로 대체합니다.
+실제 구현에서는 이 부분을 기존 챗봇 API 또는 adapter 호출로 대체합니다.
+
+### 채팅 첨부 이미지 규칙
+
+채팅 입력창에 첨부한 이미지는 지도 편집 대상이 아닙니다.
+
+- 채팅 입력창의 첨부 이미지는 고정 썸네일 preview로만 표시합니다.
+- 첨부 preview에서는 이동, 회전, resize, 투명도 조정, 모서리 핸들을 제공하지 않습니다.
+- 첨부 preview에서 허용되는 조작은 이미지 삭제뿐입니다.
+- 이미지 이동/회전/resize/투명도 조정은 우측 지도 패널의 도면 overlay에서만 동작합니다.
+
+## Adapter Layer 지침
+
+실제 통합에서는 기존 챗봇 응답을 GHC UI 타입으로 변환하는 adapter를 만듭니다. `data.ts`를 직접 운영 데이터로 쓰지 않습니다.
+
+권장 adapter 책임:
+
+- 기존 대화방/session 모델을 `ChatPage`가 필요한 `selectedReports`, `activeReportIds`, `messages`로 변환
+- 기존 스트리밍 chunk를 assistant message의 text 누적 업데이트로 변환
+- 기존 파일 업로드 응답을 `imageFileId`, `previewUrl`, `imageUrl`로 변환
+- 기존 근거/evidence 응답을 `answerFacts`, `SourceDocument`, `DrawingCandidate`로 변환
+- 기존 PDF/page API 응답을 원문 패널 이미지와 지도 배치 이미지 URL로 변환
+- 기존 오류 응답의 사용자 표시용 `message`를 toast에 그대로 전달
+
+예시:
+
+```ts
+type ExistingChatApiResponse = unknown;
+
+function adaptChatResponse(response: ExistingChatApiResponse): ChatMessage {
+  // 기존 챗봇 API 응답 구조에 맞춰 answer/evidence/source/drawingCandidates를 매핑한다.
+}
+```
+
+adapter는 기존 챗봇 service/hook과 GHC UI 컴포넌트 사이에 둡니다. UI 컴포넌트가 API 원본 구조에 직접 의존하지 않게 합니다.
 
 ## AI 챗봇 API 연결 지침
 
@@ -366,6 +464,7 @@ type DrawingCandidateFromApi = {
 - 기본 지도 표시
 - 지도 타입 토글
 - 지도 설정 패널
+- 최소화된 지도 설정 팝업 drag 이동
 - 레이어 체크 tree
 - 활성 레이어 최대 5개 관리
 - Pin.svg 마커
@@ -386,16 +485,19 @@ type DrawingCandidateFromApi = {
 3. AI가 유사후보 반환
 4. 사용자가 후보 카드의 `지도에서 보기` 클릭
 5. 우측 패널이 `map`으로 열림
-6. 해당 후보의 `mapOverlayImageUrl` 또는 fallback 이미지가 지도 위에 편집 가능한 상태로 표시
-7. 사용자가 이미지 위치/크기/회전/투명도를 조정
-8. `이미지 적용 완료` 클릭
-9. `적용 완료` 토스트 표시
-10. 이미지가 지도 좌표에 고정된 상태로 전환
-11. 관리 패널에서 `수정` 또는 `삭제` 가능
+6. 해당 후보의 `mapOverlayImageUrl` 또는 fallback 이미지가 지도 위에 적용 완료 상태로 표시
+7. 우하단 관리 패널에 `이미지 적용 완료 / 지도 위치에 고정됨` 표시
+8. 관리 패널에서 `이미지 수정` 또는 `이미지 삭제` 가능
+9. `이미지 수정` 클릭 시에만 편집 overlay와 이미지 조정 패널 표시
+10. 편집 후 `이미지 적용 완료` 클릭
+11. `적용 완료` 토스트 표시
+12. 이미지가 다시 지도 좌표에 고정된 상태로 전환
 
 ### 적용 전 편집 상태
 
-적용 전 이미지는 React overlay입니다.
+처음 `지도에서 보기`를 눌렀을 때는 편집 상태가 아니라 적용 완료 상태입니다.
+
+편집 상태는 사용자가 관리 패널의 `이미지 수정`을 클릭했을 때만 진입합니다. 편집 상태 이미지는 React overlay입니다.
 
 지원 기능:
 
@@ -426,7 +528,7 @@ type DrawingCandidateFromApi = {
 
 ### 적용 완료 상태
 
-적용 완료 후 이미지는 편집 overlay가 아닙니다.
+`지도에서 보기` 최초 진입과 `이미지 적용 완료` 이후의 이미지는 편집 overlay가 아닙니다.
 
 현재 구현은 Leaflet pane 내부에 커스텀 DOM overlay를 생성합니다.
 
@@ -445,8 +547,8 @@ type DrawingCandidateFromApi = {
 - 드래그/키보드 이동 비활성
 - 회전/삭제 X 버튼 비활성
 - 우하단 `이미지 적용 완료 / 지도 위치에 고정됨` 관리 패널 표시
-- `수정`: 현재 지도 위치 기준으로 다시 편집 overlay로 전환
-- `삭제`: Leaflet pane DOM overlay 제거
+- `이미지 수정`: 현재 지도 위치 기준으로 다시 편집 overlay로 전환
+- `이미지 삭제`: Leaflet pane DOM overlay 제거
 
 ### 지도 이미지 적용 토스트
 
@@ -527,6 +629,13 @@ type SourceDocument = {
 - 실제 API에서는 지도 중심 좌표 또는 후보 geoReference 기준 주소를 반환
 - 좌표 문자열만 표시하지 말고 `함안 윤내리 1443 번지` 같은 주소형 문자열을 우선 표시
 
+지도 설정:
+
+- 확장된 지도 설정 패널은 좌측 고정 패널로 표시합니다.
+- 최소화된 지도 설정 팝업은 지도 위 floating UI입니다.
+- 최소화된 지도 설정 팝업은 헤더 영역을 마우스로 드래그해 위치 이동할 수 있어야 합니다.
+- 팝업의 확장 아이콘 버튼은 기존처럼 클릭 가능해야 하며, 드래그 동작과 충돌하면 안 됩니다.
+
 ## z-index 정책
 
 레이어 우선순위:
@@ -551,8 +660,8 @@ type SourceDocument = {
 
 | 현재 mock/프론트 코드 | 실제 치환 대상 |
 |---|---|
-| `createAssistantMessage` | AI 챗봇 답변 API |
-| `createImageMatchAssistantMessage` | 이미지 기반 유사 도면 검색 API |
+| `createAssistantMessage` | 기존 챗봇 답변 API 또는 streaming adapter |
+| `createImageMatchAssistantMessage` | 기존 이미지 업로드/유사 도면 검색 API adapter |
 | `drawingCandidates` | PDF 추출/벡터 검색 기반 후보 API |
 | `sourceDocument` | PDF page viewer/source API |
 | `mapDocument` | GIS/map layer metadata API |
@@ -601,14 +710,19 @@ type ImageSearchResponse = {
 챗봇 화면은 ChatPage.tsx, ChatConversation.tsx, MapPanel.tsx, SourcePanel.tsx, ReportChatSidePanel.tsx를 원본으로 봐라.
 스타일은 solvekdesignsystem-web/css/index.css와 component CSS를 원본으로 봐라.
 
-기능은 현재 state/props/handler 흐름을 유지하되 mock data.ts는 실제 API 응답으로 치환해라.
+기존 챗봇의 API, DB, AI, 세션, 스트리밍, 파일 업로드, 로그인, 대화 기록 기능은 유지해라.
+기존 챗봇 UI만 이 git의 solvek-react/src/features/report-chat/ 화면으로 교체해라.
+GHC_repo를 별도 앱으로 새로 개발하거나 iframe으로 얹지 마라.
+기존 기능 로직을 GHC UI 컴포넌트의 이벤트와 연결하는 방식으로 통합해라.
+mock data.ts는 운영 데이터로 쓰지 말고 기존 챗봇 API 응답을 GHC UI 타입으로 변환하는 adapter를 만들어라.
 이미지 비교 후보는 PDF에서 추출한 도면/페이지 이미지 URL을 API로 받아서 표시해라.
 지도 배치 이미지는 이미지 비교 후보에서 '지도에서 보기'를 눌렀을 때만 나타나야 한다.
-이미지 적용 완료 후에는 지도 좌표에 고정되고, 수정/삭제 관리 UX를 제공해야 한다.
+지도 배치 이미지는 최초 진입부터 적용 완료 상태로 지도 좌표에 고정되어야 한다.
+관리 패널에서 이미지 수정/이미지 삭제 UX를 제공하고, 이미지 수정 시에만 이동/회전/resize 편집 UI를 보여줘야 한다.
+채팅 입력창 첨부 이미지는 고정 preview로만 표시하고, 움직임/회전/resize는 지도 위 도면 이미지에만 적용해야 한다.
 
 보고서 선택 최대 개수는 프론트에서 하드코딩하지 마라.
 API 오류가 있을 때만 API message를 토스트로 표시해라.
 
 작업 후 npm run build로 검증해라.
 ```
-
